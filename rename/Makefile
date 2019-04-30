@@ -1,4 +1,8 @@
-include /homes/yongqw2/module1/ee477-cad/common/mk/cadenv.mk
+vev = verilator
+source = rename_stage.sv
+inc = rename_def.svh
+vev_op = -lint-only -Wall
+header = ../common/Purple_Jade_pkg.svh
 
-all:
-	vcs rename.sv
+all: $(source) $(header) $(inc)
+	$(vev) $(vev_op) $(source) $(header) $(inc)
