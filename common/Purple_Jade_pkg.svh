@@ -92,8 +92,8 @@ parameter WIDTH_IMM                       = $clog2(NUM_S2_IMM_SRC);
 `define LDR_OP  WIDTH_OP'd1
 
 
-parameter DECODED_INSTRUCTION_WIDTH       = $clog2(NUM_ARCH_DEST_REG) + $clog2(NUM_ARCH_SRC1_REG) + 2*WORD_SIZE_P +
-                                            $clog2(INSTRUCTION_OP_NUM) + $clog2(NUM_FU) + NUM_FLAGS + $clog2(BRANCH_CC_NUM) + 2;
+parameter DECODED_INSTRUCTION_WIDTH       = 2*$clog2(NUM_ARCH_REG) + 2*WORD_SIZE_P + $clog2(INSTRUCTION_OP_NUM) + 
+                                            $clog2(NUM_FU) + NUM_FLAGS + $clog2(BRANCH_CC_NUM) + 2;
                                             
 parameter UCODE_WIDTH_P                   = 1 + WIDTH_OP + WIDTH_FU + NUM_FLAGS + WIDTH_DEST + WIDTH_S1 + WIDTH_IMM;
 
