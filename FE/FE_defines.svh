@@ -2,9 +2,15 @@
 
 parameter I_CACHE_DEPTH_P                 = 65536;
 parameter WORD_SIZE_P                     = 16;
+parameter NUM_FLAGS                       = 4;
 
+parameter NUM_REG                         = 16;
 parameter NUM_DEST_REG                    = 8;
 parameter NUM_SRC1_REG                    = 8;
+
+parameter NUM_DEST_SRC                    = 4;
+parameter NUM_S1_SRC                      = 4;
+parameter NUM_S2_IMM_SRC                  = 8;
 
 parameter DECODED_INSTRUCTION_WIDTH       = $clog(NUM_DEST_REG) + $clog(NUM_SRC1_REG) + WORD_SIZE_P;
 
@@ -41,20 +47,18 @@ parameter INSTRUCTION_OP_NUM              = 8;
   001 - load
 */
 
+parameter NUM_FU                          = 6;
 typedef enum integer {move = 0, alu = 1, logic = 2, mem = 3, branch = 4} units;
 
 //STRUCT MACROS ??
 
-`define declare_decoded_instruction (num_dest, num_s1, word_width,)      \
-typedef struct packed                                                    \
-{                                                                        \
-  logic [$clog2(num_dest)-1:0]           dest;                           \
-  logic [$clog2(num_s1)-1:0]             s1;                             \
-  logic [word_width-1:0]                 s2_imm;                         \
-  logic                                  imm;                            \
-  logic                                  n_flag, z_flag, c_flag, v_flag; \
-  logic                                  reg_w_v;                        \
-  logic [$clog2(BRANCH_CC_NUM-1:0]       branch_cc;                      \  
-  units                                  func_unit;                      \
-  logic [$clog2(INSTRUCTION_OP_NUM)-1:0] op;                             \
-} decoded_instruction;
+`define declare_decoded_instruction (num_reg, word_size_p, num_ops, num_fu, num_flags)  \
+typedef struct packed                                                                   \
+{                                                                                       \
+  logic [$clog2(num_reg)-1:0]             dest_id, source_1;                            \
+  logic [word_size_p-1:0]                 source2_imm;                                  \
+  logic [$clog2(num_ops)-1:0]             opcode;                                       \
+  logic [$clog2(num_fu)-1:0]              func_unit;                                    \
+  logic [$clog2(num_flags)-1:0]           flags;                                        \
+  logic                                   w_v;                                          \
+  } decoded_instruction;
