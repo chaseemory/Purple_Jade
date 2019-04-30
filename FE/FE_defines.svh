@@ -90,7 +90,7 @@ parameter WIDTH_IMM    = $clog2(NUM_S2_IMM_SRC);
 `define LDR_OP  WIDTH_OP'd1;
 
 
-parameter DECODED_INSTRUCTION_WIDTH       = $clog2(NUM_ARCH_DEST_REG) + $clog2(NUM_ARCH_SRC1_REG) + 2*WORD_SIZE_P + $clog2(INSTRUCTION_OP_NUM) + $clog2(NUM_FU) + NUM_FLAGS + $clog2(branch_cc_num) + 2;
+parameter DECODED_INSTRUCTION_WIDTH       = $clog2(NUM_ARCH_DEST_REG) + $clog2(NUM_ARCH_SRC1_REG) + 2*WORD_SIZE_P + $clog2(INSTRUCTION_OP_NUM) + $clog2(NUM_FU) + NUM_FLAGS + $clog2(BRANCH_CC_NUM) + 2;
 parameter UCODE_WIDTH_P                   = 18;
 
 
@@ -123,7 +123,7 @@ typedef struct packed                                                           
 
 
 parameter NUM_PHYS_REG                    = 128;
-parameter RENAMED_INSTRUCTION_WIDTH       = $clog2(NUM_PHYS_REG) + $clog2(NUM_PHYS_REG) + WORD_SIZE_P + $clog2(INSTRUCTION_OP_NUM) + $clog2(NUM_FU) + NUM_FLAGS + 2;
+parameter RENAMED_INSTRUCTION_WIDTH       = $clog2(NUM_PHYS_REG) + $clog2(NUM_PHYS_REG) + 2*WORD_SIZE_P + $clog2(INSTRUCTION_OP_NUM) + $clog2(NUM_FU) + NUM_FLAGS + $clog2(BRANCH_CC_NUM) + 2;
 
 `define declare_renamed_instruction (num_reg, word_size_p, num_ops, num_fu, num_flags, branch_cc_num)  \
 typedef struct packed                                                                   \
