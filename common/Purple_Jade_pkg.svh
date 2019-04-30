@@ -12,8 +12,6 @@ parameter NUM_ARCH_SRC1_REG               = 8;
 
 parameter BRANCH_CC_NUM                   = 15;
 
-
-
 parameter NUM_FU                          = 7;
 parameter WIDTH_FU                        = $clog2(NUM_FU);
 /*   FUNCTIONAL UNITS
@@ -91,49 +89,41 @@ parameter WIDTH_IMM                       = $clog2(NUM_S2_IMM_SRC);
 `define STR_OP  WIDTH_OP'd0
 `define LDR_OP  WIDTH_OP'd1
 
-
-parameter DECODED_INSTRUCTION_WIDTH       = 2*$clog2(NUM_ARCH_REG) + 2*WORD_SIZE_P + $clog2(INSTRUCTION_OP_NUM) + 
-                                            $clog2(NUM_FU) + NUM_FLAGS + $clog2(BRANCH_CC_NUM) + 2;
-                                            
+parameter DECODED_INSTRUCTION_WIDTH       = 2 * $clog2(NUM_ARCH_REG) + 2*WORD_SIZE_P + 
+                                            $clog2(INSTRUCTION_OP_NUM) + $clog2(NUM_FU) + NUM_FLAGS + $clog2(BRANCH_CC_NUM) + 2;
+                                  
 parameter UCODE_WIDTH_P                   = 1 + WIDTH_OP + WIDTH_FU + NUM_FLAGS + WIDTH_DEST + WIDTH_S1 + WIDTH_IMM;
 
-
-`define declare_decoded_instruction (num_reg, word_size_p, num_ops, num_fu, num_flags, branch_cc_num)  \
+`define declare_decoded_instruction(num_reg, word_size_p, num_ops, num_fu, num_flags, branch_cc_num)  \
 typedef struct packed                                                                   \
 {                                                                                       \
-  logic [$clog2(num_reg)-1:0]             dest_id, source_1;                            \
-  logic [word_size_p-1:0]                 source2_imm, pc;                              \
+  logic [$clog2(num_reg)-1:0]             dest_id;                                      \
+  logic [$clog2(num_reg)-1:0]             source_1;                                     \
+  logic [word_size_p-1:0]                 source2_imm;                                  \
+  logic [word_size_p-1:0]                 pc;                                           \
   logic [$clog2(num_ops)-1:0]             opcode;                                       \
   logic [$clog2(num_fu)-1:0]              func_unit;                                    \
   logic [num_flags-1:0]                   flags;                                        \
-  logic [$clog2(branch_cc_num)-1:0]       bcc_op                                        \
+  logic [$clog2(branch_cc_num)-1:0]       bcc_op;                                       \
   logic                                   w_v;                                          \
   logic                                   imm;                                          \
-  } decoded_instruction;
-
-
-
-
-
-
-
-
-
-
-
+  } decoded_instruction_t;
 
 parameter NUM_PHYS_REG                    = 128;
 parameter RENAMED_INSTRUCTION_WIDTH       = $clog2(NUM_PHYS_REG) + $clog2(NUM_PHYS_REG) + 2*WORD_SIZE_P + $clog2(INSTRUCTION_OP_NUM) + $clog2(NUM_FU) + NUM_FLAGS + $clog2(BRANCH_CC_NUM) + 2;
 
-`define declare_renamed_instruction (num_reg, word_size_p, num_ops, num_fu, num_flags, branch_cc_num)  \
+`define declare_renamed_instruction(num_reg, word_size_p, num_ops, num_fu, num_flags, branch_cc_num)  \
 typedef struct packed                                                                   \
 {                                                                                       \
-  logic [$clog2(num_reg)-1:0]             dest_id, source_1;                            \
-  logic [word_size_p-1:0]                 source2_imm, pc;                              \
+  logic [$clog2(num_reg)-1:0]             dest_id;                                      \
+  logic [$clog2(num_reg)-1:0]             source_1;                                     \
+  logic [word_size_p-1:0]                 source2_imm;                                  \
+  logic [word_size_p-1:0]                 pc;                                           \
   logic [$clog2(num_ops)-1:0]             opcode;                                       \
   logic [$clog2(num_fu)-1:0]              func_unit;                                    \
   logic [num_flags-1:0]                   flags;                                        \
-  logic [$clog2(branch_cc_num)-1:0]       bcc_op                                        \
+  logic [$clog2(branch_cc_num)-1:0]       bcc_op;                                       \
   logic                                   w_v;                                          \
   logic                                   imm;                                          \
-  } renamed_instruction;
+  } renamed_instruction_t;
+  `endif
