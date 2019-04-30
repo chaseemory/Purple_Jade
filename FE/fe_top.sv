@@ -1,6 +1,7 @@
-module fe_top #(
+module fe_top 
+  #(parameter 
   )
-  (
+  ( input logic clk_i
   ):
 
 
