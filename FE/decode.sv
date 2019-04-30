@@ -73,7 +73,7 @@ module decode
   , .o(reg_4z_lo)
   );
 
-  `define declare_decoded_instruction (NUM_REG, WORD_SIZE_P, INSTRUCTION_OP_NUM, NUM_FU, NUM_FLAGS);
+  `define declare_decoded_instruction (NUM_REG, WORD_SIZE_P, INSTRUCTION_OP_NUM, NUM_FU, NUM_FLAGS, $clog2(BRANCH_CC_NUM));
 
   decoded_instruction next;
 
@@ -118,6 +118,8 @@ module decode
   ,.sel_i(src_2_imm_sel)
   ,.data_o(next.source2_imm)
   );
+
+  next.bcc_op = inst_i[11:8];
 
   assign o = next;
 
