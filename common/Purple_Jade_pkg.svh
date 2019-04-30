@@ -1,3 +1,5 @@
+`ifndef _PURPLE_JADE_PKG_
+`define _PURPLE_JADE_PKG_
 // struct defitions
 
 parameter I_ROM_DEPTH_P                   = 65536;
@@ -85,3 +87,4 @@ typedef struct packed                                                           
   logic                                   w_v;                                          \
   logic                                   imm;                                          \
   } renamed_instruction;
+`endif
