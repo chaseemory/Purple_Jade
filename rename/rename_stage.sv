@@ -36,5 +36,48 @@ assign decoded = decoded_i;
 assign renamed_o = renamed;
 assign commit_entry = commit_rename_i;
 
+// speculative renaming lookup tables and freelist
+logic [NUM_ARCH_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] lut_spec_n, lut_spec_q;
+logic [NUM_PHYS_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] fl_spec_n, fl_spec_q;
+
+// non-speculative renaming lookup tables and freelist
+logic [NUM_ARCH_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] lut_n, lut_q;
+logic [NUM_PHYS_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] fl_n, fl_q;
+
+
+// sequential processes
+always_ff @(posedge clk_i)
+  begin
+	if (reset_i)
+	  begin
+		lut_spec_q 	<= '{default:0};
+		lut_q 		<= '{default:0};
+	  end 
+	else
+	  begin
+		lut_spec_q  <= lut_spec_n;
+		lut_q 		<= lut_n;
+	  end	
+  end
+// freelist initializations
+generate
+	genvar i;
+	for (i=0; i<NUM_PHYS_REG; i++)
+	  begin
+		always_ff @(posedge clk_i)
+		  begin
+			if (reset_i)
+			  begin
+			  	fl_spec_q[i] <= $clog2(NUM_PHYS_REG)'(i); 
+			  	fl_q[i]      <= $clog2(NUM_PHYS_REG)'(i);
+			  end
+			else
+			  begin
+			  	fl_spec_q[i] <= fl_spec_n[i]; 
+			  	fl_q[i]      <= fl_n[i];
+			  end
+		  end
+	  end
+endgenerate
 endmodule
    
