@@ -110,9 +110,9 @@ typedef struct packed                                                           
   } decoded_instruction_t;
 
 parameter NUM_PHYS_REG                    = 128;
-parameter RENAMED_INSTRUCTION_WIDTH       = $clog2(NUM_PHYS_REG) + $clog2(NUM_PHYS_REG) + 2*WORD_SIZE_P + $clog2(INSTRUCTION_OP_NUM) + $clog2(NUM_FU) + NUM_FLAGS + $clog2(BRANCH_CC_NUM) + 2;
+parameter RENAMED_INSTRUCTION_WIDTH       = 3 * $clog2(NUM_PHYS_REG) + 2*WORD_SIZE_P + $clog2(INSTRUCTION_OP_NUM) + $clog2(NUM_FU) + NUM_FLAGS + $clog2(BRANCH_CC_NUM) + 2 + $clog2(NUM_ARCH_REG);
 
-`define declare_renamed_instruction(num_reg, word_size_p, num_ops, num_fu, num_flags, branch_cc_num)  \
+`define declare_renamed_instruction(num_reg, word_size_p, num_ops, num_fu, num_flags, branch_cc_num, num_arch_reg)  \
 typedef struct packed                                                                   \
 {                                                                                       \
   logic [$clog2(num_reg)-1:0]             dest_id;                                      \
@@ -125,5 +125,7 @@ typedef struct packed                                                           
   logic [$clog2(branch_cc_num)-1:0]       bcc_op;                                       \
   logic                                   w_v;                                          \
   logic                                   imm;                                          \
+  logic [$clog2(num_reg)-1:0]             freed_reg;   /* those two fileds */           \
+  logic [$clog2(num_arch_reg)-1:0]        alloc_reg;   /* are used for commit */        \
   } renamed_instruction_t;
   `endif

@@ -3,4 +3,4 @@
 	url = git@github.com:chaseemory/basejump_stl.git
 [submodule "Purple_Jade_Tests"]
 	path = Purple_Jade_Tests
-	url = git@github.com:iihihiuh/Purple_Jade_Tests.git
+	url = https://github.com/iihihiuh/Purple_Jade_Tests
