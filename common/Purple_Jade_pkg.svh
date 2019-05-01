@@ -12,7 +12,6 @@ parameter NUM_ARCH_SRC1_REG               = 8;
 
 parameter BRANCH_CC_NUM                   = 15;
 
-
 parameter NUM_FU                          = 7;
 parameter WIDTH_FU                        = $clog2(NUM_FU);
 /*   FUNCTIONAL UNITS
@@ -39,10 +38,10 @@ parameter NUM_S2_IMM_SRC                  = 8;
 
 parameter INSTRUCTION_OP_NUM              = 8;
 
-parameter WIDTH_OP     = $clog2(INSTRUCTION_OP_NUM);
-parameter WIDTH_DEST   = $clog2(NUM_ARCH_DEST_REG);
-parameter WIDTH_S1     = $clog2(NUM_S1_SRC);
-parameter WIDTH_IMM    = $clog2(NUM_S2_IMM_SRC);
+parameter WIDTH_OP                        = $clog2(INSTRUCTION_OP_NUM);
+parameter WIDTH_DEST                      = $clog2(NUM_ARCH_DEST_REG);
+parameter WIDTH_S1                        = $clog2(NUM_S1_SRC);
+parameter WIDTH_IMM                       = $clog2(NUM_S2_IMM_SRC);
 
 // Used to describe what logical op, branch type, load/store
 /*
@@ -92,7 +91,7 @@ parameter WIDTH_IMM    = $clog2(NUM_S2_IMM_SRC);
 
 parameter DECODED_INSTRUCTION_WIDTH       = 2 * $clog2(NUM_ARCH_REG) + 2*WORD_SIZE_P + 
                                             $clog2(INSTRUCTION_OP_NUM) + $clog2(NUM_FU) + NUM_FLAGS + $clog2(BRANCH_CC_NUM) + 2;
-                                            
+                                  
 parameter UCODE_WIDTH_P                   = 1 + WIDTH_OP + WIDTH_FU + NUM_FLAGS + WIDTH_DEST + WIDTH_S1 + WIDTH_IMM;
 
 `define declare_decoded_instruction(num_reg, word_size_p, num_ops, num_fu, num_flags, branch_cc_num)  \
