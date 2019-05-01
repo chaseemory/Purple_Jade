@@ -150,8 +150,6 @@ always_ff @(posedge clk_i)
   begin
 	if (reset_i)
 	  begin
-		lut_spec_q 	<= '{default:0};
-		lut_q 		<= '{default:0};
 		fl_read_pt  <= '0;
 		fl_write_pt  <= '0;
 		fl_spec_read_pt  <= '0;
@@ -160,8 +158,6 @@ always_ff @(posedge clk_i)
 	  end 
 	else
 	  begin
-		lut_spec_q  <= lut_spec_n;
-		lut_q 		<= lut_n;
 		fl_read_pt  <= fl_read_pt_n;
 		fl_write_pt  <= fl_write_pt_n;
 		fl_spec_read_pt  <= fl_spec_read_pt_n;
@@ -179,13 +175,34 @@ generate
 		  begin
 			if (reset_i)
 			  begin
-			  	fl_spec_q[i] <= $clog2(NUM_PHYS_REG)'(i+1); 
-			  	fl_q[i]      <= $clog2(NUM_PHYS_REG)'(i+1);
+			  	fl_spec_q[i] <= $clog2(NUM_PHYS_REG)'(i+NUM_ARCH_REG); 
+			  	fl_q[i]      <= $clog2(NUM_PHYS_REG)'(i+NUM_ARCH_REG);
 			  end
 			else
 			  begin
 			  	fl_spec_q[i] <= fl_spec_n[i]; 
 			  	fl_q[i]      <= fl_n[i];
+			  end
+		  end
+	  end
+endgenerate
+
+// lookup table initilization
+generate
+	genvar j;
+	for (j=0; j<NUM_ARCH_REG; j++)
+	  begin
+		always_ff @(posedge clk_i)
+		  begin
+			if (reset_i)
+			  begin
+			  	lut_spec_q[i] <= $clog2(NUM_PHYS_REG)'(i); 
+			  	lut_q[i]      <= $clog2(NUM_PHYS_REG)'(i);
+			  end
+			else
+			  begin
+			  	lut_spec_q[i] <= lut_spec_n[i]; 
+			  	lut_q[i]      <= lut_n[i];
 			  end
 		  end
 	  end
