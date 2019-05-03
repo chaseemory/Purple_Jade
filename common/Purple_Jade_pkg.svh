@@ -31,7 +31,7 @@ div = 6
 `define MUL_FU      WIDTH_FU'd5
 `define DEV_FU      WIDTH_FU'd6
 
-
+parameter NUM_EXTENDED                    = 8;
 parameter NUM_DEST_SRC                    = 4;
 parameter NUM_S1_SRC                      = 4;
 parameter NUM_S2_IMM_SRC                  = 8;
@@ -105,6 +105,7 @@ typedef struct packed                                                           
   logic [$clog2(num_fu)-1:0]              func_unit;                                    \
   logic [num_flags-1:0]                   flags;                                        \
   logic [$clog2(branch_cc_num)-1:0]       bcc_op;                                       \
+  logic                                   branch;                                       \   
   logic                                   w_v;                                          \
   logic                                   imm;                                          \
   } decoded_instruction_t;
