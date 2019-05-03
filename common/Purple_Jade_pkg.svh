@@ -105,7 +105,7 @@ typedef struct packed                                                           
   logic [$clog2(num_fu)-1:0]              func_unit;                                    \
   logic [num_flags-1:0]                   flags;                                        \
   logic [$clog2(branch_cc_num)-1:0]       bcc_op;                                       \
-  logic                                   branch;                                       \   
+  logic                                   branch_prediction;                            \   
   logic                                   w_v;                                          \
   logic                                   imm;                                          \
   } decoded_instruction_t;

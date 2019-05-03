@@ -164,8 +164,11 @@ module fe_top
   , .branch(bht_value)
   );
 
+
   assign take_branch = ~bht_value[1];
 
-  assign final_decoded_instruction = instruction_decoded_branch
+  assign final_decoded_instruction.branch_prediction = take_branch;
+
+  assign final_decoded_instruction = instruction_decoded_branch;
 
 endmodule // fe_top
