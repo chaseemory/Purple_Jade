@@ -157,15 +157,21 @@ module fe_top
   logic [1:0] bht_value;
   assign branch_target = branch_offset_branch_r + program_counter_branch_r;
 
-  bht #(parameter NUM_BHT_ENTRIES = 64
-  ) bht_er
-  ( .addr_i(program_counter_branch_r[5:0])
-  , .v_i(is_branch_branch_r)
-  , .branch(bht_value)
-  );
+  // bht #(parameter NUM_BHT_ENTRIES = 64
+  // ) bht_er
+  // ( .addr_i(program_counter_branch_r[5:0])
+  // , .v_i(is_branch_branch_r)
+  // , .branch(bht_value)
+  // );
+
+  // TODO: INSERT RETURN ADDRESS STACK HERE AS WELL
 
 
-  assign take_branch = ~bht_value[1];
+
+  assign take_branch = branch_offset_branch_r[WORD_SIZE_P-1];
+
+  assign flush_d_b = is_branch_branch_r ? take_branch : 1'b0;
+  assign flush_f_d = is_branch_branch_r ? take_branch : 1'b0;
 
   assign final_decoded_instruction.branch_prediction = take_branch;
 
