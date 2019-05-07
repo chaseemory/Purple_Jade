@@ -128,4 +128,27 @@ typedef struct packed                                                           
   logic [$clog2(num_reg)-1:0]             freed_reg;   /* those two fileds */           \
   logic [$clog2(num_arch_reg)-1:0]        alloc_reg;   /* are used for commit */        \
   } renamed_instruction_t;
-  `endif
+
+`define ROB_ENTRY 64
+
+parameter ROB_WIDTH = 1 + WORD_SIZE_P + 2 * NUM_FLAGS + 1 + 1 + WORD_SIZE_P;
+
+typedef struct packed                               
+{                                                   
+  logic                                   valid;
+  logic [WORD_SIZE_P-1:0]                 result;
+  logic [NUM_FLAGS-1:0]                   flag_mask;
+  logic [NUM_FLAGS-1:0]                   flags;
+  logic                                   is_store;
+  logic                                   w_v;
+  logic [WORD_SIZE_P-1:0]                 dest;
+} rob_t;
+
+parameter ROB_MEM_WIDTH = 1 + WORD_SIZE_P * 2;
+
+typedef struct packed {
+  logic                                   valid;
+  logic [WORD_SIZE_P-1:0]                 address;
+  logic [WORD_SIZE_P-1:0]                 result;  
+} rob_mem_t;
+`endif
