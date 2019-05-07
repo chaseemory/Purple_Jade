@@ -34,7 +34,6 @@ div = 6
 `define MUL_FU      WIDTH_FU'd5
 `define DEV_FU      WIDTH_FU'd6
 
-parameter UCODE_WIDTH_P                   = 1 + WIDTH_OP + WIDTH_FU + NUM_FLAGS + WIDTH_DEST + WIDTH_S1 + WIDTH_IMM;
 
 typedef struct packed
 {

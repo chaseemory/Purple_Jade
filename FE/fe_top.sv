@@ -1,3 +1,6 @@
+`include "Purple_Jade_pkg.svh"
+`include "FE_def.svh"
+
 module fe_top 
   #(parameter place_holder = -1
   )
@@ -5,6 +8,7 @@ module fe_top
   , input   logic reset_i
   , input   logic ready_i
   , output  logic [DECODED_INSTRUCTION_WIDTH-1:0] final_decoded_instruction
+  , output  logic valid_o
   );
 
   logic stall;
@@ -53,7 +57,7 @@ module fe_top
     ) fetch_decode_pipe
     ( .clk_i
     , .data_i({program_counter_fetch_r, instruction_fetch_r})
-    , .flush(flush_f_d)
+    , .flush(flush_f_d | reset_i)
     , .stall(stall)
     , .v_i(1'b1)
     , .data_o({program_counter_decode_r, instruction_decode_r})
@@ -70,9 +74,8 @@ module fe_top
   logic [WORD_SIZE_P-1:0]             immediates [NUM_EXTENDED-1:0] 
   logic                               is_branch_decode;
 
-  `define declare_decoded_instruction (NUM_ARCH_REG, WORD_SIZE_P, INSTRUCTION_OP_NUM, NUM_FU, NUM_FLAGS, $clog2(BRANCH_CC_NUM));
 
-  decoded_instruction instruction_decoded_decode;
+  decoded_instruction_t instruction_decoded_decode;
 
 
   extension extend_the_things
@@ -86,7 +89,7 @@ module fe_top
     ) decoder
     (.addr_i(instruction_decode_r)
     ,.o({instruction_decoded_decode.w_v, instruction_decoded_decode.opcode, instruction_decoded_decode.func_unit
-          , instruction_decoded_decode.flags, dest_src_sel, src_1_sel, src_2_imm_sel})
+          , instruction_decoded_decode.flags, dest_src_sel, src_1_sel, src_2_imm_sel, assign instruction_decoded_decode.imm})
     );
 
   bsg_mux #(.width_p($clog2(NUM_REG))
@@ -100,7 +103,7 @@ module fe_top
   bsg_mux #(.width_p($clog2(NUM_REG))
           , .els_p(NUM_DEST_SRC)
     ) src_1_mux
-    (.data_i({4'd14, 4'd13, {1'b0, instruction_decode_r[2:0]}, {1'b0, instruction_decode_r[5:3]}})
+    (.data_i({4'd12, 4'd13, {1'b0, instruction_decode_r[2:0]}, {1'b0, instruction_decode_r[5:3]}})
     ,.sel_i(src_1_sel)
     ,.data_o(instruction_decoded_decode.source_1)
     );
@@ -137,13 +140,13 @@ module fe_top
   logic [WORD_SIZE_P-1:0] program_counter_branch_r, branch_offset_branch_r;
   logic                   flush_d_b, valid_d_b, is_branch_branch_r;
 
-  decoded_instruction instruction_decoded_branch;
+  decoded_instruction_t instruction_decoded_branch;
 
   pipe #(.WIDTH_P($bits({program_counter_decode_r, instruction_decoded_decode, is_branch_decode, branch_offset_decode}))
     ) decode_branch_pipe
     ( .clk_i
     , .data_i({program_counter_decode_r, instruction_decoded_decode, is_branch_decode, branch_offset_decode})
-    , .flush(flush_d_b)
+    , .flush(flush_d_b | reset_i)
     , .stall(stall)
     , .v_i(valid_f_d)
     , .data_o({program_counter_branch_r, instruction_decoded_branch, is_branch_branch_r, branch_offset_branch_r})
@@ -154,26 +157,26 @@ module fe_top
   // ~~~~~~~~~~~~~~~~~~~~~~BRANCH~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  logic [1:0] bht_value;
   assign branch_target = branch_offset_branch_r + program_counter_branch_r;
 
-  // bht #(parameter NUM_BHT_ENTRIES = 64
-  // ) bht_er
-  // ( .addr_i(program_counter_branch_r[5:0])
-  // , .v_i(is_branch_branch_r)
-  // , .branch(bht_value)
-  // );
+  logic speculative_branch;
+
+  branch_control branch_control
+    ( .sign_bit_i(branch_offset_branch_r[WORD_SIZE_P-1])
+    , .s_branch_i(is_branch_branch_r)
+    , .branch_op_code_i(instruction_decoded_decode.opcode[1:0])
+    , .take_branch_o(take_branch)
+    , .speculative_o(speculative_branch)
+    );
 
   // TODO: INSERT RETURN ADDRESS STACK HERE AS WELL
 
-
-
-  assign take_branch = branch_offset_branch_r[WORD_SIZE_P-1];
-
-  assign flush_d_b = is_branch_branch_r ? take_branch : 1'b0;
-  assign flush_f_d = is_branch_branch_r ? take_branch : 1'b0;
+  assign flush_d_b = take_branch;
+  assign flush_f_d = take_branch;
 
   assign final_decoded_instruction.branch_prediction = take_branch;
+
+  assign valid_o = (~speculative_branch & is_branch_branch_r) ? 1'b0 : valid_d_b;
 
   assign final_decoded_instruction = instruction_decoded_branch;
 
