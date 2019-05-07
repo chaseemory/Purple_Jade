@@ -34,8 +34,6 @@ div = 6
 `define MUL_FU      WIDTH_FU'd5
 `define DEV_FU      WIDTH_FU'd6
 
-parameter UCODE_WIDTH_P                   = 1 + WIDTH_OP + WIDTH_FU + NUM_FLAGS + WIDTH_DEST + WIDTH_S1 + WIDTH_IMM;
-
 typedef struct packed
 {
   logic [$clog2(NUM_ARCH_REG)-1:0]        dest_id;
@@ -74,26 +72,45 @@ typedef struct packed
 
 parameter RENAMED_INSTRUCTION_WIDTH       = $bits(renamed_instruction_t);
 
-`define ROB_ENTRY 64
-
-parameter ROB_WIDTH = 1 + WORD_SIZE_P + 2 * NUM_FLAGS + 1 + 1 + WORD_SIZE_P;
+parameter ROB_ENTRY = 64;
 
 typedef struct packed                               
 {                                                   
-  logic                                   valid;
-  logic [WORD_SIZE_P-1:0]                 result;
+  logic                                   wb; /* CDB write back ?  */
+  logic [WORD_SIZE_P-1:0]                 result;  // keep it for debug purpose
+  logic                                   is_spec;
+  logic [WORD_SIZE_P-1:0]                 spec_pc;
   logic [NUM_FLAGS-1:0]                   flag_mask;
   logic [NUM_FLAGS-1:0]                   flags;
   logic                                   is_store;
   logic                                   w_v;
-  logic [WORD_SIZE_P-1:0]                 dest;
+  logic [$clog2(NUM_PHYS_REG)-1:0]        freed_reg;
+  logic [$clog2(NUM_ARCH_REG)-1:0]        alloc_reg; 
 } rob_t;
 
-parameter ROB_MEM_WIDTH = 1 + WORD_SIZE_P * 2;
+parameter ROB_WIDTH = $bits(rob_t);
 
 typedef struct packed {
   logic                                   valid;
   logic [WORD_SIZE_P-1:0]                 address;
   logic [WORD_SIZE_P-1:0]                 result;  
-} rob_mem_t;
+} store_buffer_t;
+
+parameter ROB_MEM_WIDTH = $bits(store_buffer_t);
+
+// ROB issue interfaces
+typedef rob_t issue_rob_t;  // with issue_rob.valid 0
+parameter ISSUE_ENTRY_WIDTH = ROB_WIDTH;
+
+// CDB type
+typedef struct packed {
+  logic                                   valid;
+  logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
+  logic                                   w_v;  // whether to write back
+  logic [WORD_SIZE_P-1:0]                 dest; // reg or mem
+  logic                                   is_spec;
+  logic [WORD_SIZE_P-1:0]                 result;
+} CDB_t;
+
+parameter CDB_WIDTH = $bits(CDB_t);
 `endif
