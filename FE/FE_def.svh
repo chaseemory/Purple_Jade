@@ -9,7 +9,7 @@ parameter NUM_DEST_SRC                    = 4;
 parameter NUM_S1_SRC                      = 4;
 parameter NUM_S2_IMM_SRC                  = 8;
 
-parameter INSTRUCTION_OP_NUM              = 8;
+
 
 parameter WIDTH_OP                        = $clog2(INSTRUCTION_OP_NUM);
 parameter WIDTH_DEST                      = $clog2(NUM_ARCH_DEST_REG);
