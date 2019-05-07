@@ -1,3 +1,5 @@
+`include "Purple_Jade_pkg.svh"
+
 module pc_next
   ( input   logic [WORD_SIZE_P-1:0] pc_i, pc_2_i, branch_target_i
   , input   logic reset_i, branch_take, stall

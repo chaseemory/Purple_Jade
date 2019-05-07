@@ -1,3 +1,6 @@
+`include "Purple_Jade_pkg.svh"
+`include "FE_def.svh"
+
 module extension
   #( parameter  NUM_EXTENDED = -1
   )
