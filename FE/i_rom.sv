@@ -1,5 +1,6 @@
-// A ROM for instructions >.>
+// A ROM for instructions
 // Async Reads
+`include "Purple_Jade_pkg.svh"
 
 module i_rom
   #(localparam  ADDR_WIDTH_LP = $CLOG(I_CACHE_DEPTH_P)
