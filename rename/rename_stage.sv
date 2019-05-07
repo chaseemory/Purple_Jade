@@ -57,7 +57,7 @@ logic 											   roll_back;
 assign roll_back = mispredict_i & commit_v_i;
 
 // valid ready signals
-assign rename_decode_ready_o = (fl_spec_num != 0) && (!roll_back);
+assign rename_decode_ready_o = (fl_spec_num != 0) && (!roll_back) && issue_rename_ready_i;
 assign renamed_v_o = rename_decode_ready_o & issue_rename_ready_i & decoded_v_i;
 
 assign renamed.pc = decoded.pc;
@@ -69,7 +69,6 @@ assign renamed.w_v = decoded.w_v;
 assign renamed.imm = decoded.imm;
 assign renamed.alloc_reg = decoded.dest_id;
 assign renamed.freed_reg = lut_spec_q[decoded.dest_id];
-
 
 // renaming
 always_comb
@@ -106,24 +105,22 @@ always_comb
   	  end
 
   	// freeing registers
-  	if (commit_v_i & ~mispredict_i)
+  	if (commit_v_i & commit_entry.w_v)
   	  begin
-  	  	if (commit_entry.w_v)
-  	  	  begin
-  	  	  	fl_spec_n[fl_spec_write_pt] = commit_entry.freed_reg;
-  	  	  	fl_spec_write_pt_n++;
-  	  	  end
+  	  	fl_spec_n[fl_spec_write_pt] = commit_entry.freed_reg;
+  	  	fl_spec_write_pt_n++;
+  	  	fl_spec_num_n++;  
   	  end
 
   	// on a valid miss predict
   	if (roll_back)
   	  begin
   	  	// when misprediction is resolved # of speculative free registers should be the same as reset
-  		lut_spec_n         = lut_q;
-		fl_spec_read_pt_n  = fl_read_pt;
-		fl_spec_write_pt_n = fl_write_pt;
+  		lut_spec_n         = lut_n;
+		fl_spec_read_pt_n  = fl_read_pt_n;
+		fl_spec_write_pt_n = fl_write_pt_n;
 		fl_spec_num_n      = $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
-		fl_spec_n          = fl_q;  	  	
+		fl_spec_n          = fl_n;  	  	
   	  end
   end
 
@@ -136,10 +133,10 @@ always_comb
 	fl_n          = fl_q;
 
 	// update non speculative
-	if (commit_v_i & ~mispredict_i)
+	if (commit_v_i & commit_entry.w_v)
 	  begin
   	  	fl_n[fl_write_pt] = commit_entry.freed_reg;
-  	  	lut_n[commit_entry.alloc_reg] = fl_q[fl_spec_read_pt];
+  	  	lut_n[commit_entry.alloc_reg] = fl_q[fl_read_pt];
   	  	fl_write_pt_n++;
    	  	fl_read_pt_n++;
 	  end
@@ -151,9 +148,9 @@ always_ff @(posedge clk_i)
 	if (reset_i)
 	  begin
 		fl_read_pt  <= '0;
-		fl_write_pt  <= '0;
+		fl_write_pt  <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
 		fl_spec_read_pt  <= '0;
-		fl_spec_write_pt  <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-1);
+		fl_spec_write_pt  <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
 		fl_spec_num <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
 	  end 
 	else
@@ -175,8 +172,8 @@ generate
 		  begin
 			if (reset_i)
 			  begin
-			  	fl_spec_q[i] <= $clog2(NUM_PHYS_REG)'(i+NUM_ARCH_REG); 
-			  	fl_q[i]      <= $clog2(NUM_PHYS_REG)'(i+NUM_ARCH_REG);
+			  	fl_spec_q[i] <= (i+NUM_ARCH_REG); 
+			  	fl_q[i]      <= (i+NUM_ARCH_REG);
 			  end
 			else
 			  begin
@@ -196,13 +193,13 @@ generate
 		  begin
 			if (reset_i)
 			  begin
-			  	lut_spec_q[i] <= $clog2(NUM_PHYS_REG)'(i); 
-			  	lut_q[i]      <= $clog2(NUM_PHYS_REG)'(i);
+			  	lut_spec_q[j] <= (j); 
+			  	lut_q[j]      <= (j);
 			  end
 			else
 			  begin
-			  	lut_spec_q[i] <= lut_spec_n[i]; 
-			  	lut_q[i]      <= lut_n[i];
+			  	lut_spec_q[j] <= lut_spec_n[j]; 
+			  	lut_q[j]      <= lut_n[j];
 			  end
 		  end
 	  end
