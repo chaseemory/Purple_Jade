@@ -1,12 +1,12 @@
 FLD = $(shell pwd)/
 vev = verilator
-source = $(FLD)rename_stage.sv
-inc = $(FLD)rename_def.svh
+source = $(FLD)rob.sv
+inc = $(FLD)rob_def.svh
 vev_op = --trace -Wall --cc
 exe_op = --exe
 header = $(FLD)../common/Purple_Jade_pkg.svh
-csource = rename_test.cpp
-name = rename_stage
+csource = rob_test.cpp
+name = rob
 junk = obj_dir *.vcd
 
 all: $(source) $(header) $(inc)
