@@ -1,4 +1,4 @@
-module branch_control
+module static_branch_control
   ( input       sign_bit_i
   , input       is_branch_i
   , input [1:0] branch_op_code_i
@@ -35,9 +35,9 @@ module branch_control
     endcase
 
 
-endmodule // branch_control
+endmodule // static_branch_control
 
-  // Branch typ
+  // Branch types
   // 000 - CC
   // 001 - B
   // 010 - BL

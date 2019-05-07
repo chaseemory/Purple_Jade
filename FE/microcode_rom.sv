@@ -1,3 +1,6 @@
+`include "Purple_Jade_pkg.svh"
+`include "FE_def.svh"
+
 module microcode_rom #(
     parameter UCODE_WIDTH_P  = -1
   , parameter INPUT_WIDTH_P = -1
