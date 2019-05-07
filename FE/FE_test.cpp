@@ -1,4 +1,4 @@
-#include "Vrename_stage.h"
+#include "Vfront_end.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h" 
 
@@ -9,17 +9,7 @@ static vluint64_t main_time = 0;
 #define NUM_PHY_REG 128
 #define NUM_ARCH_REG 16
 
-#define ASSERT_RENAME(valid,alloced,freed,dest,r1,r2) \
-    assert(top->renamed_v_o == valid); \
-    assert((top->renamed_o[0] & 0xf) == alloced); \
-    assert(((top->renamed_o[0] >> 4) & 0x7f) == freed); \
-    assert(((top->renamed_o[2] >> 2) & 0x7f) == dest); \
-    rs1 = ((top->renamed_o[2] & 0x3) << 5) | ((top->renamed_o[1] >> 27) & 0x1f); \
-    assert(rs1 == r1); \
-    rs2 = ((top->renamed_o[1] >> 11) & 0xffff); \
-    assert(rs2 == r2)
-
-static void tick(Vrename_stage* top) {
+static void tick(NAME* top) {
     top->clk_i = ((top->clk_i == 0) ? 1 : 0);
     top->eval();
 }
@@ -45,9 +35,9 @@ static vluint64_t set_commit_entry(vluint64_t w_v, vluint64_t arch, vluint64_t f
 int main(int argc, char** argv, char** env) {
     Verilated::commandArgs(argc, argv);
     Verilated::traceEverOn(true);
-    Vrename_stage* top = new Vrename_stage;
+    NAME* DUT = new NAME;
     VerilatedVcdC* tfp = new VerilatedVcdC;
-    top->trace(tfp, 99);
+    DUT->trace(tfp, 99);
     tfp->open("rename.vcd");
 /*****************************************************************************/
     top->clk_i = 1;
