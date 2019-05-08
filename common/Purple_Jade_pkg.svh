@@ -73,6 +73,7 @@ typedef struct packed
 parameter RENAMED_INSTRUCTION_WIDTH       = $bits(renamed_instruction_t);
 
 parameter ROB_ENTRY = 64;
+parameter SB_ENTRY = 16;
 
 typedef struct packed                               
 {       
@@ -96,12 +97,12 @@ typedef struct packed
 parameter ROB_WIDTH = $bits(rob_t);
 
 typedef struct packed {
-  logic                                   valid;
+  logic                                   wb;
   logic [WORD_SIZE_P-1:0]                 address;
   logic [WORD_SIZE_P-1:0]                 result;  
 } store_buffer_t;
 
-parameter ROB_MEM_WIDTH = $bits(store_buffer_t);
+parameter STORE_BUFFER_WIDTH = $bits(store_buffer_t);
 
 // ROB issue interfaces
 typedef rob_t issue_rob_t;  // with issue_rob.valid 0
@@ -117,6 +118,15 @@ typedef struct packed {
   logic [NUM_FLAGS-1:0]                   flags;
   logic [WORD_SIZE_P-1:0]                 result;
 } CDB_t;
+
+// CDB to SB type
+typedef struct packed {
+  logic                                   valid;
+  logic [$clog2(SB_ENTRY)-1:0]            sb_dest;
+  logic [WORD_SIZE_P-1:0]                 address;  // store buffer expects an address
+} CDB_sb_t;
+
+parameter CDB_SB_WIDTH = $bits(CDB_sb_t);
 
 parameter CDB_WIDTH = $bits(CDB_t);
 

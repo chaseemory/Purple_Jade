@@ -2,7 +2,6 @@
 `include "rob_def.svh"
 `include "../rename/rename_def.svh";
 
-
 module rob
 (input										clk_i
  , input                                    reset_i
@@ -143,6 +142,7 @@ always_comb
 	  	// committing logics
 	  	if (committing_instr.wb)
 	  	  begin
+	  	  	rob_n[rob_commit_pt].wb = 1'b0;
 	  	  	rob_commit_pt_n++;
 	  	  	rob_num_n++;
 	  	  end
@@ -153,6 +153,7 @@ always_comb
 	  	rob_n = '{default: 0};
 	  	rob_alloc_pt_n = 0;
 	  	rob_commit_pt_n = 0;
+		rob_num_n = ($clog2(ROB_ENTRY)+1)'(ROB_ENTRY);
 	  end
   end
 
