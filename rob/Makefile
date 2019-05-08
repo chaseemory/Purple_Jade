@@ -8,6 +8,12 @@ header = $(FLD)../common/Purple_Jade_pkg.svh
 csource = rob_test.cpp
 name = rob
 junk = obj_dir *.vcd
+DEBUG=0
+
+# debug flags
+ifeq ($(DEBUG),1)
+	vev_op += -DDEBUG
+endif
 
 all: $(source) $(header) $(inc)
 	$(vev) $(vev_op) $(source) $(exe_op) $(csource)

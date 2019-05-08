@@ -75,11 +75,16 @@ parameter RENAMED_INSTRUCTION_WIDTH       = $bits(renamed_instruction_t);
 parameter ROB_ENTRY = 64;
 
 typedef struct packed                               
-{                                                   
+{       
+  logic [WORD_SIZE_P-1:0]                 pc;                                      
   logic                                   wb; /* CDB write back ?  */
+`ifdef DEBUG // for debug purpose
   logic [WORD_SIZE_P-1:0]                 result;  // keep it for debug purpose
+  logic [WORD_SIZE_P-1:0]                 addr;    // keep it for debug purpose
+`endif
+
   logic                                   is_spec;
-  logic [WORD_SIZE_P-1:0]                 spec_pc;
+  logic [WORD_SIZE_P-1:0]                 resolved_pc;
   logic [NUM_FLAGS-1:0]                   flag_mask;
   logic [NUM_FLAGS-1:0]                   flags;
   logic                                   is_store;
@@ -109,8 +114,23 @@ typedef struct packed {
   logic                                   w_v;  // whether to write back
   logic [WORD_SIZE_P-1:0]                 dest; // reg or mem
   logic                                   is_spec;
+  logic [NUM_FLAGS-1:0]                   flags;
   logic [WORD_SIZE_P-1:0]                 result;
 } CDB_t;
 
 parameter CDB_WIDTH = $bits(CDB_t);
+
+`ifdef DEBUG
+typedef struct packed {
+  logic [WORD_SIZE_P-1:0]                 pc;                                      
+  logic                                   is_store;
+  logic                                   w_v;
+  logic [WORD_SIZE_P-1:0]                 addr;
+  logic [WORD_SIZE_P-1:0]                 result;
+} debug_t;
+
+parameter DEBUG_WIDTH = $bits(debug_t);
+
+`endif
+
 `endif
