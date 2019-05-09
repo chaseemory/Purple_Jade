@@ -9,7 +9,6 @@ parameter NUM_FLAGS                       = 4;
 parameter NUM_ARCH_REG                    = 16;
 parameter NUM_ARCH_DEST_REG               = 8;
 parameter NUM_ARCH_SRC1_REG               = 8;
-
 parameter BRANCH_CC_NUM                   = 15;
 
 parameter NUM_FU                          = 7;

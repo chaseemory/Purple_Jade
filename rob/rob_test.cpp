@@ -3,7 +3,108 @@
 
 #include <iostream>
 
+#define ROB_ENTRY 64
+
 static vluint64_t main_time = 0;
+
+typedef struct                               
+{       
+  uint pc;      //  16:12                                
+  uint64_t wb;      //  11
+  uint result;  //  11:0 | 5:27
+  uint addr;    // 16:11
+  uint64_t is_spec; // 10
+  uint64_t is_cond_branch;// 9
+  uint bcc_op;     // 4:5
+  uint resolved_pc;// 5:0 || 11:21
+  uint flag_mask; // 4:17
+  uint flags;     // 4:13
+  uint64_t is_store;  // 12
+  uint64_t w_v;		  // 11
+  uint freed_reg; // 7:4
+  uint alloc_reg; // 4:0
+} rob_t;
+
+typedef struct {
+  uint64_t valid;    // 44
+  uint64_t rob_dest; // 6:38
+  uint64_t w_v;  // 37
+  uint64_t dest; // 16:21
+  uint64_t is_spec; // 20
+  uint64_t flags;   // 4:16
+  uint64_t result;  // 16:0
+} CDB_t;
+
+void set_issue(Vrob* top, rob_t* rob) {
+	vluint32_t res0 = 0;
+	vluint32_t res1 = 0;
+	vluint32_t res2 = 0;
+
+	res0 = (rob->alloc_reg & 0xf)
+		 | ((rob->freed_reg & 0x7f) << 4)
+		 | ((rob->w_v & 0x1) << 11)
+		 | ((rob->is_store & 0x1) << 12)
+		 | ((rob->flags & 0xf) << 13)
+		 | ((rob->flag_mask & 0xf) << 17)
+		 | ((rob->resolved_pc & 0x7ff) << 21);
+
+	res1 = (rob->resolved_pc & 0xf800) >> 11
+		 | ((rob->bcc_op & 0xf) << 5)
+		 | ((rob->is_cond_branch & 0x1) << 9)
+		 | ((rob->is_spec & 0x1) << 10)
+		 | ((rob->addr & 0xffff) << 11)
+		 | ((rob->result & 0x1f) << 27);
+
+	res2 = (rob->result & 0xffe0) >> 5
+		 | ((rob->wb & 0x1) << 11)
+		 | ((rob->pc & 0xffff) << 12);
+
+	top->issue_rob_entry_i[0] = res0;
+	top->issue_rob_entry_i[1] = res1;
+	top->issue_rob_entry_i[2] = res2;	
+}
+
+void set_cdb(Vrob* top, uint entry, CDB_t* cdb) {
+	vluint64_t res = 0;
+	res = (cdb->result & 0xffff) 
+		| ((cdb->flags & 0xf) << 16)
+		| ((cdb->is_spec & 0x1) << 20)
+		| ((cdb->dest & 0xffff) << 21)
+		| ((cdb->w_v & 0x1) << 37)
+		| ((cdb->rob_dest & 0x3f) << 38)
+		| ((cdb->valid & 0x1) << 44);
+	top->cdb_i[entry] = res;
+}
+
+void set_flag(Vrob* top, uint flag) {
+	top->flag_rob_i = flag & 0xf;
+}
+
+void assert_rob(Vrob* top, rob_t* rob, uint64_t entry) {
+	vluint32_t res[3];
+	res[0] = (rob->alloc_reg & 0xf)
+		 | ((rob->freed_reg & 0x7f) << 4)
+		 | ((rob->w_v & 0x1) << 11)
+		 | ((rob->is_store & 0x1) << 12)
+		 | ((rob->flags & 0xf) << 13)
+		 | ((rob->flag_mask & 0xf) << 17)
+		 | ((rob->resolved_pc & 0x7ff) << 21);
+
+	res[1] = (rob->resolved_pc & 0xf800) >> 11
+		 | ((rob->bcc_op & 0xf) << 5)
+		 | ((rob->is_cond_branch & 0x1) << 9)
+		 | ((rob->is_spec & 0x1) << 10)
+		 | ((rob->addr & 0xffff) << 11)
+		 | ((rob->result & 0x1f) << 27);
+
+	res[2] = (rob->result & 0xffe0) >> 5
+		 | ((rob->wb & 0x1) << 11)
+		 | ((rob->pc & 0xffff) << 12);
+
+	assert(top->rob__DOT__rob_q[entry][0] == res[0]);
+	assert(top->rob__DOT__rob_q[entry][1] == res[1]);
+	assert(top->rob__DOT__rob_q[entry][2] == res[2]);
+}
 
 static void tick(Vrob* top) {
     top->clk_i = ((top->clk_i == 0) ? 1 : 0);
@@ -21,8 +122,35 @@ int main(int argc, char** argv, char** env) {
     tick(top);
     tick(top);
     // test reset
+    assert(top->rob__DOT__rob_num == ROB_ENTRY);
+    assert(top->rob__DOT__rob_alloc_pt == 0);
+    assert(top->rob__DOT__rob_commit_pt == 0);
+    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob_phys_valid_o == 0);
+    assert(top->rob_sb_valid_o == 0);
+    assert(top->rob_mispredict_o == 0);
+    assert(top->rob_rename_valid_o == 0);
+    assert(top->rob_flag_valid_o == 0);
+
+    // keep allocing to test fifos
+
+    // first one should be a mispredict
+    
+    // trigger mispredictions
+    
+    // first one and second one set flags
+    // third one loads
+    // misprediction on conditional branches
+
+    // check flags
+
+    // alloc all entrys and tests on rob write back
+    // in the meantime check flags and freed registers
 
 
+    // store entrys intermingled with adds and loads
+
+    // CDB writes checks : might not be necessary
     delete top; 
     return 0;
 }

@@ -112,11 +112,11 @@ always_comb
   	if (roll_back)
   	  begin
   	  	// when misprediction is resolved # of speculative free registers should be the same as reset
-  		lut_spec_n         = lut_n;
-		fl_spec_read_pt_n  = fl_read_pt_n;
-		fl_spec_write_pt_n = fl_write_pt_n;
+  		lut_spec_n         = lut_q;
+		fl_spec_read_pt_n  = fl_read_pt;
+		fl_spec_write_pt_n = fl_write_pt;
 		fl_spec_num_n      = ($clog2(NUM_PHYS_REG)+1)'(NUM_PHYS_REG-NUM_ARCH_REG);
-		fl_spec_n          = fl_n;  	  	
+		fl_spec_n          = fl_q;  	  	
   	  end
   end
 
@@ -129,7 +129,7 @@ always_comb
 	fl_n          = fl_q;
 
 	// update non speculative
-	if (commit_v_i & commit_entry.w_v)
+	if (commit_v_i & commit_entry.w_v & ~roll_back)
 	  begin
   	  	fl_n[fl_write_pt] = commit_entry.freed_reg;
   	  	lut_n[commit_entry.alloc_reg] = fl_q[fl_read_pt];

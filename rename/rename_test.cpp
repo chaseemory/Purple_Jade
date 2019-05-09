@@ -138,7 +138,7 @@ int main(int argc, char** argv, char** env) {
     top->decoded_i = set_decode(1,12,4,5,0,0);
     tick(top);
     tick(top);
-    ASSERT_RENAME(1,12,12,18,16,17);
+    ASSERT_RENAME(1,12,12,17,16,5);
 /*****************************************************************************/
     tfp->close();
     delete top;

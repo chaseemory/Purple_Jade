@@ -7,7 +7,7 @@ module rob
  , input                                    reset_i
 
  // CDB-rob interface
- , input [NUM_FU-1:0][CDB_WIDTH-1:0]		cdb_i
+ , input  [CDB_WIDTH-1:0]					cdb_i [NUM_FU-1:0]
  // issue-rob interface
  , input									issue_rob_valid_i
  , input  [ISSUE_ENTRY_WIDTH-1:0]			issue_rob_entry_i
@@ -35,11 +35,16 @@ module rob
 );
 
 // input output passing
-CDB_t [NUM_FU-1:0] cdb;
+CDB_t cdb [NUM_FU-1:0];
 assign cdb = cdb_i;
 
 // rob
-rob_t  [ROB_ENTRY-1:0] 					rob_q, rob_n;
+`ifdef DEBUG
+rob_t  				 					rob_q [ROB_ENTRY-1:0];
+rob_t  				 					rob_n [ROB_ENTRY-1:0];
+`else
+rob_t [ROB_ENTRY-1:0] 					rob_q, rob_n;
+`endif
 logic  [$clog2(ROB_ENTRY)-1:0]			rob_alloc_pt, rob_alloc_pt_n;
 logic  [$clog2(ROB_ENTRY)-1:0]			rob_commit_pt, rob_commit_pt_n;
 logic  [$clog2(ROB_ENTRY):0]   			rob_num, rob_num_n;
@@ -48,7 +53,7 @@ logic  [$clog2(ROB_ENTRY):0]   			rob_num, rob_num_n;
 rob_t 									committing_instr;
 
 // ready valid signals
-assign rob_issue_ready_o = rob_num != 0 & ~rob_mispredict_o;
+assign rob_issue_ready_o = (rob_num != 0) & ~rob_mispredict_o;
 assign rob_issue_entry_num_o = rob_alloc_pt;
 
 // committing a store instruction
