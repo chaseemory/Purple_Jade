@@ -25,11 +25,14 @@ module rob
  // commit-flag interface
  , output									rob_flag_valid_o
  , output [NUM_FLAGS*2-1:0]					rob_flag_o
+ // exe-commit flag read
 `ifdef DEBUG
  , output									rob_debug_valid_o								
  , output [DEBUG_WIDTH-1:0]					rob_debug_o
 `endif
 );
+
+// TODO: update flags on cdb write backs, and correct branch resolve mechanism.
 
 // input output passing
 CDB_t [NUM_FU-1:0] cdb;

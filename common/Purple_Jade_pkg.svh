@@ -83,7 +83,6 @@ typedef struct packed
   logic [WORD_SIZE_P-1:0]                 result;  // keep it for debug purpose
   logic [WORD_SIZE_P-1:0]                 addr;    // keep it for debug purpose
 `endif
-
   logic                                   is_spec;
   logic [WORD_SIZE_P-1:0]                 resolved_pc;
   logic [NUM_FLAGS-1:0]                   flag_mask;
