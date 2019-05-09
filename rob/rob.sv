@@ -74,19 +74,21 @@ assign N = flag_rob_i[n];
 assign Z = flag_rob_i[z];
 assign V = flag_rob_i[v];
 
+// condition_pc is targeted address for conditional branch
 assign condition_pc = (condition_taken) ? (committing_instr.resolved_pc) : (committing_instr.pc + 4);
-assign prev_spec_branch_n = committing_instr.is_spec;
-assign predicted_pc_n = (committing_instr.is_cond_branch) ? condition_pc
+assign prev_spec_branch_n = committing_instr.is_spec;  // previous instruction commited is a speculative
+assign predicted_pc_n = (committing_instr.is_cond_branch) ? condition_pc  // correct address to jump to
 		: committing_instr.resolved_pc;
 // previous speculative branch and current pc does not match
 assign rob_mispredict_o = committing_instr.wb && (committing_instr.pc != predicted_pc)
-							&& prev_spec_branch;
+							&& prev_spec_branch;  // mismatch of pcs
 assign rob_fe_redirected_pc_o = predicted_pc;
 
 // to renaming
 assign rob_rename_valid_o = committing_instr.wb &  ~rob_mispredict_o;
 commit_rename_t rename_entry;
 assign rename_entry.w_v = committing_instr.w_v;
+// used to update non speculative renaming table
 assign rename_entry.alloc_reg = committing_instr.alloc_reg;
 assign rename_entry.freed_reg = committing_instr.freed_reg;
 assign rob_rename_entry_o = rename_entry;
@@ -167,7 +169,8 @@ always_comb
 	  	  	  	  	  end
 `endif
 	  	  	  	  	// if rob entry is a speculative branch
-	  	  	  	  	// write speculative 
+	  	  	  	  	// bx write target address
+	  	  	  	  	// bcond write taken address
 	  	  	  	  	if (rob_q[i].is_spec)
 	  	  	  	  	  begin
 	  	  	  	  	  	rob_n[i].resolved_pc = cdb[j].result;
