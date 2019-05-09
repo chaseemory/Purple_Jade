@@ -13,10 +13,10 @@ static vluint64_t main_time = 0;
     assert(top->renamed_v_o == valid); \
     assert((top->renamed_o[0] & 0xf) == alloced); \
     assert(((top->renamed_o[0] >> 4) & 0x7f) == freed); \
-    assert(((top->renamed_o[2] >> 2) & 0x7f) == dest); \
-    rs1 = ((top->renamed_o[2] & 0x3) << 5) | ((top->renamed_o[1] >> 27) & 0x1f); \
+    assert(((top->renamed_o[2] >> 3) & 0x7f) == dest); \
+    rs1 = ((top->renamed_o[2] & 0x7) << 4) | ((top->renamed_o[1] >> 28) & 0xf); \
     assert(rs1 == r1); \
-    rs2 = ((top->renamed_o[1] >> 11) & 0xffff); \
+    rs2 = ((top->renamed_o[1] >> 12) & 0xffff); \
     assert(rs2 == r2)
 
 static void tick(Vrename_stage* top) {
@@ -26,10 +26,10 @@ static void tick(Vrename_stage* top) {
 
 static vluint64_t set_decode(vluint64_t w_v, vluint64_t dest, vluint64_t rs1, vluint64_t rs2, vluint64_t imm, vluint64_t imm_val) {
     vluint64_t res = 0;
-    dest = (dest & 0xf) << 52; 
-    rs1 = (rs1 & 0xf) << 48;
-    rs2 = (rs2 & 0xf) << 32;
-    imm_val = (imm_val & 0xffff) << 32;
+    dest = (dest & 0xf) << 53; 
+    rs1 = (rs1 & 0xf) << 49;
+    rs2 = (rs2 & 0xf) << 33;
+    imm_val = (imm_val & 0xffff) << 33;
     w_v = (w_v & 0xf) << 1;
     res = dest | rs1 | ((imm == 1) ? imm_val : rs2) | imm | w_v;
     return res;

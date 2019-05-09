@@ -21,11 +21,6 @@ module rename_stage
  , input                                    mispredict_i
 );
 
-// type delcaration
-`declare_decoded_instruction(NUM_ARCH_REG,WORD_SIZE_P,INSTRUCTION_OP_NUM,NUM_FU,NUM_FLAGS,BRANCH_CC_NUM);
-`declare_renamed_instruction(NUM_PHYS_REG,WORD_SIZE_P,INSTRUCTION_OP_NUM,NUM_FU,NUM_FLAGS,BRANCH_CC_NUM,NUM_ARCH_REG);
-`declare_commit_rename_t(NUM_ARCH_REG,NUM_PHYS_REG);
-
 decoded_instruction_t decoded;
 renamed_instruction_t renamed;
 commit_rename_t commit_entry;
@@ -46,8 +41,8 @@ logic [NUM_PHYS_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] fl_n, fl_q;
 // pointers for freelists
 logic [$clog2(NUM_PHYS_REG)-1:0]				   fl_read_pt, fl_write_pt, fl_spec_read_pt, fl_spec_write_pt;
 logic [$clog2(NUM_PHYS_REG)-1:0]				   fl_read_pt_n, fl_write_pt_n, fl_spec_read_pt_n, fl_spec_write_pt_n;
-logic [$clog2(NUM_PHYS_REG)-1:0]				   fl_spec_num;
-logic [$clog2(NUM_PHYS_REG)-1:0]				   fl_spec_num_n;
+logic [$clog2(NUM_PHYS_REG):0]					   fl_spec_num;
+logic [$clog2(NUM_PHYS_REG):0]					   fl_spec_num_n;
 
 localparam REG_PAD_WIDTH = $clog2(NUM_PHYS_REG) - $clog2(NUM_ARCH_REG);
 localparam PHYREG_TO_WORD_PAD_WIDTH = WORD_SIZE_P - $clog2(NUM_PHYS_REG);
@@ -69,6 +64,7 @@ assign renamed.w_v = decoded.w_v;
 assign renamed.imm = decoded.imm;
 assign renamed.alloc_reg = decoded.dest_id;
 assign renamed.freed_reg = lut_spec_q[decoded.dest_id];
+assign renamed.branch_speculation = decoded.branch_speculation;
 
 // renaming
 always_comb
@@ -119,7 +115,7 @@ always_comb
   		lut_spec_n         = lut_n;
 		fl_spec_read_pt_n  = fl_read_pt_n;
 		fl_spec_write_pt_n = fl_write_pt_n;
-		fl_spec_num_n      = $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
+		fl_spec_num_n      = ($clog2(NUM_PHYS_REG)+1)'(NUM_PHYS_REG-NUM_ARCH_REG);
 		fl_spec_n          = fl_n;  	  	
   	  end
   end
@@ -151,7 +147,7 @@ always_ff @(posedge clk_i)
 		fl_write_pt  <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
 		fl_spec_read_pt  <= '0;
 		fl_spec_write_pt  <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
-		fl_spec_num <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
+		fl_spec_num <= ($clog2(NUM_PHYS_REG)+1)'(NUM_PHYS_REG-NUM_ARCH_REG);
 	  end 
 	else
 	  begin

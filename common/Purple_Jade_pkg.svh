@@ -82,7 +82,6 @@ parameter WIDTH_OP                        = $clog2(INSTRUCTION_OP_NUM);
 `define STR_OP  WIDTH_OP'd0
 `define LDR_OP  WIDTH_OP'd1
 
-
 typedef struct packed
 {
   logic [$clog2(NUM_ARCH_REG)-1:0]        dest_id;
@@ -121,26 +120,75 @@ typedef struct packed
 
 parameter RENAMED_INSTRUCTION_WIDTH       = $bits(renamed_instruction_t);
 
-`define ROB_ENTRY 64
-
-parameter ROB_WIDTH = 1 + WORD_SIZE_P + 2 * NUM_FLAGS + 1 + 1 + WORD_SIZE_P;
+parameter ROB_ENTRY = 64;
+parameter SB_ENTRY = 16;
 
 typedef struct packed                               
-{                                                   
-  logic                                   valid;
-  logic [WORD_SIZE_P-1:0]                 result;
+{       
+  logic [WORD_SIZE_P-1:0]                 pc;                                      
+  logic                                   wb; /* CDB write back ?  */
+`ifdef DEBUG // for debug purpose
+  logic [WORD_SIZE_P-1:0]                 result;  // keep it for debug purpose
+  logic [WORD_SIZE_P-1:0]                 addr;    // keep it for debug purpose
+`endif
+
+  logic                                   is_spec;
+  logic [WORD_SIZE_P-1:0]                 resolved_pc;
   logic [NUM_FLAGS-1:0]                   flag_mask;
   logic [NUM_FLAGS-1:0]                   flags;
   logic                                   is_store;
   logic                                   w_v;
-  logic [WORD_SIZE_P-1:0]                 dest;
+  logic [$clog2(NUM_PHYS_REG)-1:0]        freed_reg;
+  logic [$clog2(NUM_ARCH_REG)-1:0]        alloc_reg; 
 } rob_t;
 
-parameter ROB_MEM_WIDTH = 1 + WORD_SIZE_P * 2;
+parameter ROB_WIDTH = $bits(rob_t);
 
 typedef struct packed {
-  logic                                   valid;
+  logic                                   wb;
   logic [WORD_SIZE_P-1:0]                 address;
   logic [WORD_SIZE_P-1:0]                 result;  
-} rob_mem_t;
+} store_buffer_t;
+
+parameter STORE_BUFFER_WIDTH = $bits(store_buffer_t);
+
+// ROB issue interfaces
+typedef rob_t issue_rob_t;  // with issue_rob.valid 0
+parameter ISSUE_ENTRY_WIDTH = ROB_WIDTH;
+
+// CDB type
+typedef struct packed {
+  logic                                   valid;
+  logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
+  logic                                   w_v;  // whether to write back
+  logic [WORD_SIZE_P-1:0]                 dest; // reg or mem
+  logic                                   is_spec;
+  logic [NUM_FLAGS-1:0]                   flags;
+  logic [WORD_SIZE_P-1:0]                 result;
+} CDB_t;
+
+// CDB to SB type
+typedef struct packed {
+  logic                                   valid;
+  logic [$clog2(SB_ENTRY)-1:0]            sb_dest;
+  logic [WORD_SIZE_P-1:0]                 address;  // store buffer expects an address
+} CDB_sb_t;
+
+parameter CDB_SB_WIDTH = $bits(CDB_sb_t);
+
+parameter CDB_WIDTH = $bits(CDB_t);
+
+`ifdef DEBUG
+typedef struct packed {
+  logic [WORD_SIZE_P-1:0]                 pc;                                      
+  logic                                   is_store;
+  logic                                   w_v;
+  logic [WORD_SIZE_P-1:0]                 addr;
+  logic [WORD_SIZE_P-1:0]                 result;
+} debug_t;
+
+parameter DEBUG_WIDTH = $bits(debug_t);
+
+`endif
+
 `endif
