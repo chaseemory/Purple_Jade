@@ -19,20 +19,20 @@ module rob
  // rob-store buffer interface: pop signal to store buffer
  , output									rob_sb_valid_o
  , output									rob_mispredict_o
+ , output [WORD_SIZE_P-1:0]					rob_fe_redirected_pc_o
  // rename-commit interface
  , output                                   rob_rename_valid_o
  , output [COMMIT_RENAME_WIDTH-1:0]         rob_rename_entry_o
  // commit-flag interface
  , output									rob_flag_valid_o
  , output [NUM_FLAGS*2-1:0]					rob_flag_o
+ , input  [NUM_FLAGS-1:0]					flag_rob_i
  // exe-commit flag read
 `ifdef DEBUG
  , output									rob_debug_valid_o								
  , output [DEBUG_WIDTH-1:0]					rob_debug_o
 `endif
 );
-
-// TODO: update flags on cdb write backs, and correct branch resolve mechanism.
 
 // input output passing
 CDB_t [NUM_FU-1:0] cdb;
@@ -65,13 +65,23 @@ assign rob_phys_reg_cl_o = committing_instr.freed_reg;
 // misprediction detection variables
 logic 					prev_spec_branch_n, prev_spec_branch;
 logic [WORD_SIZE_P-1:0] predicted_pc_n, predicted_pc;
-
+logic [WORD_SIZE_P-1:0]	condition_pc;
+logic 					condition_taken;
+logic 					N, Z, V, C;  // current flags
 // save prediction meta data
+assign C = flag_rob_i[c];
+assign N = flag_rob_i[n];
+assign Z = flag_rob_i[z];
+assign V = flag_rob_i[v];
+
+assign condition_pc = (condition_taken) ? (committing_instr.resolved_pc) : (committing_instr.pc + 4);
 assign prev_spec_branch_n = committing_instr.is_spec;
-assign predicted_pc_n = committing_instr.resolved_pc;
+assign predicted_pc_n = (committing_instr.is_cond_branch) ? condition_pc
+		: committing_instr.resolved_pc;
 // previous speculative branch and current pc does not match
 assign rob_mispredict_o = committing_instr.wb && (committing_instr.pc != predicted_pc)
 							&& prev_spec_branch;
+assign rob_fe_redirected_pc_o = predicted_pc;
 
 // to renaming
 assign rob_rename_valid_o = committing_instr.wb &  ~rob_mispredict_o;
@@ -96,6 +106,29 @@ assign debug.addr = committing_instr.addr;
 assign debug.result = committing_instr.result;
 assign rob_debug_o = debug;
 `endif
+
+// is conditional taken
+always_comb
+  begin
+	unique case(committing_instr.bcc_op)
+		`EQ 	: condition_taken = Z;
+		`NE 	: condition_taken = ~Z;
+		`CS 	: condition_taken = C;
+		`CC 	: condition_taken = ~C;
+		`MI 	: condition_taken = N;
+		`PL 	: condition_taken = ~N;
+		`VS 	: condition_taken = V;
+		`VC 	: condition_taken = ~V;
+		`HI 	: condition_taken = C & ~Z;
+		`LS 	: condition_taken = ~C | Z;
+		`GE 	: condition_taken = N == V;
+		`LT 	: condition_taken = (~N) == V;
+		`GT 	: condition_taken = ~Z && (N == V);
+		`LE 	: condition_taken = Z || ((~N) == V);
+		`AL 	: condition_taken = 1'b1;
+		default : condition_taken = 1'b0;
+	endcase
+  end
 
 always_comb
   begin
@@ -125,6 +158,7 @@ always_comb
 	  	  	  		&& cdb[j].rob_dest == $clog2(ROB_ENTRY)'(i))
 	  	  	  	  begin
 	  	  	  	  	rob_n[i].wb = 1'b1;  // written back
+	  	  	  	  	rob_n[i].flags = cdb[j].flags;
 `ifdef DEBUG
 	  	  	  	  	if (rob_q[i].w_v)  // for debug purpose
 	  	  	  	  	  begin

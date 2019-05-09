@@ -82,6 +82,29 @@ parameter WIDTH_OP                        = $clog2(INSTRUCTION_OP_NUM);
 `define STR_OP  WIDTH_OP'd0
 `define LDR_OP  WIDTH_OP'd1
 
+// conditional branch opcode
+`define EQ 4'h0
+`define NE 4'h1
+`define CS 4'h2
+`define CC 4'h3
+`define MI 4'h4
+`define PL 4'h5
+`define VS 4'h6
+`define VC 4'h7
+`define HI 4'h8
+`define LS 4'h9
+`define GE 4'hA
+`define LT 4'hB
+`define GT 4'hC
+`define LE 4'hD
+`define AL 4'hE
+
+// flag position
+parameter c = 3;
+parameter n = 2;
+parameter z = 1;
+parameter v = 0;
+
 typedef struct packed
 {
   logic [$clog2(NUM_ARCH_REG)-1:0]        dest_id;
@@ -132,6 +155,8 @@ typedef struct packed
   logic [WORD_SIZE_P-1:0]                 addr;    // keep it for debug purpose
 `endif
   logic                                   is_spec;
+  logic                                   is_cond_branch;
+  logic [$clog2(BRANCH_CC_NUM)-1:0]       bcc_op;
   logic [WORD_SIZE_P-1:0]                 resolved_pc;
   logic [NUM_FLAGS-1:0]                   flag_mask;
   logic [NUM_FLAGS-1:0]                   flags;
