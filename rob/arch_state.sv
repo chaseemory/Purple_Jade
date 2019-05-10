@@ -25,12 +25,12 @@ module arch_state
 );
 
 // registers
-logic [NUM_PHYS_REG-1:0][WORD_SIZE_P-1:0]  reg_n reg_q;
-logic [NUM_PHYS_REG-1:0]				           valid, valid_n;
-logic [NUM_FLAGS-1:0]					             flag, flag_n;		  
+logic [NUM_PHYS_REG-1:0][WORD_SIZE_P-1:0] reg_n reg_q;
+logic [NUM_PHYS_REG-1:0]                  valid, valid_n;
+logic [NUM_FLAGS-1:0]                     flag, flag_n;		  
 
 //flag variables
-logic [NUM_FLAGS-1:0]					             flags, flag_mask;
+logic [NUM_FLAGS-1:0]                     flags, flag_mask;
 assign flags = rob_flag_i[NUM_FLAGS-1:0];
 assign flag_mask = rob_flag_i[NUM_FLAGS*2-1:NUM_FLAGS];
 assign flag_n = (rob_flag_valid_i) ? (flag_mask & flag) | (~flag_mask & flags): flag;

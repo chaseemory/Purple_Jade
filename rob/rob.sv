@@ -40,17 +40,17 @@ assign cdb = cdb_i;
 
 // rob
 `ifdef DEBUG
-rob_t  				 					rob_q [ROB_ENTRY-1:0];
-rob_t  				 					rob_n [ROB_ENTRY-1:0];
+rob_t									rob_q [ROB_ENTRY-1:0];
+rob_t									rob_n [ROB_ENTRY-1:0];
 `else
-rob_t [ROB_ENTRY-1:0] 					rob_q, rob_n;
+rob_t [ROB_ENTRY-1:0]					rob_q, rob_n;
 `endif
 logic  [$clog2(ROB_ENTRY)-1:0]			rob_alloc_pt, rob_alloc_pt_n;
 logic  [$clog2(ROB_ENTRY)-1:0]			rob_commit_pt, rob_commit_pt_n;
-logic  [$clog2(ROB_ENTRY):0]   			rob_num, rob_num_n;
+logic  [$clog2(ROB_ENTRY):0]			rob_num, rob_num_n;
 
 // instruction being committed
-rob_t 									committing_instr;
+rob_t									committing_instr;
 
 // ready valid signals
 assign rob_issue_ready_o = (rob_num != 0) & ~rob_mispredict_o;
