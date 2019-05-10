@@ -5,6 +5,8 @@
 
 #define ROB_ENTRY 64
 
+using namespace std;
+
 static vluint64_t main_time = 0;
 
 typedef struct                               
@@ -131,26 +133,217 @@ int main(int argc, char** argv, char** env) {
     assert(top->rob_mispredict_o == 0);
     assert(top->rob_rename_valid_o == 0);
     assert(top->rob_flag_valid_o == 0);
-
+    tick(top);
     // keep allocing to test fifos
+    top->reset_i = 0;
+    top->issue_rob_valid_i = 1;
+    rob_t rob_i;
+    rob_i.pc = 0;
+    rob_i.wb = 0;
+    rob_i.result = 0;
+    rob_i.addr = 0;
+    rob_i.is_spec = 1;
+    rob_i.is_cond_branch = 0;
+    rob_i.bcc_op = 0;
+    rob_i.resolved_pc = 0;
+    rob_i.flag_mask = 0;
+    rob_i.flags = 0;
+    rob_i.is_store = 0;
+    rob_i.w_v = 1;
+    rob_i.freed_reg = 0;
+    rob_i.alloc_reg = 0;
+    set_issue(top, &rob_i);
+    tick(top);
+    tick(top);
+    assert(top->rob__DOT__rob_num == ROB_ENTRY-1);
+    assert(top->rob_mispredict_o == 0);
+    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob__DOT__rob_alloc_pt == 1);
+    assert(top->rob__DOT__rob_commit_pt == 0);
+    assert(top->rob_sb_valid_o == 0);
+    assert(top->rob_rename_valid_o == 0);
+    assert(top->rob_flag_valid_o == 0);
+    assert(top->rob_phys_valid_o == 0);
+    rob_i.is_spec = 0;
 
+    for (vluint64_t i=1; i<63; i++) {
+      rob_i.pc = i;
+      set_issue(top, &rob_i);
+      tick(top);
+      tick(top);
+      assert(top->rob__DOT__rob_num == ROB_ENTRY-i-1);
+      assert(top->rob_mispredict_o == 0);
+      assert(top->rob_issue_ready_o == 1);
+      assert(top->rob__DOT__rob_alloc_pt == i+1);
+      assert(top->rob__DOT__rob_commit_pt == 0);
+      assert(top->rob_sb_valid_o == 0);
+      assert(top->rob_rename_valid_o == 0);
+      assert(top->rob_flag_valid_o == 0);
+      assert(top->rob_phys_valid_o == 0);
+
+    }
+    tick(top);
+    tick(top);
+    assert(top->rob__DOT__rob_num == 0);
+    assert(top->rob_issue_ready_o == 0);
+    assert(top->rob__DOT__rob_alloc_pt == 0);
+    assert(top->rob_sb_valid_o == 0);
+    assert(top->rob_rename_valid_o == 0);
+    assert(top->rob_flag_valid_o == 0);
+    assert(top->rob_phys_valid_o == 0);
     // first one should be a mispredict
-    
-    // trigger mispredictions
-    
+    CDB_t cdb;
+    cdb.valid = 1;
+    cdb.rob_dest = 0;
+    cdb.w_v = 1;
+    cdb.dest = 8;
+    cdb.result = 4;
+    cdb.is_spec = 1;
+    set_cdb(top, 1, &cdb);
+    tick(top);
+    tick(top);
+    assert(top->rob_flag_valid_o == 0);
+    assert(top->rob_rename_valid_o == 1);
+    assert(top->rob_phys_valid_o == 1);
+    assert(top->rob_sb_valid_o == 0);
+    cdb.valid = 1;
+    set_cdb(top, 1, &cdb);
+    tick(top);
+    tick(top);
+    cdb.valid = 0;
+    set_cdb(top, 1, &cdb);
+    assert(top->rob__DOT__rob_commit_pt == 1);
+    assert(top->rob_issue_ready_o == 0);
+    assert(top->rob__DOT__rob_num == 1);
+    assert(top->rob_mispredict_o == 1);
+    assert(top->rob_fe_redirected_pc_o == 4);
+    tick(top);
+    tick(top);
+    assert(top->rob__DOT__rob_num == ROB_ENTRY);
+    assert(top->rob__DOT__rob_alloc_pt == 0);
+    assert(top->rob__DOT__rob_commit_pt == 0);
+    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob_phys_valid_o == 0);
+    assert(top->rob_sb_valid_o == 0);
+    assert(top->rob_mispredict_o == 0);
+    assert(top->rob_rename_valid_o == 0);
+    assert(top->rob_flag_valid_o == 0);
     // first one and second one set flags
     // third one loads
     // misprediction on conditional branches
-
+    rob_i.pc = 0;
+    rob_i.wb = 1;
+    rob_i.result = 0;
+    rob_i.addr = 0;
+    rob_i.is_spec = 0;
+    rob_i.is_cond_branch = 0;
+    rob_i.bcc_op = 0;
+    rob_i.resolved_pc = 0;
+    rob_i.flag_mask = 0x3;
+    rob_i.flags = 0x3;
+    rob_i.is_store = 0;
+    rob_i.w_v = 1;
+    rob_i.freed_reg = 0;
+    rob_i.alloc_reg = 0;
+    set_issue(top, &rob_i);
+    tick(top);
+    tick(top);
+    assert(top->rob__DOT__rob_num == ROB_ENTRY-1);
+    assert(top->rob_mispredict_o == 0);
+    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob__DOT__rob_alloc_pt == 1);
+    assert(top->rob__DOT__rob_commit_pt == 0);
+    assert(top->rob_sb_valid_o == 0);
+    assert(top->rob_rename_valid_o == 1);
+    assert(top->rob_flag_valid_o == 1);
+    assert(top->rob_phys_valid_o == 1);
     // check flags
-
-    // alloc all entrys and tests on rob write back
-    // in the meantime check flags and freed registers
-
-
-    // store entrys intermingled with adds and loads
-
-    // CDB writes checks : might not be necessary
+    rob_i.pc = 2;
+    rob_i.wb = 1;
+    rob_i.result = 0;
+    rob_i.addr = 0;
+    rob_i.is_spec = 0;
+    rob_i.is_cond_branch = 0;
+    rob_i.bcc_op = 0;
+    rob_i.resolved_pc = 0;
+    rob_i.flag_mask = 0x3;
+    rob_i.flags = 0x0;
+    rob_i.is_store = 0;
+    rob_i.w_v = 1;
+    rob_i.freed_reg = 0;
+    rob_i.alloc_reg = 0;
+    set_issue(top, &rob_i);
+    tick(top);
+    tick(top);
+    assert(top->rob__DOT__rob_num == ROB_ENTRY-1);
+    assert(top->rob_mispredict_o == 0);
+    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob__DOT__rob_alloc_pt == 2);
+    assert(top->rob__DOT__rob_commit_pt == 1);
+    assert(top->rob_sb_valid_o == 0);
+    assert(top->rob_rename_valid_o == 1);
+    assert(top->rob_flag_valid_o == 1);
+    assert(top->rob_phys_valid_o == 1);
+    // a store
+    rob_i.pc = 3;
+    rob_i.wb = 1;
+    rob_i.result = 0;
+    rob_i.addr = 0;
+    rob_i.is_spec = 0;
+    rob_i.is_cond_branch = 0;
+    rob_i.bcc_op = 0;
+    rob_i.resolved_pc = 0;
+    rob_i.flag_mask = 0x0;
+    rob_i.flags = 0;
+    rob_i.is_store = 1;
+    rob_i.w_v = 0;
+    rob_i.freed_reg = 0;
+    rob_i.alloc_reg = 0;
+    set_issue(top, &rob_i);
+    tick(top);
+    tick(top);
+    assert(top->rob__DOT__rob_num == ROB_ENTRY-1);
+    assert(top->rob_mispredict_o == 0);
+    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob__DOT__rob_alloc_pt == 3);
+    assert(top->rob__DOT__rob_commit_pt == 2);
+    assert(top->rob_sb_valid_o == 1);
+    assert(top->rob_rename_valid_o == 1);
+    assert(top->rob_flag_valid_o == 0);
+    assert(top->rob_phys_valid_o == 0);
+    // an beq
+    rob_i.pc = 4;
+    rob_i.wb = 1;
+    rob_i.result = 0;
+    rob_i.addr = 0;
+    rob_i.is_spec = 1;
+    rob_i.is_cond_branch = 1;
+    rob_i.bcc_op = 0;
+    rob_i.resolved_pc = 6;
+    rob_i.flag_mask = 0x0;
+    rob_i.flags = 0;
+    rob_i.is_store = 0;
+    rob_i.w_v = 0;
+    rob_i.freed_reg = 0;
+    rob_i.alloc_reg = 0;
+    set_issue(top, &rob_i);
+    tick(top);
+    tick(top);
+    assert(top->rob__DOT__rob_num == ROB_ENTRY-1);
+    assert(top->rob_mispredict_o == 0);
+    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob__DOT__rob_alloc_pt == 4);
+    assert(top->rob__DOT__rob_commit_pt == 3);
+    assert(top->rob_sb_valid_o == 0);
+    assert(top->rob_rename_valid_o == 1);
+    assert(top->rob_flag_valid_o == 0);
+    assert(top->rob_phys_valid_o == 0);
+    top->issue_rob_valid_i = 0;
+    set_issue(top, &rob_i);
+    tick(top);
+    tick(top);
+    assert(top->rob_mispredict_o == 0);
+    assert(top->rob_fe_redirected_pc_o == 5);
     delete top; 
     return 0;
 }
