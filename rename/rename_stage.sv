@@ -3,22 +3,22 @@
 
 module rename_stage 
 (input										clk_i
- , input                                    reset_i
+ , input									reset_i
 
  // decoder-rename interface
- , input  [DECODED_INSTRUCTION_WIDTH-1:0]   decoded_i
- , input                                    decoded_v_i
- , output                                   rename_decode_ready_o
+ , input  [DECODED_INSTRUCTION_WIDTH-1:0]	decoded_i
+ , input									decoded_v_i
+ , output									rename_decode_ready_o
 
  // rename-issue interface
- , output [RENAMED_INSTRUCTION_WIDTH-1:0]   renamed_o  
- , output                                   renamed_v_o
- , input                                    issue_rename_ready_i
+ , output [RENAMED_INSTRUCTION_WIDTH-1:0]	renamed_o  
+ , output									renamed_v_o
+ , input									issue_rename_ready_i
 
  // commit-rename interface
- , input                                    commit_v_i
- , input  [COMMIT_RENAME_WIDTH-1:0]         commit_rename_i
- , input                                    mispredict_i
+ , input									commit_v_i
+ , input  [COMMIT_RENAME_WIDTH-1:0]			commit_rename_i
+ , input									mispredict_i
 );
 
 decoded_instruction_t decoded;

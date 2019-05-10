@@ -1,27 +1,27 @@
 `include "../common/Purple_Jade_pkg.svh";
 
 module arch_state
-(input										                 clk_i
- , input                                   reset_i
+(input                                      clk_i
+ , input                                    reset_i
  // execute register write back
- , input									                 exe_w_v_i
- , input [$clog2(NUM_PHYS_REG)-1:0]		     exe_addr_i
- , input [WORD_SIZE_P-1:0]					       exe_data_i
+ , input                                    exe_w_v_i
+ , input [$clog2(NUM_PHYS_REG)-1:0]         exe_addr_i
+ , input [WORD_SIZE_P-1:0]                  exe_data_i
  // rob register clear
- , input									                 rob_phys_valid_i
- , input [$clog2(NUM_PHYS_REG)-1:0]			   rob_phys_reg_cl_i
+ , input                                    rob_phys_valid_i
+ , input [$clog2(NUM_PHYS_REG)-1:0]         rob_phys_reg_cl_i
  // rob flag write interfaces
- , input									                 rob_flag_valid_i
- , input [NUM_FLAGS*2-1:0]					       rob_flag_i 
+ , input                                    rob_flag_valid_i
+ , input [NUM_FLAGS*2-1:0]                  rob_flag_i 
  // rob  flag read
- , output [NUM_FLAGS-1:0]                  flag_rob_o
+ , output [NUM_FLAGS-1:0]                   flag_rob_o
  // issue read ports
- , input  [$clog2(NUM_PHYS_REG)-1:0]       issue_read_rs1_i
- , output                                  rs1_valid_o
- , output [WORD_SIZE_P-1:0]                rs1_data_o
- , input  [$clog2(NUM_PHYS_REG)-1:0]       issue_read_rs2_i
- , output                                  rs2_valid_o
- , output [WORD_SIZE_P-1:0]                rs2_data_o
+ , input  [$clog2(NUM_PHYS_REG)-1:0]        issue_read_rs1_i
+ , output                                   rs1_valid_o
+ , output [WORD_SIZE_P-1:0]                 rs1_data_o
+ , input  [$clog2(NUM_PHYS_REG)-1:0]        issue_read_rs2_i
+ , output                                   rs2_valid_o
+ , output [WORD_SIZE_P-1:0]                 rs2_data_o
 );
 
 // registers

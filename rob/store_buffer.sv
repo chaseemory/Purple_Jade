@@ -2,36 +2,36 @@
 `include "rob_def.svh"
 
 module store_buffer
-(input										clk_i
+(input                                      clk_i
  , input                                    reset_i
  // commit-store buffer interfaces
- , input									rob_sb_valid_i
- , input									rob_mispredict_i
+ , input                                    rob_sb_valid_i
+ , input                                    rob_mispredict_i
 
  // issue-store buffer interfaces
- , input 									issue_sb_v_i
- , input  [STORE_BUFFER_WIDTH-1:0]			issue_sb_i
- , output [$clog2(SB_ENTRY)-1:0]			sb_issue_entry_num_o
- , output 									sb_issue_ready_o
+ , input                                    issue_sb_v_i
+ , input  [STORE_BUFFER_WIDTH-1:0]          issue_sb_i
+ , output [$clog2(SB_ENTRY)-1:0]            sb_issue_entry_num_o	
+ , output                                   sb_issue_ready_o
 
  // execute-write back interfaces
- , input									exe_sb_v_i
- , input  [CDB_SB_WIDTH-1:0]				exe_sb_i
+ , input                                    exe_sb_v_i
+ , input  [CDB_SB_WIDTH-1:0]                exe_sb_i
  // load bypass interfaces
- , input  [WORD_SIZE_P-1:0]					exe_ld_bypass_addr_i
- , output 									sb_ld_pass_valid_o							
- , output [WORD_SIZE_P-1:0]					sb_ld_pass_value_o
+ , input  [WORD_SIZE_P-1:0]                 exe_ld_bypass_addr_i
+ , output                                   sb_ld_pass_valid_o							
+ , output [WORD_SIZE_P-1:0]                 sb_ld_pass_value_o
  // sb to memory interfaces
- , output									sb_mem_v_o
- , output [WORD_SIZE_P-1:0]					sb_mem_addr_o
- , output [WORD_SIZE_P-1:0]					sb_mem_data_o
+ , output                                   sb_mem_v_o
+ , output [WORD_SIZE_P-1:0]                 sb_mem_addr_o
+ , output [WORD_SIZE_P-1:0]                 sb_mem_data_o
 );
 
 // store buffer
-store_buffer_t [SB_ENTRY-1:0] 			sb_n, sb;
-logic  [$clog2(SB_ENTRY)-1:0]			sb_alloc_pt, sb_alloc_pt_n;
-logic  [$clog2(SB_ENTRY)-1:0]			sb_commit_pt, sb_commit_pt_n;
-logic  [$clog2(SB_ENTRY):0]   			sb_num, sb_num_n;
+store_buffer_t [SB_ENTRY-1:0]     sb_n, sb;
+logic  [$clog2(SB_ENTRY)-1:0]     sb_alloc_pt, sb_alloc_pt_n;
+logic  [$clog2(SB_ENTRY)-1:0]     sb_commit_pt, sb_commit_pt_n;
+logic  [$clog2(SB_ENTRY):0]       sb_num, sb_num_n;
 
 // issue interfaces assignments
 assign sb_issue_entry_num_o = sb_alloc_pt;

@@ -4,7 +4,7 @@
 
 module rob
 (input										clk_i
- , input                                    reset_i
+ , input									reset_i
 
  // CDB-rob interface
  , input  [CDB_WIDTH-1:0]					cdb_i [NUM_FU-1:0]
@@ -12,7 +12,7 @@ module rob
  , input									issue_rob_valid_i
  , input  [ISSUE_ENTRY_WIDTH-1:0]			issue_rob_entry_i
  , output [$clog2(ROB_ENTRY)-1:0]			rob_issue_entry_num_o
- , output 									rob_issue_ready_o
+ , output									rob_issue_ready_o
  // rob-physical register interface
  , output									rob_phys_valid_o
  , output [$clog2(NUM_PHYS_REG)-1:0]		rob_phys_reg_cl_o
@@ -21,8 +21,8 @@ module rob
  , output									rob_mispredict_o
  , output [WORD_SIZE_P-1:0]					rob_fe_redirected_pc_o
  // rename-commit interface
- , output                                   rob_rename_valid_o
- , output [COMMIT_RENAME_WIDTH-1:0]         rob_rename_entry_o
+ , output									rob_rename_valid_o
+ , output [COMMIT_RENAME_WIDTH-1:0]			rob_rename_entry_o
  // commit-flag interface
  , output									rob_flag_valid_o
  , output [NUM_FLAGS*2-1:0]					rob_flag_o
