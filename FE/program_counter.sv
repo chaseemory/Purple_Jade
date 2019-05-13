@@ -5,6 +5,6 @@ module program_counter
   , output  logic [WORD_SIZE_P-1:0] o
   );
 
-  always_ff @(posedge clk_i) o = pc_i;
+  always_ff @(posedge clk_i) o <= pc_i;
 
 endmodule // program_counter
