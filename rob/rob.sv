@@ -81,11 +81,11 @@ assign V = flag_rob_i[v];
 
 // condition_pc is targeted address for conditional branch
 assign condition_pc = (condition_taken) ? (committing_instr.resolved_pc) : (committing_instr.pc + 1);
-assign prev_spec_branch_n = committing_instr.is_spec;  // previous instruction commited is a speculative
-assign predicted_pc_n = (committing_instr.is_cond_branch) ? condition_pc  // correct address to jump to
-		: committing_instr.resolved_pc;
+assign prev_spec_branch_n = (committing_instr.wb & ~rob_mispredict_o) ? committing_instr.is_spec : prev_spec_branch;  // previous instruction commited is a speculative
+assign predicted_pc_n = (committing_instr.wb & ~rob_mispredict_o) ? ((committing_instr.is_cond_branch) ? condition_pc  // correct address to jump to
+		: committing_instr.resolved_pc) : predicted_pc;
 // previous speculative branch and current pc does not match
-assign rob_mispredict_o = (committing_instr.pc != predicted_pc) && (rob_num != ROB_ENTRY)
+assign rob_mispredict_o = (committing_instr.pc != predicted_pc) && (rob_num != ROB_ENTRY) && committing_instr.wb
 							&& prev_spec_branch;  // mismatch of pcs
 assign rob_fe_redirected_pc_o = predicted_pc;
 
