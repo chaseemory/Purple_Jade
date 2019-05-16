@@ -1,9 +1,9 @@
-FLD = $(shell pwd)/
+FLD = $(shell pwd)/../../
 name = rob
 vev = verilator
 source = $(FLD)$(name).sv
 inc = $(FLD)$(name)_def.svh
-inc_dir = +incdir+$(FLD)../common/ +incdir+$(FLD)../rename_stage
+inc_dir = +incdir+$(FLD)../common/ +incdir+$(FLD)../rename_stage +incdir+$(FLD)
 vev_op = --trace -Wall --cc
 exe_op = --exe
 header = $(FLD)../common/Purple_Jade_pkg.svh
