@@ -2,51 +2,51 @@
 `include "FE_def.svh"
 
 module microcode_rom #(
-    parameter UCODE_WIDTH_P  = -1
-  , parameter INPUT_WIDTH_P = -1
+    parameter INPUT_WIDTH_P = -1
   )
   ( input   logic [INPUT_WIDTH_P-1:0] addr_i
   , output  logic [UCODE_WIDTH_P-1:0] o
   );
 
   always_comb begin
-    casex (addr_i)               //     WE     OP      FU               FLAGS        Dest_SRC       S1_SRC   Imm/S2_SRC  Immediate
-      INPUT_WIDTH_P'b00100XXXXX: o = {1'b1,`ADD_OP  ,`ALU_FU    ,NUM_FLAGS'b0110,WIDTH_DEST'd1,WIDTH_S1'd3,WIDTH_IMM'd0, 1'b1} // MOVS
-      INPUT_WIDTH_P'b010001100X: o = {1'b1,`ADD_OP  ,`ALU_FU    ,NUM_FLAGS'b0000,WIDTH_DEST'd0,WIDTH_S1'd3,WIDTH_IMM'd7, 1'b0} // MOV
+    casez (addr_i)    //    WE     OP         FU           FLAGS  Dest_SRC   S1_SRC  Imm/S2_SRC  Immediate
+      10'b00100?????: o = {1'b1,`ADD_OP    ,`ALU_FU      ,4'b0110  ,2'd1     ,2'd3   ,3'd0       ,1'b1}; // MOVS
+      10'b010001100?: o = {1'b1,`ADD_OP    ,`ALU_FU      ,4'b0000  ,2'd0     ,2'd3   ,3'd7       ,1'b0}; // MOV
 
-      INPUT_WIDTH_P'b0001110XXX: o = {1'b1,`ADD_OP  ,`ALU_FU    ,NUM_FLAGS'b1111,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'd1, 1'b1} // ADDS IMM
-      INPUT_WIDTH_P'b0001100XXX: o = {1'b1,`ADD_OP  ,`ALU_FU    ,NUM_FLAGS'b1111,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'd1, 1'b0} // ADDS
-      INPUT_WIDTH_P'b101100000X: o = {1'b1,`ADD_OP  ,`ALU_FU    ,NUM_FLAGS'b0000,WIDTH_DEST'd2,WIDTH_S1'd2,WIDTH_IMM'd2, 1'b1} // ADD SP
-      INPUT_WIDTH_P'b0001101XXX: o = {1'b1,`SUB_OP  ,`ALU_FU    ,NUM_FLAGS'b1111,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'd1, 1'b0} // SUBS
-      INPUT_WIDTH_P'b0001101XXX: o = {1'b1,`SUB_OP  ,`ALU_FU    ,NUM_FLAGS'b1111,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'd1, 1'b1} // SUBS IMM
-      INPUT_WIDTH_P'b0001101XXX: o = {1'b1,`SUB_OP  ,`ALU_FU    ,NUM_FLAGS'b0000,WIDTH_DEST'd2,WIDTH_S1'd2,WIDTH_IMM'd2, 1'b1} // SUBS SP
+      10'b0001110???: o = {1'b1,`ADD_OP    ,`ALU_FU      ,4'b1111  ,2'd0     ,2'd0   ,3'd1       ,1'b1}; // ADDS IMM
+      10'b0001100???: o = {1'b1,`ADD_OP    ,`ALU_FU      ,4'b1111  ,2'd0     ,2'd0   ,3'd1       ,1'b0}; // ADDS
+      10'b101100000?: o = {1'b1,`ADD_OP    ,`ALU_FU      ,4'b0000  ,2'd2     ,2'd2   ,3'd2       ,1'b1}; // ADD SP
+      10'b0001101???: o = {1'b1,`SUB_OP    ,`ALU_FU      ,4'b1111  ,2'd0     ,2'd0   ,3'd1       ,1'b0}; // SUBS
+      10'b0001111???: o = {1'b1,`SUB_OP    ,`ALU_FU      ,4'b1111  ,2'd0     ,2'd0   ,3'd1       ,1'b1}; // SUBS IMM
+      10'b101100001?: o = {1'b1,`SUB_OP    ,`ALU_FU      ,4'b0000  ,2'd2     ,2'd2   ,3'd2       ,1'b1}; // SUBS SP
 
-      INPUT_WIDTH_P'b0001101XXX: o = {1'b0,`SUB_OP  ,`ALU_FU    ,NUM_FLAGS'b1111,WIDTH_DEST'dX,WIDTH_S1'd1,WIDTH_IMM'd7, 1'b0} // CMP
+      10'b0100001010: o = {1'b0,`SUB_OP    ,`ALU_FU      ,4'b1111  ,2'b00    ,2'd1   ,3'd7       ,1'b0}; // CMP
 
-      INPUT_WIDTH_P'b0100000101: o = {1'b1,'X       ,`MUL_FU    ,NUM_FLAGS'b0000,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'dX, 1'b0} // MUL
-      INPUT_WIDTH_P'b0100000110: o = {1'b1,'X       ,`DIV_FU    ,NUM_FLAGS'b0000,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'dX, 1'b0} // DIV
+      10'b0100000101: o = {1'b1,3'b000     ,`MUL_FU      ,4'b0000  ,2'd0     ,2'd0   ,3'b000     ,1'b0}; // MUL
+      10'b0100000110: o = {1'b1,3'b000     ,`DIV_FU      ,4'b0000  ,2'd0     ,2'd0   ,3'b000     ,1'b0}; // DIV
 
 
-      INPUT_WIDTH_P'b0100000000: o = {1'b1,`AND_OP  ,`LOGICAL_FU,NUM_FLAGS'b0110,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'dX, 1'b0} // ANDS
-      INPUT_WIDTH_P'b0100000001: o = {1'b1,`XOR_OP  ,`LOGICAL_FU,NUM_FLAGS'b0110,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'dX, 1'b0} // EORS
-      INPUT_WIDTH_P'b0100001100: o = {1'b1,`OR_OP   ,`LOGICAL_FU,NUM_FLAGS'b0110,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'dX, 1'b0} // ORRS
-      INPUT_WIDTH_P'b0100001111: o = {1'b1,`NEG_OP  ,`LOGICAL_FU,NUM_FLAGS'b0110,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'dX, 1'b0} // MVNS
-      INPUT_WIDTH_P'b0100000010: o = {1'b1,`LSLS_OP ,`LOGICAL_FU,NUM_FLAGS'b1110,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'dX, 1'b0} // LSLS
-      INPUT_WIDTH_P'b0100000011: o = {1'b1,`LSRS_OP ,`LOGICAL_FU,NUM_FLAGS'b1110,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'dX, 1'b0} // LSRS
-      INPUT_WIDTH_P'b0100000100: o = {1'b1,`ASRS_OP ,`LOGICAL_FU,NUM_FLAGS'b1110,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'dX, 1'b0} // ASRS
-      INPUT_WIDTH_P'b0100000111: o = {1'b1,`RORS_OP ,`LOGICAL_FU,NUM_FLAGS'b1110,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'dX, 1'b0} // RORS
+      10'b0100000000: o = {1'b1,`AND_OP    ,`LOGICAL_FU  ,4'b0110  ,2'd0     ,2'd0   ,3'b000     ,1'b0}; // ANDS
+      10'b0100000001: o = {1'b1,`XOR_OP    ,`LOGICAL_FU  ,4'b0110  ,2'd0     ,2'd0   ,3'b000     ,1'b0}; // EORS
+      10'b0100001100: o = {1'b1,`OR_OP     ,`LOGICAL_FU  ,4'b0110  ,2'd0     ,2'd0   ,3'b000     ,1'b0}; // ORRS
+      10'b0100001111: o = {1'b1,`NEG_OP    ,`LOGICAL_FU  ,4'b0110  ,2'd0     ,2'd0   ,3'b000     ,1'b0}; // MVNS
+      10'b0100000010: o = {1'b1,`LSLS_OP   ,`LOGICAL_FU  ,4'b1110  ,2'd0     ,2'd0   ,3'b000     ,1'b0}; // LSLS
+      10'b0100000011: o = {1'b1,`LSRS_OP   ,`LOGICAL_FU  ,4'b1110  ,2'd0     ,2'd0   ,3'b000     ,1'b0}; // LSRS
+      10'b0100000100: o = {1'b1,`ASRS_OP   ,`LOGICAL_FU  ,4'b1110  ,2'd0     ,2'd0   ,3'b000     ,1'b0}; // ASRS
+      10'b0100000111: o = {1'b1,`RORS_OP   ,`LOGICAL_FU  ,4'b1110  ,2'd0     ,2'd0   ,3'b000     ,1'b0}; // RORS
 
-      INPUT_WIDTH_P'b01100XXXXX: o = {1'b0,`STR_OP  ,`MEM_FU    ,NUM_FLAGS'b0000,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'd3, 1'b1} // STR
-      INPUT_WIDTH_P'b01101XXXXX: o = {1'b1,`LDR_OP  ,`MEM_FU    ,NUM_FLAGS'b0000,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'd3, 1'b1} // LDR
+      10'b01100?????: o = {1'b0,`STR_OP    ,`MEM_FU      ,4'b0000  ,2'd0     ,2'd0   ,3'd3       ,1'b1}; // STR
+      10'b01101?????: o = {1'b1,`LDR_OP    ,`MEM_FU      ,4'b0000  ,2'd0     ,2'd0   ,3'd3       ,1'b1}; // LDR
 
-      INPUT_WIDTH_P'b1101XXXXXX: o = {1'b0,`BCC_OP  ,`BRANCH_FU ,NUM_FLAGS'b0000,WIDTH_DEST'd0,WIDTH_S1'dX,WIDTH_IMM'd4, 1'b1} // B <CC>
-      INPUT_WIDTH_P'b11100XXXXX: o = {1'b0,`B_OP    ,`BRANCH_FU ,NUM_FLAGS'b0000,WIDTH_DEST'd0,WIDTH_S1'dX,WIDTH_IMM'd5, 1'b1} // B 
-      INPUT_WIDTH_P'b11100XXXXX: o = {1'b1,`BL_OP   ,`BRANCH_FU ,NUM_FLAGS'b0000,WIDTH_DEST'd3,WIDTH_S1'dX,WIDTH_IMM'd6, 1'b1} // BL
-      INPUT_WIDTH_P'b11100XXXXX: o = {1'b0,`BX_OP   ,`BRANCH_FU ,NUM_FLAGS'b0000,WIDTH_DEST'd0,WIDTH_S1'dX,WIDTH_IMM'd7, 1'b0} // BX
+      10'b1101??????: o = {1'b0,`BCC_OP    ,`BRANCH_FU   ,4'b0000  ,2'd0     ,2'bxx  ,3'd4       ,1'b1}; // B <CC>
+      10'b11100?????: o = {1'b0,`B_OP      ,`BRANCH_FU   ,4'b0000  ,2'd0     ,2'bxx  ,3'd5       ,1'b1}; // B 
+      10'b0100010100: o = {1'b1,`BL_OP     ,`BRANCH_FU   ,4'b0000  ,2'd3     ,2'bxx  ,3'd6       ,1'b1}; // BL
+      10'b010001110?: o = {1'b0,`BX_OP     ,`BRANCH_FU   ,4'b0000  ,2'd0     ,2'bxx  ,3'd7       ,1'b0}; // Bx
 
-      default:                   o = {1'b0,WIDTH_OP'd0,WIDTH_FU'd0,NUM_FLAGS'b0000,WIDTH_DEST'd0,WIDTH_S1'd0,WIDTH_IMM'd0, 1'bX} // NOOP?
+      default:        o = {1'b0,3'd0       ,`NOOP_FU     ,4'b0000  ,2'd0     ,2'd0   ,3'd0       ,1'b0}; // NOOP / INVALID instruction
     endcase
 
   end // always_comb
 
 endmodule // microcode_rom
+

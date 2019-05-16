@@ -1,0 +1,13 @@
+../common/Purple_Jade_pkg.svh
+./FE_def.svh
+./fe_top.sv
+./extension.sv
+./i_rom.sv
+./microcode_rom.sv
+./pc_next.sv
+./pipe.sv
+./program_counter.sv
+./sign_extend.sv
+./static_branch_control.sv
+./zero_extend.sv
+../Purple_Jade_Tests/bin/test/bin/test_arch.bin

@@ -6,11 +6,13 @@ module pc_next
   , output  logic [WORD_SIZE_P-1:0] pc_next
   );
 
-  casex({reset_i, stall, branch_take})
-    2'b1XX:   pc_next = WORD_SIZE_P'd0;
-    2'b01X:   pc_next = pc_i;
-    2'b001:   pc_next = branch_target_i;
-    default:  pc_next = pc_2_i;
-  endcase
+  always_comb begin
+    casez({reset_i, stall, branch_take})
+      3'b1??:   pc_next = '0;
+      3'b01?:   pc_next = pc_i;
+      3'b001:   pc_next = branch_target_i;
+      default:  pc_next = pc_2_i;
+    endcase
+  end // always_comb
 
 endmodule // pc_next

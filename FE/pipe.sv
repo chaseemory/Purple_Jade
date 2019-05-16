@@ -12,18 +12,18 @@ module pipe
 
   always_ff @(posedge clk_i) begin
 
-    casex ({flush, stall})
-      2'b1X: begin
-        v_o     = 1'b0;
-        data_o  = data_i;
+    casez({flush, stall})
+      2'b1?: begin
+        v_o     <= 1'b0;
+        data_o  <= data_i;
       end
       2'b01: begin
-        v_o     = v_o;
-        data_o  = data_o;
+        v_o     <= v_o;
+        data_o  <= data_o;
       end
       default: begin
-        v_o     = v_i;
-        data_o  = data_i;
+        v_o     <= v_i;
+        data_o  <= data_i;
       end
     endcase 
 
