@@ -84,16 +84,16 @@ assign rename_rob.wb = 1'b0;
 assign rename_rob.result = '0;
 assign rename_rob.addr = '0;
 `endif
-assign rename_rob.is_spec = (decoded.opcode == `BX_OP || decoded.opcode == `BCC_OP);
-assign rename_rob.is_cond_branch = (decoded.opcode == `BCC_OP);
+assign rename_rob.is_spec = (decoded.func_unit == `BRANCH_FU) && (decoded.opcode == `BX_OP || decoded.opcode == `BCC_OP);
+assign rename_rob.is_cond_branch = (decoded.func_unit == `BRANCH_FU) && (decoded.opcode == `BCC_OP);
 assign rename_rob.bcc_op = decoded.bcc_op;
 assign rename_rob.resolved_pc = '0;
 assign rename_rob.flag_mask = decoded.flags;
 assign rename_rob.flags = '0;
 assign rename_rob.is_store = (decoded.opcode == `STR_OP);
 assign rename_rob.w_v = decoded.w_v;
-assign rename_rob.freed_reg = decoded.dest_id;
-assign rename_rob.alloc_reg = lut_spec_q[decoded.dest_id];
+assign rename_rob.alloc_reg = decoded.dest_id;
+assign rename_rob.freed_reg = lut_spec_q[decoded.dest_id];
 
 // renaming
 always_comb
@@ -111,7 +111,7 @@ always_comb
  	renamed.dest_id  =  {{REG_PAD_WIDTH{1'b0}}, decoded.dest_id};
 
   	// renaming logics
-  	if (renamed_v_o)
+  	if (renamed_v)
   	  begin
   	  	// translating sources
   	  	renamed.source_1 = lut_spec_q[decoded.source_1];
@@ -122,7 +122,6 @@ always_comb
   	  	  begin
   	  	  	// allocate a free register & update speculative lut
   	  		renamed.dest_id = fl_spec_q[fl_spec_read_pt];
-  	  		// TODO: change this 
   	  		lut_spec_n[decoded.dest_id] = fl_spec_q[fl_spec_read_pt];
   	  		fl_spec_read_pt_n++;
   	  		fl_spec_num_n--;

@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+using namespace std;
+
 static vluint64_t main_time = 0;
 
 #define NUM_PHY_REG 128
@@ -69,11 +71,14 @@ int main(int argc, char** argv, char** env) {
     assert(top->rename_stage__DOT__fl_spec_read_pt == 0);
     assert(top->rename_stage__DOT__fl_write_pt == 112);
     assert(top->rename_stage__DOT__fl_spec_write_pt == 112);
+    assert(top->rename_rob_v_o == 0);
     top->reset_i = 0;
     // testing renaming
     top->issue_rename_ready_i = 1;
     top->decoded_v_i = 1;
     top->decoded_i = set_decode(1,0,0,2,0,0);
+    top->rob_ready_i = 1;
+    tick(top);
     tick(top);
     tick(top);
     vluint64_t rs1, rs2;
@@ -104,7 +109,7 @@ int main(int argc, char** argv, char** env) {
     top->commit_rename_i = set_commit_entry(1,4,4);
     tick(top);
     tick(top);
-    assert(top->rename_decode_ready_o == 0);
+    assert(top->rename_decode_ready_o == 1);
     assert(top->renamed_v_o == 0);
 
     // ready now
@@ -137,8 +142,18 @@ int main(int argc, char** argv, char** env) {
     top->decoded_v_i = 1;
     top->decoded_i = set_decode(1,12,4,5,0,0);
     tick(top);
+    top->issue_rename_ready_i = 0;
+    assert(top->rename_rob_v_o == 1);
     tick(top);
     ASSERT_RENAME(1,12,12,17,16,5);
+    assert(top->rename_rob_v_o == 0);
+    tick(top);
+    assert(top->renamed_v_o == 1);
+    top->issue_rename_ready_i = 1;
+    top->rob_ready_i = 0;
+    tick(top);
+    tick(top);
+    assert(top->rename_rob_v_o == 0);
 /*****************************************************************************/
     tfp->close();
     delete top;
