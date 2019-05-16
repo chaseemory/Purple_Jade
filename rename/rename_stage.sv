@@ -1,4 +1,4 @@
-`include "../common/Purple_Jade_pkg.svh";
+`include "Purple_Jade_pkg.svh";
 `include "rename_def.svh";
 
 module rename_stage 
@@ -19,16 +19,24 @@ module rename_stage
  , input									commit_v_i
  , input  [COMMIT_RENAME_WIDTH-1:0]			commit_rename_i
  , input									mispredict_i
+
+ // rename-commit/rob interfaces
+ , input									rob_ready_i
+ , output [RENAME_ROB_ENTRY_WIDTH-1:0]		rename_rob_o
+ , output  									rename_rob_v_o
 );
 
 decoded_instruction_t decoded;
-renamed_instruction_t renamed;
+renamed_instruction_t renamed, renamed_r, renamed_n;
 commit_rename_t commit_entry;
+rename_rob_t rename_rob;
 
 // io assignment
 assign decoded = decoded_i;
-assign renamed_o = renamed;
+assign renamed_o = renamed_r;
 assign commit_entry = commit_rename_i;
+assign rename_rob_o = rename_rob;
+assign renamed_n = (issue_rename_ready_i) ? renamed : renamed_r;
 
 // speculative renaming lookup tables and freelist
 logic [NUM_ARCH_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] lut_spec_n, lut_spec_q;
@@ -52,8 +60,11 @@ logic 											   roll_back;
 assign roll_back = mispredict_i & commit_v_i;
 
 // valid ready signals
-assign rename_decode_ready_o = (fl_spec_num != 0) && (!roll_back) && issue_rename_ready_i;
-assign renamed_v_o = rename_decode_ready_o & issue_rename_ready_i & decoded_v_i;
+logic  renamed_v, renamed_v_r;
+assign rename_decode_ready_o = (fl_spec_num != 0) && (!roll_back) && issue_rename_ready_i && rob_ready_i;
+assign renamed_v = (issue_rename_ready_i) ? (rename_rob_v_o) : renamed_v_r;
+assign renamed_v_o = renamed_v_r;
+assign rename_rob_v_o = rename_decode_ready_o & issue_rename_ready_i & decoded_v_i;
 
 assign renamed.pc = decoded.pc;
 assign renamed.opcode = decoded.opcode;
@@ -65,6 +76,24 @@ assign renamed.imm = decoded.imm;
 assign renamed.alloc_reg = decoded.dest_id;
 assign renamed.freed_reg = lut_spec_q[decoded.dest_id];
 assign renamed.branch_speculation = decoded.branch_speculation;
+
+// rename rob assignments
+assign rename_rob.pc = decoded.pc;
+assign rename_rob.wb = 1'b0;
+`ifdef DEBUG
+assign rename_rob.result = '0;
+assign rename_rob.addr = '0;
+`endif
+assign rename_rob.is_spec = (decoded.opcode == `BX_OP || decoded.opcode == `BCC_OP);
+assign rename_rob.is_cond_branch = (decoded.opcode == `BCC_OP);
+assign rename_rob.bcc_op = decoded.bcc_op;
+assign rename_rob.resolved_pc = '0;
+assign rename_rob.flag_mask = decoded.flags;
+assign rename_rob.flags = '0;
+assign rename_rob.is_store = (decoded.opcode == `STR_OP);
+assign rename_rob.w_v = decoded.w_v;
+assign rename_rob.freed_reg = decoded.dest_id;
+assign rename_rob.alloc_reg = lut_spec_q[decoded.dest_id];
 
 // renaming
 always_comb
@@ -148,6 +177,8 @@ always_ff @(posedge clk_i)
 		fl_spec_read_pt  <= '0;
 		fl_spec_write_pt  <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
 		fl_spec_num <= ($clog2(NUM_PHYS_REG)+1)'(NUM_PHYS_REG-NUM_ARCH_REG);
+		renamed_r <= '0;
+		renamed_v_r <= '0;
 	  end 
 	else
 	  begin
@@ -156,6 +187,8 @@ always_ff @(posedge clk_i)
 		fl_spec_read_pt  <= fl_spec_read_pt_n;
 		fl_spec_write_pt  <= fl_spec_write_pt_n;
 		fl_spec_num <= fl_spec_num_n;
+		renamed_r <= renamed_n;
+		renamed_v_r <= renamed_v;
 	  end	
   end
 
