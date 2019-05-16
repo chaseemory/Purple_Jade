@@ -28,13 +28,11 @@ typedef struct
 } rob_t;
 
 typedef struct {
-  uint64_t valid;    // 44
-  uint64_t rob_dest; // 6:38
-  uint64_t w_v;  // 37
-  uint64_t dest; // 16:21
-  uint64_t is_spec; // 20
-  uint64_t flags;   // 4:16
-  uint64_t result;  // 16:0
+  uint64_t valid;     // 33
+  uint64_t dest;      // 7:26
+  uint64_t flags;     // 4:22
+  uint64_t result;    // 16:6
+  uint64_t rob_dest;  // 6:0
 } CDB_t;
 
 void set_issue(Vrob* top, rob_t* rob) {
@@ -61,20 +59,18 @@ void set_issue(Vrob* top, rob_t* rob) {
 		 | ((rob->wb & 0x1) << 11)
 		 | ((rob->pc & 0xffff) << 12);
 
-	top->issue_rob_entry_i[0] = res0;
-	top->issue_rob_entry_i[1] = res1;
-	top->issue_rob_entry_i[2] = res2;	
+	top->rename_rob_entry_i[0] = res0;
+	top->rename_rob_entry_i[1] = res1;
+	top->rename_rob_entry_i[2] = res2;	
 }
 
 void set_cdb(Vrob* top, uint entry, CDB_t* cdb) {
 	vluint64_t res = 0;
-	res = (cdb->result & 0xffff) 
-		| ((cdb->flags & 0xf) << 16)
-		| ((cdb->is_spec & 0x1) << 20)
-		| ((cdb->dest & 0xffff) << 21)
-		| ((cdb->w_v & 0x1) << 37)
-		| ((cdb->rob_dest & 0x3f) << 38)
-		| ((cdb->valid & 0x1) << 44);
+	res = (cdb->rob_dest & 0x3f) 
+		| ((cdb->result & 0xffff) << 6)
+		| ((cdb->flags & 0xf) << 22)
+		| ((cdb->dest & 0x7f) << 26)
+		| ((cdb->valid & 0x1) << 33);
 	top->cdb_i[entry] = res;
 }
 
@@ -127,7 +123,7 @@ int main(int argc, char** argv, char** env) {
     assert(top->rob__DOT__rob_num == ROB_ENTRY);
     assert(top->rob__DOT__rob_alloc_pt == 0);
     assert(top->rob__DOT__rob_commit_pt == 0);
-    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob_rename_ready_o == 1);
     assert(top->rob_phys_valid_o == 0);
     assert(top->rob_sb_valid_o == 0);
     assert(top->rob_mispredict_o == 0);
@@ -136,7 +132,7 @@ int main(int argc, char** argv, char** env) {
     tick(top);
     // keep allocing to test fifos
     top->reset_i = 0;
-    top->issue_rob_valid_i = 1;
+    top->rename_rob_valid_i = 1;
     rob_t rob_i;
     rob_i.pc = 0;
     rob_i.wb = 0;
@@ -157,7 +153,7 @@ int main(int argc, char** argv, char** env) {
     tick(top);
     assert(top->rob__DOT__rob_num == ROB_ENTRY-1);
     assert(top->rob_mispredict_o == 0);
-    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob_rename_ready_o == 1);
     assert(top->rob__DOT__rob_alloc_pt == 1);
     assert(top->rob__DOT__rob_commit_pt == 0);
     assert(top->rob_sb_valid_o == 0);
@@ -173,19 +169,18 @@ int main(int argc, char** argv, char** env) {
       tick(top);
       assert(top->rob__DOT__rob_num == ROB_ENTRY-i-1);
       assert(top->rob_mispredict_o == 0);
-      assert(top->rob_issue_ready_o == 1);
+      assert(top->rob_rename_ready_o == 1);
       assert(top->rob__DOT__rob_alloc_pt == i+1);
       assert(top->rob__DOT__rob_commit_pt == 0);
       assert(top->rob_sb_valid_o == 0);
       assert(top->rob_rename_valid_o == 0);
       assert(top->rob_flag_valid_o == 0);
       assert(top->rob_phys_valid_o == 0);
-
     }
     tick(top);
     tick(top);
     assert(top->rob__DOT__rob_num == 0);
-    assert(top->rob_issue_ready_o == 0);
+    assert(top->rob_rename_ready_o == 0);
     assert(top->rob__DOT__rob_alloc_pt == 0);
     assert(top->rob_sb_valid_o == 0);
     assert(top->rob_rename_valid_o == 0);
@@ -195,10 +190,8 @@ int main(int argc, char** argv, char** env) {
     CDB_t cdb;
     cdb.valid = 1;
     cdb.rob_dest = 0;
-    cdb.w_v = 1;
     cdb.dest = 8;
     cdb.result = 4;
-    cdb.is_spec = 1;
     set_cdb(top, 1, &cdb);
     tick(top);
     tick(top);
@@ -206,23 +199,24 @@ int main(int argc, char** argv, char** env) {
     assert(top->rob_rename_valid_o == 1);
     assert(top->rob_phys_valid_o == 1);
     assert(top->rob_sb_valid_o == 0);
-    cdb.valid = 1;
+    cdb.rob_dest = 1;
+    cdb.valid = 0;
     set_cdb(top, 1, &cdb);
     tick(top);
     tick(top);
     cdb.valid = 0;
     set_cdb(top, 1, &cdb);
     assert(top->rob__DOT__rob_commit_pt == 1);
-    assert(top->rob_issue_ready_o == 0);
-    assert(top->rob__DOT__rob_num == 1);
     assert(top->rob_mispredict_o == 1);
+    assert(top->rob_rename_ready_o == 0);
+    assert(top->rob__DOT__rob_num == 1);
     assert(top->rob_fe_redirected_pc_o == 4);
     tick(top);
     tick(top);
     assert(top->rob__DOT__rob_num == ROB_ENTRY);
     assert(top->rob__DOT__rob_alloc_pt == 0);
     assert(top->rob__DOT__rob_commit_pt == 0);
-    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob_rename_ready_o == 1);
     assert(top->rob_phys_valid_o == 0);
     assert(top->rob_sb_valid_o == 0);
     assert(top->rob_mispredict_o == 0);
@@ -231,7 +225,7 @@ int main(int argc, char** argv, char** env) {
     // first one and second one set flags
     // third one loads
     // misprediction on conditional branches
-    rob_i.pc = 0;
+    rob_i.pc = 4;
     rob_i.wb = 1;
     rob_i.result = 0;
     rob_i.addr = 0;
@@ -250,7 +244,7 @@ int main(int argc, char** argv, char** env) {
     tick(top);
     assert(top->rob__DOT__rob_num == ROB_ENTRY-1);
     assert(top->rob_mispredict_o == 0);
-    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob_rename_ready_o == 1);
     assert(top->rob__DOT__rob_alloc_pt == 1);
     assert(top->rob__DOT__rob_commit_pt == 0);
     assert(top->rob_sb_valid_o == 0);
@@ -277,7 +271,7 @@ int main(int argc, char** argv, char** env) {
     tick(top);
     assert(top->rob__DOT__rob_num == ROB_ENTRY-1);
     assert(top->rob_mispredict_o == 0);
-    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob_rename_ready_o == 1);
     assert(top->rob__DOT__rob_alloc_pt == 2);
     assert(top->rob__DOT__rob_commit_pt == 1);
     assert(top->rob_sb_valid_o == 0);
@@ -304,7 +298,7 @@ int main(int argc, char** argv, char** env) {
     tick(top);
     assert(top->rob__DOT__rob_num == ROB_ENTRY-1);
     assert(top->rob_mispredict_o == 0);
-    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob_rename_ready_o == 1);
     assert(top->rob__DOT__rob_alloc_pt == 3);
     assert(top->rob__DOT__rob_commit_pt == 2);
     assert(top->rob_sb_valid_o == 1);
@@ -331,14 +325,14 @@ int main(int argc, char** argv, char** env) {
     tick(top);
     assert(top->rob__DOT__rob_num == ROB_ENTRY-1);
     assert(top->rob_mispredict_o == 0);
-    assert(top->rob_issue_ready_o == 1);
+    assert(top->rob_rename_ready_o == 1);
     assert(top->rob__DOT__rob_alloc_pt == 4);
     assert(top->rob__DOT__rob_commit_pt == 3);
     assert(top->rob_sb_valid_o == 0);
     assert(top->rob_rename_valid_o == 1);
     assert(top->rob_flag_valid_o == 0);
     assert(top->rob_phys_valid_o == 0);
-    top->issue_rob_valid_i = 0;
+    top->rename_rob_valid_i = 0;
     set_issue(top, &rob_i);
     tick(top);
     tick(top);

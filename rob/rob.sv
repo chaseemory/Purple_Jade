@@ -1,18 +1,17 @@
-`include "../common/Purple_Jade_pkg.svh";
+`include "Purple_Jade_pkg.svh";
 `include "rob_def.svh"
-`include "../rename/rename_def.svh";
+`include "rename_def.svh";
 
 module rob
 (input										clk_i
  , input									reset_i
 
  // CDB-rob interface
- , input  [CDB_WIDTH-1:0]					cdb_i [NUM_FU-1:0]
+ , input  [ROB_WB_WIDTH-1:0]				cdb_i [NUM_FU-1:0]
  // issue-rob interface
- , input									issue_rob_valid_i
- , input  [ISSUE_ENTRY_WIDTH-1:0]			issue_rob_entry_i
- , output [$clog2(ROB_ENTRY)-1:0]			rob_issue_entry_num_o
- , output									rob_issue_ready_o
+ , input									rename_rob_valid_i
+ , input  [RENAME_ROB_ENTRY_WIDTH-1:0]		rename_rob_entry_i
+ , output									rob_rename_ready_o
  // rob-physical register interface
  , output									rob_phys_valid_o
  , output [$clog2(NUM_PHYS_REG)-1:0]		rob_phys_reg_cl_o
@@ -34,8 +33,8 @@ module rob
 `endif
 );
 
-// input output passing
-CDB_t cdb [NUM_FU-1:0];
+// input output casting
+rob_wb_t cdb [NUM_FU-1:0];
 assign cdb = cdb_i;
 
 // rob
@@ -53,8 +52,7 @@ logic  [$clog2(ROB_ENTRY):0]			rob_num, rob_num_n;
 rob_t									committing_instr;
 
 // ready valid signals
-assign rob_issue_ready_o = (rob_num != 0) & ~rob_mispredict_o;
-assign rob_issue_entry_num_o = rob_alloc_pt;
+assign rob_rename_ready_o = (rob_num != 0) & ~rob_mispredict_o;
 
 // committing a store instruction
 assign committing_instr  = rob_q[rob_commit_pt];
@@ -85,7 +83,7 @@ assign prev_spec_branch_n = (committing_instr.wb & ~rob_mispredict_o) ? committi
 assign predicted_pc_n = (committing_instr.wb & ~rob_mispredict_o) ? ((committing_instr.is_cond_branch) ? condition_pc  // correct address to jump to
 		: committing_instr.resolved_pc) : predicted_pc;
 // previous speculative branch and current pc does not match
-assign rob_mispredict_o = (committing_instr.pc != predicted_pc) && (rob_num != ROB_ENTRY) && committing_instr.wb
+assign rob_mispredict_o = (committing_instr.pc != predicted_pc) && (rob_num != ROB_ENTRY) && committing_instr.valid
 							&& prev_spec_branch;  // mismatch of pcs
 assign rob_fe_redirected_pc_o = predicted_pc;
 
@@ -140,20 +138,21 @@ always_comb
 always_comb
   begin
   	// default assignments
-  	rob_n = rob_q;
-  	rob_alloc_pt_n = rob_alloc_pt;
-  	rob_commit_pt_n = rob_commit_pt;
-  	rob_num_n = rob_num;
+	rob_n = rob_q;
+	rob_alloc_pt_n = rob_alloc_pt;
+	rob_commit_pt_n = rob_commit_pt;
+	rob_num_n = rob_num;
 
   	if (~rob_mispredict_o)  // not a mispredict
-  	  begin
-	  	// issue logics
-	  	if (rob_issue_ready_o & issue_rob_valid_i)
-	  	  begin
-	  		rob_n[rob_alloc_pt] = issue_rob_entry_i;
-	  		rob_alloc_pt_n++;
-	  		rob_num_n--;
-	  	  end
+	  begin
+		// issue logics
+		if (rob_rename_ready_o & rename_rob_valid_i)
+		  begin
+			rob_n[rob_alloc_pt] = rename_rob_entry_i;
+			rob_n[rob_alloc_pt].valid = 1'b1;  // valid set
+			rob_alloc_pt_n++;
+			rob_num_n--;
+		  end
 
 	  	// common data bus write logics
 	  	for (int unsigned i = 0; i < ROB_ENTRY; i++)
@@ -161,16 +160,16 @@ always_comb
 	  	  	for (int unsigned j = 0; j < NUM_FU; j++)
 	  	  	  begin
 	  	  	  	// not written back, rob entry match
-	  	  	  	if (!rob_q[i].wb && cdb[j].valid 
+	  	  	  	if (!rob_q[i].wb && cdb[j].cdb.valid 
 	  	  	  		&& cdb[j].rob_dest == $clog2(ROB_ENTRY)'(i))
 	  	  	  	  begin
 	  	  	  	  	rob_n[i].wb = 1'b1;  // written back
-	  	  	  	  	rob_n[i].flags = cdb[j].flags;
+	  	  	  	  	rob_n[i].flags = cdb[j].cdb.flags;
 `ifdef DEBUG
 	  	  	  	  	if (rob_q[i].w_v)  // for debug purpose
 	  	  	  	  	  begin
-	  	  	  	  		rob_n[i].addr = cdb[j].dest;
-	  	  	  	  		rob_n[i].result = cdb[j].result;
+	  	  	  	  		rob_n[i].addr = {9'b0, cdb[j].cdb.dest};
+	  	  	  	  		rob_n[i].result = cdb[j].cdb.result;
 	  	  	  	  	  end
 `endif
 	  	  	  	  	// if rob entry is a speculative branch
@@ -178,7 +177,7 @@ always_comb
 	  	  	  	  	// bcond write taken address
 	  	  	  	  	if (rob_q[i].is_spec)
 	  	  	  	  	  begin
-	  	  	  	  	  	rob_n[i].resolved_pc = cdb[j].result;
+	  	  	  	  	  	rob_n[i].resolved_pc = cdb[j].cdb.result;
 	  	  	  	  	  end
 	  	  	  	  end
 	  	  	  end
@@ -188,6 +187,7 @@ always_comb
 	  	if (committing_instr.wb)
 	  	  begin
 	  	  	rob_n[rob_commit_pt].wb = 1'b0;
+	  	  	rob_n[rob_commit_pt].valid = 1'b0;  // valid clear
 	  	  	rob_commit_pt_n++;
 	  	  	rob_num_n++;
 	  	  end

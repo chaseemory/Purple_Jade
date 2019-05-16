@@ -149,6 +149,7 @@ parameter SB_ENTRY = 16;
 
 typedef struct packed                               
 {       
+  logic                                   valid;
   logic [WORD_SIZE_P-1:0]                 pc;                                      
   logic                                   wb; /* CDB write back ?  */
 `ifdef DEBUG // for debug purpose
@@ -193,6 +194,8 @@ typedef struct packed {
   CDB_t                                   cdb;
   logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
 } rob_wb_t;
+
+parameter ROB_WB_WIDTH = $bits(rob_wb_t);
 
 typedef struct packed {
   CDB_t                                   cdb;

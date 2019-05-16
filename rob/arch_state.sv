@@ -1,4 +1,4 @@
-`include "../common/Purple_Jade_pkg.svh";
+`include "Purple_Jade_pkg.svh";
 
 module arch_state
 (input                                                  clk_i

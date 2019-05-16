@@ -3,6 +3,7 @@ name = rob
 vev = verilator
 source = $(FLD)$(name).sv
 inc = $(FLD)$(name)_def.svh
+inc_dir = +incdir+$(FLD)../common/ +incdir+$(FLD)../rename
 vev_op = --trace -Wall --cc
 exe_op = --exe
 header = $(FLD)../common/Purple_Jade_pkg.svh
@@ -16,7 +17,7 @@ ifeq ($(DEBUG),1)
 endif
 
 all: $(source) $(header) $(inc)
-	$(vev) $(vev_op) $(source) $(exe_op) $(csource)
+	$(vev) $(vev_op) $(inc_dir) $(source) $(exe_op) $(csource)
 	make -j -C obj_dir -f V$(name).mk V$(name)
 
 clean:
