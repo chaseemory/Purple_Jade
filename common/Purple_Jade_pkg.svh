@@ -25,13 +25,13 @@ branch = 4
 mul =5
 div = 6
 */
-`define MOVE_FU     WIDTH_FU'd0
-`define ALU_FU      WIDTH_FU'd1
-`define LOGICAL_FU  WIDTH_FU'd2
-`define MEM_FU      WIDTH_FU'd3
-`define BRANCH_FU   WIDTH_FU'd4
-`define MUL_FU      WIDTH_FU'd5
-`define DEV_FU      WIDTH_FU'd6
+`define NOOP_FU     3'd0
+`define ALU_FU      3'd1
+`define LOGICAL_FU  3'd2
+`define MEM_FU      3'd3
+`define BRANCH_FU   3'd4
+`define MUL_FU      3'd5
+`define DIV_FU      3'd6
 
 parameter WIDTH_OP                        = $clog2(INSTRUCTION_OP_NUM);
 
@@ -61,25 +61,26 @@ parameter WIDTH_OP                        = $clog2(INSTRUCTION_OP_NUM);
   000 - store
   001 - load
 */
-`define ADD_OP  WIDTH_OP'd0
-`define SUB_OP  WIDTH_OP'd1
+`define ADD_OP  3'd0
+`define SUB_OP  3'd1
 
-`define AND_OP  WIDTH_OP'd0
-`define XOR_OP  WIDTH_OP'd1
-`define OR_OP   WIDTH_OP'd2
-`define NEG_OP  WIDTH_OP'd3
-`define LSLS_OP WIDTH_OP'd4
-`define LSRS_OP WIDTH_OP'd5
-`define ASRS_OP WIDTH_OP'd6
-`define RORS_OP WIDTH_OP'd7
+`define AND_OP  3'd0
+`define XOR_OP  3'd1
+`define OR_OP   3'd2
+`define NEG_OP  3'd3
+`define LSLS_OP 3'd4
+`define LSRS_OP 3'd5
+`define ASRS_OP 3'd6
+`define RORS_OP 3'd7
 
-`define BCC_OP  WIDTH_OP'd0
-`define B_OP    WIDTH_OP'd1
-`define BL_OP   WIDTH_OP'd2
-`define BX_OP   WIDTH_OP'd3
 
-`define STR_OP  WIDTH_OP'd0
-`define LDR_OP  WIDTH_OP'd1
+`define BCC_OP  3'd0
+`define B_OP    3'd1
+`define BL_OP   3'd2
+`define BX_OP   3'd3
+
+`define STR_OP  3'd0
+`define LDR_OP  3'd1
 
 // conditional branch opcode
 `define EQ 4'h0

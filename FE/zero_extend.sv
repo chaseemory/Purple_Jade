@@ -1,6 +1,5 @@
-module zero_extend #(
-  #(parameter WORD_SIZE_P  = -1
-  , parameter INPUT_SIZE   = -1
+module zero_extend
+  #(parameter INPUT_SIZE   = -1
   )
   ( input   logic [INPUT_SIZE-1:0]  i
   , output  logic [WORD_SIZE_P-1:0] o

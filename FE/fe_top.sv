@@ -14,7 +14,7 @@ module fe_top
   logic stall;
   logic take_branch;
 
-  assign stall = ready_i
+  assign stall = ~ready_i;
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~i_rom / PC / FETCH~~~~~~~~~~~~~~~~~~~
@@ -22,10 +22,12 @@ module fe_top
 
   logic [WORD_SIZE_P-1:0] instruction_fetch_r, program_counter_fetch_r, program_counter_n, program_counter_n_p2, branch_target;
 
-  assign program_counter_n_p2 = {program_counter_r[WORD_SIZE_P-1:1]+1'b1, 1'b0}; // Incrementing is faster than adding
+  // assign program_counter_n_p2 = {program_counter_fetch_r[WORD_SIZE_P-1:1]+1'b1, 1'b0}; // Incrementing is faster than adding
+  assign program_counter_n_p2 = program_counter_fetch_r[WORD_SIZE_P-1:0]+1'b1; // Incrementing is faster than adding
+
 
   pc_next next_pc
-    ( .pc_i(program_counter_r)
+    ( .pc_i(program_counter_fetch_r)
     , .pc_2_i(program_counter_n_p2)
     , .branch_target_i(branch_target)
     , .reset_i(reset_i)
@@ -41,7 +43,7 @@ module fe_top
     );
 
   i_rom instruction_mem
-    ( .r_addr_i(program_counter_fetch_r)
+    ( .r_addr_i(program_counter_fetch_r[15:0])
     , .data_o(instruction_fetch_r)
     );
 
@@ -68,11 +70,11 @@ module fe_top
   // ~~~~~~~~~~~~~~~~~~~~~~DECODE~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  logic [$clog2(NUM_DEST_SRC)-1:0]    dest_src_sel;
-  logic [$clog2(NUM_S1_SRC)-1:0]      src_1_sel;
-  logic [$clog2(NUM_S2_IMM_SRC)-1:0]  src_2_imm_sel;
-  logic [WORD_SIZE_P-1:0]             immediates [NUM_EXTENDED-1:0] 
-  logic                               is_branch_decode;
+  logic [$clog2(NUM_DEST_SRC)-1:0]          dest_src_sel;
+  logic [$clog2(NUM_S1_SRC)-1:0]            src_1_sel;
+  logic [$clog2(NUM_S2_IMM_SRC)-1:0]        src_2_imm_sel;
+  logic [NUM_EXTENDED-1:0][WORD_SIZE_P-1:0] immediates;
+  logic                                     is_branch_decode;
 
 
   decoded_instruction_t instruction_decoded_decode;
@@ -84,15 +86,14 @@ module fe_top
     );
 
 
-  microcode_rom #(.UCODE_WIDTH_P(UCODE_WIDTH_P)
-                , .INPUT_WIDTH_P(10)
+  microcode_rom #(.INPUT_WIDTH_P(10)
     ) decoder
-    (.addr_i(instruction_decode_r)
+    (.addr_i(instruction_decode_r[15:6])
     ,.o({instruction_decoded_decode.w_v, instruction_decoded_decode.opcode, instruction_decoded_decode.func_unit
-          , instruction_decoded_decode.flags, dest_src_sel, src_1_sel, src_2_imm_sel, assign instruction_decoded_decode.imm})
+          , instruction_decoded_decode.flags, dest_src_sel, src_1_sel, src_2_imm_sel, instruction_decoded_decode.imm})
     );
 
-  bsg_mux #(.width_p($clog2(NUM_REG))
+  bsg_mux #(.width_p($clog2(NUM_ARCH_REG))
           , .els_p(NUM_DEST_SRC)
     ) dest_src_mux
     (.data_i({4'd14, 4'd13, {1'b0, instruction_decode_r[10:8]}, {1'b0, instruction_decode_r[2:0]}})
@@ -100,7 +101,7 @@ module fe_top
     ,.data_o(instruction_decoded_decode.dest_id)
     );
 
-  bsg_mux #(.width_p($clog2(NUM_REG))
+  bsg_mux #(.width_p($clog2(NUM_ARCH_REG))
           , .els_p(NUM_DEST_SRC)
     ) src_1_mux
     (.data_i({4'd12, 4'd13, {1'b0, instruction_decode_r[2:0]}, {1'b0, instruction_decode_r[5:3]}})
@@ -116,12 +117,12 @@ module fe_top
     ,.data_o(instruction_decoded_decode.source2_imm)
     );
 
-  assign instruction_decoded_decode.bcc_op = instruction_decode_r[11:8];
-
-
+  assign instruction_decoded_decode.bcc_op              = instruction_decode_r[11:8];
+  assign instruction_decoded_decode.pc                  = program_counter_decode_r;
+  assign instruction_decoded_decode.branch_speculation  = 1'b0;
 
   logic [WORD_SIZE_P-1:0] branch_offset_decode;
-  assign is_branch_decode = (instruction_decoded_decode.func_unit == BRANCH_FU);
+  assign is_branch_decode = (instruction_decoded_decode.func_unit == `BRANCH_FU);
 
   bsg_mux #(.width_p(WORD_SIZE_P)
             , .els_p(4)
@@ -137,19 +138,22 @@ module fe_top
   // ~~~~~~~~~~~~~~~~~~~D / B/BE PIPE~~~~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  logic [WORD_SIZE_P-1:0] program_counter_branch_r, branch_offset_branch_r;
+  logic [WORD_SIZE_P-1:0] branch_offset_branch_r;
   logic                   flush_d_b, valid_d_b, is_branch_branch_r;
 
+  // Verilatorssss doesnt like me using part of the struct to determine another part of it :/
+  /* verilator lint_off UNOPTFLAT */                
   decoded_instruction_t instruction_decoded_branch;
+  /* verilator lint_on UNOPTFLAT */
 
-  pipe #(.WIDTH_P($bits({program_counter_decode_r, instruction_decoded_decode, is_branch_decode, branch_offset_decode}))
+  pipe #(.WIDTH_P($bits({instruction_decoded_decode, is_branch_decode, branch_offset_decode}))
     ) decode_branch_pipe
     ( .clk_i
-    , .data_i({program_counter_decode_r, instruction_decoded_decode, is_branch_decode, branch_offset_decode})
+    , .data_i({instruction_decoded_decode, is_branch_decode, branch_offset_decode})
     , .flush(flush_d_b | reset_i)
     , .stall(stall)
     , .v_i(valid_f_d)
-    , .data_o({program_counter_branch_r, instruction_decoded_branch, is_branch_branch_r, branch_offset_branch_r})
+    , .data_o({instruction_decoded_branch, is_branch_branch_r, branch_offset_branch_r})
     , .v_o(valid_d_b)
     );
 
@@ -157,14 +161,14 @@ module fe_top
   // ~~~~~~~~~~~~~~~~~~~~~~BRANCH~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  assign branch_target = branch_offset_branch_r + program_counter_branch_r;
+  assign branch_target = branch_offset_branch_r + instruction_decoded_branch.pc;
 
   logic speculative_branch;
 
-  branch_control branch_control
+  static_branch_control branch_control
     ( .sign_bit_i(branch_offset_branch_r[WORD_SIZE_P-1])
-    , .s_branch_i(is_branch_branch_r)
-    , .branch_op_code_i(instruction_decoded_decode.opcode[1:0])
+    , .is_branch_i(is_branch_branch_r)
+    , .branch_op_code_i(instruction_decoded_branch.opcode[1:0])
     , .take_branch_o(take_branch)
     , .speculative_o(speculative_branch)
     );
@@ -174,9 +178,9 @@ module fe_top
   assign flush_d_b = take_branch;
   assign flush_f_d = take_branch;
 
-  assign final_decoded_instruction.branch_prediction = take_branch;
+  always_comb instruction_decoded_branch.branch_speculation = take_branch;
 
-  assign valid_o = (~speculative_branch & is_branch_branch_r) ? 1'b0 : valid_d_b;
+  assign valid_o = ( (~speculative_branch & is_branch_branch_r) | (instruction_decoded_branch.func_unit == `NOOP_FU) ) ? 1'b0 : valid_d_b;
 
   assign final_decoded_instruction = instruction_decoded_branch;
 
