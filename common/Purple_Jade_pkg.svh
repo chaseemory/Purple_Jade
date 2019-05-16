@@ -136,6 +136,7 @@ typedef struct packed
   logic                                   branch_speculation;
   logic                                   w_v;
   logic                                   imm;
+  // TODO : Those two fields are no longer needed
   logic [$clog2(NUM_PHYS_REG)-1:0]        freed_reg;   /* those two fileds */
   logic [$clog2(NUM_ARCH_REG)-1:0]        alloc_reg;   /* are used for commit */
   } renamed_instruction_t;
@@ -176,19 +177,32 @@ typedef struct packed {
 parameter STORE_BUFFER_WIDTH = $bits(store_buffer_t);
 
 // ROB issue interfaces
-typedef rob_t issue_rob_t;  // with issue_rob.valid 0
-parameter ISSUE_ENTRY_WIDTH = ROB_WIDTH;
+typedef rob_t rename_rob_t;  // with issue_rob.valid 0
+parameter RENAME_ROB_ENTRY_WIDTH = ROB_WIDTH;
 
 // CDB type
 typedef struct packed {
   logic                                   valid;
-  logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
-  logic                                   w_v;  // whether to write back
-  logic [WORD_SIZE_P-1:0]                 dest; // reg or mem
-  logic                                   is_spec;
+  logic [$clog2(NUM_PHYS_REG)-1:0]        dest;
   logic [NUM_FLAGS-1:0]                   flags;
   logic [WORD_SIZE_P-1:0]                 result;
 } CDB_t;
+
+typedef struct packed {
+  CDB_t                                   cdb;
+  logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
+} rob_wb_t;
+
+typedef struct packed {
+  CDB_t                                   cdb;
+  logic                                   w_v;
+} reg_wb_t;
+
+typedef struct packed {
+  logic                                   valid;
+  logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
+  logic [WORD_SIZE_P-1:0]                 spec_pc;
+} lsu_rob_wb_t;
 
 // CDB to SB type
 typedef struct packed {
