@@ -64,40 +64,39 @@ always_comb
 // register write logic
 always_comb
   begin
-  	reg_n = reg_q;
-  	valid_n = valid;
-  	flag_n = flag;
+    reg_n = reg_q;
+    valid_n = valid;
+    flag_n = flag;
 
-  	// during execution write data
-  	// and valid bit
+    // during execution write data
+    // and valid bit
     for (int unsigned i = 0; i < NUM_FU; i++)
       begin
-    	if (exe_w_v_i[i])
-    	  begin
-    		  reg_n[exe_addr_i[i]] = exe_data_i[i];
-    		  valid_n[exe_addr_i[i]] = 1'b1;  // set valid
-    	  end
+        if (exe_w_v_i[i])
+          begin
+            reg_n[exe_addr_i[i]] = exe_data_i[i];
+            valid_n[exe_addr_i[i]] = 1'b1;  // set valid
+          end
       end
   	// commit stage free a register
-  	if (rob_phys_valid_i)
-  		valid_n[rob_phys_reg_cl_i] = 1'b0;  // set clear
+    if (rob_phys_valid_i)
+        valid_n[rob_phys_reg_cl_i] = 1'b0;  // set clear
   end
 
 // sequential process
 always_ff @(posedge clk_i) 
   begin
-	if(reset_i)
-	  begin
-		reg_q <= '{default:0};
-		valid <= 128'h0000_0000_0000_0000_0000_0000_0000_ffff;
-		flag  <= '0;
-	  end
-	else 
-	  begin
-		reg_q <= reg_n;
-		valid <= valid_n;
-		flag  <= flag_n;
-	  end
+    if(reset_i)
+      begin
+        reg_q <= '{default:0};
+        valid <= 128'h0000_0000_0000_0000_0000_0000_0000_ffff;
+        flag  <= '0;
+      end
+    else 
+      begin
+        reg_q <= reg_n;
+        valid <= valid_n;
+        flag  <= flag_n;
+      end
   end
-
 endmodule
