@@ -84,6 +84,7 @@ assign rename_rob.wb = 1'b0;
 assign rename_rob.result = '0;
 assign rename_rob.addr = '0;
 `endif
+assign rename_rob.valid = 1'b0;
 assign rename_rob.is_spec = (decoded.func_unit == `BRANCH_FU) && (decoded.opcode == `BX_OP || decoded.opcode == `BCC_OP);
 assign rename_rob.is_cond_branch = (decoded.func_unit == `BRANCH_FU) && (decoded.opcode == `BCC_OP);
 assign rename_rob.bcc_op = decoded.bcc_op;
