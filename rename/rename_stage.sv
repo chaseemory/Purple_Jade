@@ -64,7 +64,7 @@ logic  renamed_v, renamed_v_r;
 assign rename_decode_ready_o = (fl_spec_num != 0) && (!roll_back) && issue_rename_ready_i && rob_ready_i;
 assign renamed_v = (issue_rename_ready_i) ? (rename_rob_v_o) : renamed_v_r;
 assign renamed_v_o = renamed_v_r;
-assign rename_rob_v_o = rename_decode_ready_o & issue_rename_ready_i & decoded_v_i;
+assign rename_rob_v_o = rename_decode_ready_o & decoded_v_i;
 
 assign renamed.pc = decoded.pc;
 assign renamed.opcode = decoded.opcode;
