@@ -33,7 +33,7 @@ logic [NUM_FLAGS-1:0]                     flag, flag_n;
 logic [NUM_FLAGS-1:0]                     flags, flag_mask;
 assign flags = rob_flag_i[NUM_FLAGS-1:0];
 assign flag_mask = rob_flag_i[NUM_FLAGS*2-1:NUM_FLAGS];
-assign flag_n = (rob_flag_valid_i) ? (flag_mask & flag) | (~flag_mask & flags): flag;
+assign flag_n = (rob_flag_valid_i) ? (flag_mask & flags) | (~flag_mask & flag): flag;
 assign flag_rob_o = flag;
 
 // register read logic
