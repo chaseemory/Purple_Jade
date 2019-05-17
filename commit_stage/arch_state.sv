@@ -25,7 +25,7 @@ module arch_state
 );
 
 // registers
-logic [NUM_PHYS_REG-1:0][WORD_SIZE_P-1:0] reg_n reg_q;
+logic [NUM_PHYS_REG-1:0][WORD_SIZE_P-1:0] reg_n, reg_q;
 logic [NUM_PHYS_REG-1:0]                  valid, valid_n;
 logic [NUM_FLAGS-1:0]                     flag, flag_n;		                                       
 

@@ -210,7 +210,6 @@ typedef struct packed {
 
 // CDB to SB type
 typedef struct packed {
-  logic                                   valid;
   logic [$clog2(SB_ENTRY)-1:0]            sb_dest;
   logic [WORD_SIZE_P-1:0]                 address;  // store buffer expects an address
 } CDB_sb_t;

@@ -28,7 +28,7 @@ module store_buffer
 );
 
 // store buffer
-store_buffer_t [SB_ENTRY-1:0]     sb_n, sb;
+store_buffer_t [SB_ENTRY-1:0]     sb_n, sb_q;
 logic  [$clog2(SB_ENTRY)-1:0]     sb_alloc_pt, sb_alloc_pt_n;
 logic  [$clog2(SB_ENTRY)-1:0]     sb_commit_pt, sb_commit_pt_n;
 logic  [$clog2(SB_ENTRY):0]       sb_num, sb_num_n;
@@ -82,7 +82,7 @@ always_comb
   	if (sb_mem_v_o)
   	  begin
   	  	sb_n[sb_commit_pt].wb = 1'b0;
-  	  	sb_commit_pt++;
+  	  	sb_commit_pt_n++;
   	  	sb_num_n++;
   	  end
 
@@ -105,10 +105,10 @@ always_comb
   	// for loop acts as an priority encoder
   	for (int unsigned i = 0; i < SB_ENTRY; i++)
   	  begin
-  	  	if (sb[i].wb && sb[i].address == exe_ld_bypass_addr_i)
+  	  	if (sb_q[i].wb && sb_q[i].address == exe_ld_bypass_addr_i)
   	  	  begin
   	  	  	address_match = 1'b1;
-  	  	  	data_match = sb[i].result;
+  	  	  	data_match = sb_q[i].result;
   	  	  end	
   	  end
   end
@@ -118,14 +118,14 @@ always_ff @(posedge clk_i)
   begin 
 	if(reset_i)
 	  begin
-		sb 				 <= '{default: 0};
+		sb_q 				 <= '{default: 0};
 		sb_alloc_pt 	 <= '0;
 		sb_commit_pt 	 <= '0;
 		sb_num 		 	 <= ($clog2(SB_ENTRY)+1)'(SB_ENTRY);
 	  end 
 	else 
 	  begin
-		sb 				 <= sb_n;
+		sb_q 				 <= sb_n;
 		sb_alloc_pt 	 <= sb_alloc_pt_n;
 		sb_commit_pt 	 <= sb_commit_pt_n;
 		sb_num 		 	 <= sb_num_n;

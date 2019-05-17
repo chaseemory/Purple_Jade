@@ -8,7 +8,7 @@ module rob
 
  // CDB-rob interface
  , input  [ROB_WB_WIDTH-1:0]				cdb_i [NUM_FU-1:0]
- // issue-rob interface
+ // rename-rob interface
  , input									rename_rob_valid_i
  , input  [RENAME_ROB_ENTRY_WIDTH-1:0]		rename_rob_entry_i
  , output									rob_rename_ready_o
