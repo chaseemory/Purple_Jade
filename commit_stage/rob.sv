@@ -3,33 +3,33 @@
 `include "rename_def.svh";
 
 module rob
-(input										clk_i
- , input									reset_i
+(input                                      clk_i
+ , input                                    reset_i
 
  // CDB-rob interface
- , input  [ROB_WB_WIDTH-1:0]				cdb_i [NUM_FU-1:0]
+ , input  [ROB_WB_WIDTH-1:0]                cdb_i [NUM_FU-1:0]
  // rename-rob interface
- , input									rename_rob_valid_i
- , input  [RENAME_ROB_ENTRY_WIDTH-1:0]		rename_rob_entry_i
- , output									rob_rename_ready_o
+ , input                                    rename_rob_valid_i
+ , input  [RENAME_ROB_ENTRY_WIDTH-1:0]      rename_rob_entry_i
+ , output                                   rob_rename_ready_o
  // rob-physical register interface
- , output									rob_phys_valid_o
- , output [$clog2(NUM_PHYS_REG)-1:0]		rob_phys_reg_cl_o
+ , output                                   rob_phys_valid_o
+ , output [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_cl_o
  // rob-store buffer interface: pop signal to store buffer
- , output									rob_sb_valid_o
- , output									rob_mispredict_o
- , output [WORD_SIZE_P-1:0]					rob_fe_redirected_pc_o
+ , output                                   rob_sb_valid_o
+ , output                                   rob_mispredict_o
+ , output [WORD_SIZE_P-1:0]                 rob_fe_redirected_pc_o
  // rename-commit interface
- , output									rob_rename_valid_o
- , output [COMMIT_RENAME_WIDTH-1:0]			rob_rename_entry_o
+ , output                                   rob_rename_valid_o
+ , output [COMMIT_RENAME_WIDTH-1:0]         rob_rename_entry_o
  // commit-flag interface
- , output									rob_flag_valid_o
- , output [NUM_FLAGS*2-1:0]					rob_flag_o
- , input  [NUM_FLAGS-1:0]					flag_rob_i
+ , output                                   rob_flag_valid_o
+ , output [NUM_FLAGS*2-1:0]                 rob_flag_o
+ , input  [NUM_FLAGS-1:0]                   flag_rob_i
  // exe-commit flag read
 `ifdef DEBUG
- , output									rob_debug_valid_o								
- , output [DEBUG_WIDTH-1:0]					rob_debug_o
+ , output                                   rob_debug_valid_o								
+ , output [DEBUG_WIDTH-1:0]                 rob_debug_o
 `endif
 );
 
@@ -39,17 +39,17 @@ assign cdb = cdb_i;
 
 // rob
 `ifdef DEBUG
-rob_t									rob_q [ROB_ENTRY-1:0];
-rob_t									rob_n [ROB_ENTRY-1:0];
+rob_t                                   rob_q [ROB_ENTRY-1:0];
+rob_t                                   rob_n [ROB_ENTRY-1:0];
 `else
-rob_t [ROB_ENTRY-1:0]					rob_q, rob_n;
+rob_t [ROB_ENTRY-1:0]                   rob_q, rob_n;
 `endif
-logic  [$clog2(ROB_ENTRY)-1:0]			rob_alloc_pt, rob_alloc_pt_n;
-logic  [$clog2(ROB_ENTRY)-1:0]			rob_commit_pt, rob_commit_pt_n;
-logic  [$clog2(ROB_ENTRY):0]			rob_num, rob_num_n;
+logic  [$clog2(ROB_ENTRY)-1:0]          rob_alloc_pt, rob_alloc_pt_n;
+logic  [$clog2(ROB_ENTRY)-1:0]          rob_commit_pt, rob_commit_pt_n;
+logic  [$clog2(ROB_ENTRY):0]            rob_num, rob_num_n;
 
 // instruction being committed
-rob_t									committing_instr;
+rob_t                                   committing_instr;
 
 // ready valid signals
 assign rob_rename_ready_o = (rob_num != 0) & ~rob_mispredict_o;
