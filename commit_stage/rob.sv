@@ -205,7 +205,7 @@ always_comb
 // sequential processes
 always_ff @(posedge clk_i)
   begin 
-	if(reset_i)
+    if(reset_i)
       begin
         rob_q            <= '{default: 0};
         rob_alloc_pt     <= '0;
