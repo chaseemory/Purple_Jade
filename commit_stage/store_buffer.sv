@@ -7,12 +7,10 @@ module store_buffer
  // commit-store buffer interfaces
  , input                                    rob_sb_valid_i
  , input                                    rob_mispredict_i
-
  // issue-store buffer interfaces
  , input                                    issue_sb_v_i
  , output [$clog2(SB_ENTRY)-1:0]            sb_issue_entry_num_o	
  , output                                   sb_issue_ready_o
-
  // execute-write back interfaces
  , input                                    exe_sb_v_i
  , input  [CDB_SB_WIDTH-1:0]                exe_sb_i
@@ -59,8 +57,8 @@ always_comb
     sb_commit_pt_n = sb_commit_pt;
     sb_num_n = sb_num;
 
-  	// issue logic
-  	// most of time wb is zero and result is written
+    // issue logic
+    // most of time wb is zero and result is written
     if (issue_sb_v_i)
       begin
         sb_n[sb_alloc_pt].wb = 1'b0;
@@ -68,26 +66,26 @@ always_comb
         sb_num_n--;
       end
 
-  	// common data bus write back
-  	// a store writing back its address and result
-  	if (exe_sb_v_i)
-  	  begin
+    // common data bus write back
+    // a store writing back its address and result
+    if (exe_sb_v_i)
+      begin
         sb_n[cdb.sb_dest].wb = 1'b1;
         sb_n[cdb.sb_dest].address = cdb.address;
         sb_n[cdb.sb_dest].result = cdb.result;
-  	  end
+      end
 
-  	// commit logic assignments
-  	// address written back & valid pop from rob
-  	if (sb_mem_v_o)
-  	  begin
+    // commit logic assignments
+    // address written back & valid pop from rob
+    if (sb_mem_v_o)
+      begin
         sb_n[sb_commit_pt].wb = 1'b0;
         sb_commit_pt_n++;
         sb_num_n++;
-  	  end
+      end
 
-  	// misprediction flush everything
-  	if (rob_mispredict_i)
+    // misprediction flush everything
+    if (rob_mispredict_i)
       begin    
         sb_n = '{default: 0};
         sb_alloc_pt_n = '0;
@@ -115,20 +113,20 @@ always_comb
 
 // sequential processes
 always_ff @(posedge clk_i)
-  begin 
-	if(reset_i)
-	  begin
-		sb_q 				 <= '{default: 0};
-		sb_alloc_pt 	 <= '0;
-		sb_commit_pt 	 <= '0;
-		sb_num 		 	 <= ($clog2(SB_ENTRY)+1)'(SB_ENTRY);
-	  end 
-	else 
-	  begin
-		sb_q 				 <= sb_n;
-		sb_alloc_pt 	 <= sb_alloc_pt_n;
-		sb_commit_pt 	 <= sb_commit_pt_n;
-		sb_num 		 	 <= sb_num_n;
-	  end
+  begin     
+    if(reset_i)
+      begin
+        sb_q             <= '{default: 0};
+        sb_alloc_pt      <= '0;
+        sb_commit_pt     <= '0;
+        sb_num           <= ($clog2(SB_ENTRY)+1)'(SB_ENTRY);
+      end 
+    else 
+      begin
+        sb_q             <= sb_n;
+        sb_alloc_pt      <= sb_alloc_pt_n;
+        sb_commit_pt     <= sb_commit_pt_n;
+        sb_num           <= sb_num_n;
+      end
   end
 endmodule

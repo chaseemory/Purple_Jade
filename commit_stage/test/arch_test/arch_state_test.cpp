@@ -10,7 +10,7 @@ using namespace std;
 static vluint64_t main_time = 0;
 
 static void tick(Varch_state* top) {
-    top->clk_i = ~top->clk_i;
+    top->clk_i = ((top->clk_i == 0) ? 1 : 0);
     top->eval();
 }
 
@@ -27,7 +27,6 @@ int main(int argc, char** argv, char** env) {
     tick(top);
     assert(top->rs1_valid_o == 1);    
     assert(top->rs2_valid_o == 0);    
-    tick(top);
     // test bypassing
     top->reset_i = 0;
     top->exe_w_v_i = 0x5;
