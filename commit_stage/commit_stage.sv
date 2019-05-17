@@ -3,61 +3,61 @@
 `include "rob_def.svh"
 
 module commit_stage
-(input													clk_i
- , input												reset_i
+(input                                                  clk_i
+ , input                                                reset_i
  // execute register write back
- , input [NUM_FU-1:0]									exe_w_v_i
- , input [NUM_FU-1:0][$clog2(NUM_PHYS_REG)-1:0]			exe_addr_i
- , input [NUM_FU-1:0][WORD_SIZE_P-1:0]					exe_data_i
+ , input  [NUM_FU-1:0]                                  exe_w_v_i
+ , input  [NUM_FU-1:0][$clog2(NUM_PHYS_REG)-1:0]        exe_addr_i
+ , input  [NUM_FU-1:0][WORD_SIZE_P-1:0]                 exe_data_i
   // issue read ports
- , input  [$clog2(NUM_PHYS_REG)-1:0]					issue_read_rs1_i
- , output logic											rs1_valid_o
- , output logic [WORD_SIZE_P-1:0]						rs1_data_o
- , input  [$clog2(NUM_PHYS_REG)-1:0]					issue_read_rs2_i
- , output logic											rs2_valid_o
+ , input	[$clog2(NUM_PHYS_REG)-1:0]                  issue_read_rs1_i
+ , output logic                                         rs1_valid_o
+ , output logic [WORD_SIZE_P-1:0]                       rs1_data_o
+ , input  [$clog2(NUM_PHYS_REG)-1:0]                    issue_read_rs2_i
+ , output logic                                         rs2_valid_o
  , output logic [WORD_SIZE_P-1:0]						rs2_data_o
  // rename store buffer setup
- , input												issue_sb_v_i
- , input  [STORE_BUFFER_WIDTH-1:0]						issue_sb_i
- , output [$clog2(SB_ENTRY)-1:0]						sb_issue_entry_num_o	
- , output												sb_issue_ready_o
+ , input                                                issue_sb_v_i
+ , input  [STORE_BUFFER_WIDTH-1:0]                      issue_sb_i
+ , output [$clog2(SB_ENTRY)-1:0]                        sb_issue_entry_num_o	
+ , output                                               sb_issue_ready_o
  // execute-write back interfaces
- , input												exe_sb_v_i
- , input  [CDB_SB_WIDTH-1:0]							exe_sb_i
+ , input                                                exe_sb_v_i
+ , input  [CDB_SB_WIDTH-1:0]                            exe_sb_i
  // CDB-rob interface
- , input  [ROB_WB_WIDTH-1:0]							cdb_i [NUM_FU-1:0]
+ , input  [ROB_WB_WIDTH-1:0]                            cdb_i [NUM_FU-1:0]
  // execute-memory interface
- , input  [WORD_SIZE_P-1:0]								exe_mem_addr_i
- , output [WORD_SIZE_P-1:0]								exe_mem_data_o
+ , input  [WORD_SIZE_P-1:0]                             exe_mem_addr_i
+ , output [WORD_SIZE_P-1:0]                             exe_mem_data_o
  // rename-rob interface
- , input												rename_rob_valid_i
- , input  [RENAME_ROB_ENTRY_WIDTH-1:0]					rename_rob_entry_i
- , output												rob_rename_ready_o
+ , input                                                rename_rob_valid_i
+ , input  [RENAME_ROB_ENTRY_WIDTH-1:0]                  rename_rob_entry_i
+ , output                                               rob_rename_ready_o
  // load bypass interfaces
- , input  [WORD_SIZE_P-1:0]								exe_ld_bypass_addr_i
- , output												sb_ld_pass_valid_o							
- , output [WORD_SIZE_P-1:0]								sb_ld_pass_value_o
+ , input  [WORD_SIZE_P-1:0]                             exe_ld_bypass_addr_i
+ , output                                               sb_ld_pass_valid_o							
+ , output [WORD_SIZE_P-1:0]                             sb_ld_pass_value_o
  // rename-commit interface
- , output												rob_rename_valid_o
- , output [COMMIT_RENAME_WIDTH-1:0]						rob_rename_entry_o
+ , output                                               rob_rename_valid_o
+ , output [COMMIT_RENAME_WIDTH-1:0]                     rob_rename_entry_o
  // rob-fe misprediction interface
- , output												rob_mispredict_o
- , output [WORD_SIZE_P-1:0]								rob_fe_redirected_pc_o
+ , output                                               rob_mispredict_o
+ , output [WORD_SIZE_P-1:0]                             rob_fe_redirected_pc_o
 `ifdef DEBUG
- , output												rob_debug_valid_o								
- , output [DEBUG_WIDTH-1:0]								rob_debug_o
+ , output                                               rob_debug_valid_o								
+ , output [DEBUG_WIDTH-1:0]                             rob_debug_o
 `endif
 );
 
 // rob <-> arch_state
-logic									rob_phys_valid;
-logic [$clog2(NUM_PHYS_REG)-1:0]		rob_phys_reg_cl;
-logic									rob_flag_valid;
-logic [NUM_FLAGS*2-1:0]					rob_flag;
-logic [NUM_FLAGS-1:0]					flag_rob;
+logic                                   rob_phys_valid;
+logic [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_cl;
+logic                                   rob_flag_valid;
+logic [NUM_FLAGS*2-1:0]                 rob_flag;
+logic [NUM_FLAGS-1:0]                   flag_rob;
 
 // rob <-> store_buffer
-logic									rob_sb_valid;
+logic                                   rob_sb_valid;
 
 // store buffer <-> memory
 logic                                   sb_mem_v;
