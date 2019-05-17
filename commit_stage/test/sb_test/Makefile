@@ -1,8 +1,7 @@
 FLD = $(shell pwd)/../../
-name = rob
+name = store_buffer
 vev = verilator
 source = $(FLD)$(name).sv
-inc = $(FLD)$(name)_def.svh
 inc_dir = +incdir+$(FLD)../common/ +incdir+$(FLD)../rename_stage +incdir+$(FLD)
 vev_op = --trace -Wall --cc
 exe_op = --exe
@@ -16,7 +15,7 @@ ifeq ($(DEBUG),1)
 	vev_op += -DDEBUG
 endif
 
-all: $(source) $(header) $(inc)
+all: $(source) $(header)
 	$(vev) $(vev_op) $(inc_dir) $(source) $(exe_op) $(csource)
 	make -j -C obj_dir -f V$(name).mk V$(name)
 

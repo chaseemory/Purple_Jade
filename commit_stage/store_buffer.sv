@@ -10,7 +10,6 @@ module store_buffer
 
  // issue-store buffer interfaces
  , input                                    issue_sb_v_i
- , input  [STORE_BUFFER_WIDTH-1:0]          issue_sb_i
  , output [$clog2(SB_ENTRY)-1:0]            sb_issue_entry_num_o	
  , output                                   sb_issue_ready_o
 
@@ -54,63 +53,64 @@ assign sb_ld_pass_value_o = data_match;
 
 always_comb
   begin
-  	// default assignments
-  	sb_n = sb_q;
-  	sb_alloc_pt_n = sb_alloc_pt;
-  	sb_commit_pt_n = sb_commit_pt;
-  	sb_num_n = sb_num;
+    // default assignments
+    sb_n = sb_q;
+    sb_alloc_pt_n = sb_alloc_pt;
+    sb_commit_pt_n = sb_commit_pt;
+    sb_num_n = sb_num;
 
   	// issue logic
   	// most of time wb is zero and result is written
-  	if (issue_sb_v_i)
-  	  begin
-  	  	sb_n[sb_alloc_pt] = issue_sb_i;
-  	  	sb_alloc_pt_n++;
-  	  	sb_num_n--;
-  	  end
+    if (issue_sb_v_i)
+      begin
+        sb_n[sb_alloc_pt].wb = 1'b0;
+        sb_alloc_pt_n++;
+        sb_num_n--;
+      end
 
   	// common data bus write back
-  	// a store writing back its address
+  	// a store writing back its address and result
   	if (exe_sb_v_i)
   	  begin
-  		sb_n[cdb.sb_dest].wb = 1'b1;
- 		sb_n[cdb.sb_dest].address = cdb.address;
+        sb_n[cdb.sb_dest].wb = 1'b1;
+        sb_n[cdb.sb_dest].address = cdb.address;
+        sb_n[cdb.sb_dest].result = cdb.result;
   	  end
 
   	// commit logic assignments
   	// address written back & valid pop from rob
   	if (sb_mem_v_o)
   	  begin
-  	  	sb_n[sb_commit_pt].wb = 1'b0;
-  	  	sb_commit_pt_n++;
-  	  	sb_num_n++;
+        sb_n[sb_commit_pt].wb = 1'b0;
+        sb_commit_pt_n++;
+        sb_num_n++;
   	  end
 
   	// misprediction flush everything
   	if (rob_mispredict_i)
-  	  begin
-		sb_n = '{default: 0};
-		sb_alloc_pt_n = '0;
-		sb_commit_pt_n = '0;
-		sb_num_n = ($clog2(SB_ENTRY)+1)'(SB_ENTRY);
-	  end
+      begin    
+        sb_n = '{default: 0};
+        sb_alloc_pt_n = '0;
+        sb_commit_pt_n = '0;
+        sb_num_n = ($clog2(SB_ENTRY)+1)'(SB_ENTRY);
+      end
   end
 
 // load bypass logics
 always_comb
   begin
-  	address_match = 1'b0;
-  	data_match = '0;
+    address_match = 1'b0;
+    data_match = '0;
 
   	// for loop acts as an priority encoder
-  	for (int unsigned i = 0; i < SB_ENTRY; i++)
-  	  begin
-  	  	if (sb_q[i].wb && sb_q[i].address == exe_ld_bypass_addr_i)
-  	  	  begin
-  	  	  	address_match = 1'b1;
-  	  	  	data_match = sb_q[i].result;
-  	  	  end	
-  	  end
+    for (int unsigned i = 0; i < SB_ENTRY; i++)
+      begin
+        if (sb_q[i].wb && sb_q[i].address == exe_ld_bypass_addr_i)
+          begin
+            address_match = 1'b1;
+            data_match = sb_q[i].result;
+          end	
+      end
   end
 
 // sequential processes

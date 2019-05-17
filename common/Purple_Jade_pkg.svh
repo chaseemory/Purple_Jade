@@ -211,7 +211,8 @@ typedef struct packed {
 // CDB to SB type
 typedef struct packed {
   logic [$clog2(SB_ENTRY)-1:0]            sb_dest;
-  logic [WORD_SIZE_P-1:0]                 address;  // store buffer expects an address
+  logic [WORD_SIZE_P-1:0]                 address;
+  logic [WORD_SIZE_P-1:0]                 result;  
 } CDB_sb_t;
 
 parameter CDB_SB_WIDTH = $bits(CDB_sb_t);
