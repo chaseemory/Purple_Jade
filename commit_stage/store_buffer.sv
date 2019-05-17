@@ -100,7 +100,7 @@ always_comb
     address_match = 1'b0;
     data_match = '0;
 
-  	// for loop acts as an priority encoder
+    // for loop acts as an priority encoder
     for (int unsigned i = 0; i < SB_ENTRY; i++)
       begin
         if (sb_q[i].wb && sb_q[i].address == exe_ld_bypass_addr_i)

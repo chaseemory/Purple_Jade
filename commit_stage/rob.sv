@@ -114,114 +114,114 @@ assign rob_debug_o = debug;
 
 // is conditional taken
 always_comb
-  begin
-	unique case(committing_instr.bcc_op)
-		`EQ 	: condition_taken = Z;
-		`NE 	: condition_taken = ~Z;
-		`CS 	: condition_taken = C;
-		`CC 	: condition_taken = ~C;
-		`MI 	: condition_taken = N;
-		`PL 	: condition_taken = ~N;
-		`VS 	: condition_taken = V;
-		`VC 	: condition_taken = ~V;
-		`HI 	: condition_taken = C & ~Z;
-		`LS 	: condition_taken = ~C | Z;
-		`GE 	: condition_taken = N == V;
-		`LT 	: condition_taken = (~N) == V;
-		`GT 	: condition_taken = ~Z && (N == V);
-		`LE 	: condition_taken = Z || ((~N) == V);
-		`AL 	: condition_taken = 1'b1;
-		default : condition_taken = 1'b0;
-	endcase
+  begin    
+  	unique case(committing_instr.bcc_op)
+        `EQ 	: condition_taken = Z;
+        `NE 	: condition_taken = ~Z;
+        `CS 	: condition_taken = C;
+        `CC 	: condition_taken = ~C;
+        `MI 	: condition_taken = N;
+        `PL 	: condition_taken = ~N;
+        `VS 	: condition_taken = V;
+        `VC 	: condition_taken = ~V;
+        `HI 	: condition_taken = C & ~Z;
+        `LS 	: condition_taken = ~C | Z;
+        `GE 	: condition_taken = N == V;
+        `LT 	: condition_taken = (~N) == V;
+        `GT 	: condition_taken = ~Z && (N == V);
+        `LE 	: condition_taken = Z || ((~N) == V);
+        `AL 	: condition_taken = 1'b1;
+        default : condition_taken = 1'b0;
+    endcase
   end
 
 always_comb
   begin
-  	// default assignments
-	rob_n = rob_q;
-	rob_alloc_pt_n = rob_alloc_pt;
-	rob_commit_pt_n = rob_commit_pt;
-	rob_num_n = rob_num;
+    // default assignments
+    rob_n = rob_q;
+    rob_alloc_pt_n = rob_alloc_pt;
+    rob_commit_pt_n = rob_commit_pt;
+    rob_num_n = rob_num;
 
-  	if (~rob_mispredict_o)  // not a mispredict
-	  begin
-		// issue logics
-		if (rob_rename_ready_o & rename_rob_valid_i)
-		  begin
-			rob_n[rob_alloc_pt] = rename_rob_entry_i;
-			rob_n[rob_alloc_pt].valid = 1'b1;  // valid set
-			rob_alloc_pt_n++;
-			rob_num_n--;
-		  end
+    if (~rob_mispredict_o)  // not a mispredict
+      begin
+        // issue logics
+        if (rob_rename_ready_o & rename_rob_valid_i)
+          begin
+            rob_n[rob_alloc_pt] = rename_rob_entry_i;
+            rob_n[rob_alloc_pt].valid = 1'b1;  // valid set
+            rob_alloc_pt_n++;
+            rob_num_n--;
+          end
 
-	  	// common data bus write logics
-	  	for (int unsigned i = 0; i < ROB_ENTRY; i++)
-	  	  begin
-	  	  	for (int unsigned j = 0; j < NUM_FU; j++)
-	  	  	  begin
-	  	  	  	// not written back, rob entry match
-	  	  	  	if (!rob_q[i].wb && cdb[j].cdb.valid 
-	  	  	  		&& cdb[j].rob_dest == $clog2(ROB_ENTRY)'(i))
-	  	  	  	  begin
-	  	  	  	  	rob_n[i].wb = 1'b1;  // written back
-	  	  	  	  	rob_n[i].flags = cdb[j].cdb.flags;
+        // common data bus write logics
+        for (int unsigned i = 0; i < ROB_ENTRY; i++)
+          begin
+            for (int unsigned j = 0; j < NUM_FU; j++)
+              begin
+                // not written back, rob entry match
+                if (!rob_q[i].wb && cdb[j].cdb.valid 
+                    && cdb[j].rob_dest == $clog2(ROB_ENTRY)'(i))
+                  begin
+                    rob_n[i].wb = 1'b1;  // written back
+                    rob_n[i].flags = cdb[j].cdb.flags;
 `ifdef DEBUG
-	  	  	  	  	if (rob_q[i].w_v)  // for debug purpose
-	  	  	  	  	  begin
-	  	  	  	  		rob_n[i].addr = {9'b0, cdb[j].cdb.dest};
-	  	  	  	  		rob_n[i].result = cdb[j].cdb.result;
-	  	  	  	  	  end
+                    if (rob_q[i].w_v)  // for debug purpose
+                      begin
+                        rob_n[i].addr = {9'b0, cdb[j].cdb.dest};
+                        rob_n[i].result = cdb[j].cdb.result;
+                      end
 `endif
-	  	  	  	  	// if rob entry is a speculative branch
-	  	  	  	  	// bx write target address
-	  	  	  	  	// bcond write taken address
-	  	  	  	  	if (rob_q[i].is_spec)
-	  	  	  	  	  begin
-	  	  	  	  	  	rob_n[i].resolved_pc = cdb[j].cdb.result;
-	  	  	  	  	  end
-	  	  	  	  end
-	  	  	  end
-	  	  end
+                    // if rob entry is a speculative branch
+                    // bx write target address
+                    // bcond write taken address
+                    if (rob_q[i].is_spec)
+                      begin
+                        rob_n[i].resolved_pc = cdb[j].cdb.result;
+                      end
+                  end
+              end
+          end
 
-	  	// committing logics
-	  	if (committing_instr.wb)
-	  	  begin
-	  	  	rob_n[rob_commit_pt].wb = 1'b0;
-	  	  	rob_n[rob_commit_pt].valid = 1'b0;  // valid clear
-	  	  	rob_commit_pt_n++;
-	  	  	rob_num_n++;
-	  	  end
-	  end
-	else
-	  begin
-	  	// misprediction flush everything in rob
-	  	rob_n = '{default: 0};
-	  	rob_alloc_pt_n = 0;
-	  	rob_commit_pt_n = 0;
-		rob_num_n = ($clog2(ROB_ENTRY)+1)'(ROB_ENTRY);
-	  end
+        // committing logics
+        if (committing_instr.wb)
+          begin
+            rob_n[rob_commit_pt].wb = 1'b0;
+            rob_n[rob_commit_pt].valid = 1'b0;  // valid clear
+            rob_commit_pt_n++;
+            rob_num_n++;
+          end    
+      end
+    else
+      begin
+        // misprediction flush everything in rob
+        rob_n = '{default: 0};
+        rob_alloc_pt_n = 0;
+        rob_commit_pt_n = 0;
+        rob_num_n = ($clog2(ROB_ENTRY)+1)'(ROB_ENTRY);
+      end
   end
 
 // sequential processes
 always_ff @(posedge clk_i)
   begin 
 	if(reset_i)
-	  begin
-		rob_q 			 <= '{default: 0};
-		rob_alloc_pt 	 <= '0;
-		rob_commit_pt 	 <= '0;
-		rob_num 		 <= ($clog2(ROB_ENTRY)+1)'(ROB_ENTRY);
-		prev_spec_branch <= '0;
-		predicted_pc     <= '0;
-	  end 
-	else 
-	  begin
-		rob_q 			 <= rob_n;
-		rob_alloc_pt 	 <= rob_alloc_pt_n;
-		rob_commit_pt 	 <= rob_commit_pt_n;
-		rob_num 		 <= rob_num_n;
-		prev_spec_branch <= prev_spec_branch_n;
-		predicted_pc     <= predicted_pc_n;
-	  end
+      begin
+        rob_q            <= '{default: 0};
+        rob_alloc_pt     <= '0;
+        rob_commit_pt    <= '0;
+        rob_num          <= ($clog2(ROB_ENTRY)+1)'(ROB_ENTRY);
+        prev_spec_branch <= '0;
+        predicted_pc     <= '0;
+      end     
+    else 
+      begin
+        rob_q            <= rob_n;
+        rob_alloc_pt     <= rob_alloc_pt_n;
+        rob_commit_pt    <= rob_commit_pt_n;
+        rob_num          <= rob_num_n;
+        prev_spec_branch <= prev_spec_branch_n;
+        predicted_pc     <= predicted_pc_n;
+      end
   end
 endmodule
