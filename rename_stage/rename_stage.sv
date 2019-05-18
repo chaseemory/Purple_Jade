@@ -18,6 +18,8 @@ module rename_stage
  , input									mispredict_i
  // rename-commit/rob interfaces
  , input									rob_ready_i  // rob & store buffer
+ , input  [$clog2(ROB_ENTRY)-1:0]           rob_num_i
+ , input  [$clog2(SB_ENTRY)-1:0]            sb_num_i
  , output [RENAME_ROB_ENTRY_WIDTH-1:0]		rename_rob_o
  , output  									rename_rob_v_o
  , output  									rename_sb_v_o
@@ -56,6 +58,10 @@ localparam PHYREG_TO_WORD_PAD_WIDTH = WORD_SIZE_P - $clog2(NUM_PHYS_REG);
 logic 											   roll_back;
 assign roll_back = mispredict_i & commit_v_i;
 
+// load sb entry
+logic [$clog2(SB_ENTRY)-1:0]    sb_num_q, sb_num_n;
+// TODO : update sb number logics
+
 // valid ready signals
 logic  renamed_v, renamed_v_r;
 assign rename_decode_ready_o = (fl_spec_num != 0) && (!roll_back) && issue_rename_ready_i && rob_ready_i;
@@ -70,8 +76,8 @@ assign renamed.flags = decoded.flags;
 assign renamed.bcc_op = decoded.bcc_op;
 assign renamed.w_v = decoded.w_v;
 assign renamed.imm = decoded.imm;
-assign renamed.alloc_reg = decoded.dest_id;
-assign renamed.freed_reg = lut_spec_q[decoded.dest_id];
+assign renamed.rob_dest = rob_num_i;
+assign renamed.sb_dest = sb_num_q;
 assign renamed.branch_speculation = decoded.branch_speculation;
 
 // rename rob assignments
@@ -179,6 +185,7 @@ always_ff @(posedge clk_i)
 		fl_spec_num <= ($clog2(NUM_PHYS_REG)+1)'(NUM_PHYS_REG-NUM_ARCH_REG);
 		renamed_r <= '0;
 		renamed_v_r <= '0;
+		sb_num_q    <= '0;
 	  end 
 	else
 	  begin
@@ -189,6 +196,7 @@ always_ff @(posedge clk_i)
 		fl_spec_num <= fl_spec_num_n;
 		renamed_r <= renamed_n;
 		renamed_v_r <= renamed_v;
+		sb_num_q <= sb_num_n;
 	  end	
   end
 

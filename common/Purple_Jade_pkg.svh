@@ -123,6 +123,8 @@ typedef struct packed
 parameter DECODED_INSTRUCTION_WIDTH       = $bits(decoded_instruction_t);
 
 parameter NUM_PHYS_REG                    = 128;
+parameter ROB_ENTRY = 64;
+parameter SB_ENTRY = 16;
 
 typedef struct packed
 {
@@ -137,15 +139,14 @@ typedef struct packed
   logic                                   branch_speculation;
   logic                                   w_v;
   logic                                   imm;
-  // TODO : Those two fields are no longer needed
-  logic [$clog2(NUM_PHYS_REG)-1:0]        freed_reg;   /* those two fileds */
-  logic [$clog2(NUM_ARCH_REG)-1:0]        alloc_reg;   /* are used for commit */
+  logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
+  logic                                   is_wfs;   // is waiting for a store, if all stores before it 
+                                                    // are clear, this field will be zero
+  logic [$clog2(SB_ENTRY)-1:0]            sb_dest;  // for store this is the sb entry it will write
+                                                    // for load, this is the sb entry it is waiting for
   } renamed_instruction_t;
 
 parameter RENAMED_INSTRUCTION_WIDTH       = $bits(renamed_instruction_t);
-
-parameter ROB_ENTRY = 64;
-parameter SB_ENTRY = 16;
 
 typedef struct packed                               
 {       
