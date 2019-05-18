@@ -4,7 +4,8 @@ module rotate_left #(width_p=-1)
     , output [width_p-1:0] o
     );
    
-   wire [width_p*2-1:0] temp = { 2 { data_i } } << rot_i;
+   wire [width_p*2-1:0] temp;
+   assign temp = ({data_i, data_i} << rot_i);
    assign o = temp[width_p+:width_p];
    
 endmodule

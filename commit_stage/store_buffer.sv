@@ -51,7 +51,8 @@ assign sb_ld_pass_valid_o = address_match & ~rob_mispredict_i;
 assign sb_ld_pass_value_o = data_match;
 
 // bypass variables
-logic [SB_ENTRY-1:0]             match_vector, trimed_match_vector;
+logic [SB_ENTRY-1:0]             match_vector;
+logic [SB_ENTRY-1:0]             trimed_match_vector;
 logic [$clog2(SB_ENTRY)-1:0]     trimed_sb_num, matched_trimed_sb_num, matched_sb_num;
 
 // bypass logic assignments
@@ -59,6 +60,12 @@ assign trimed_sb_num = $unsigned(exe_ld_pass_sb_num_i) - $unsigned(sb_commit_pt)
 assign matched_sb_num = $unsigned(matched_trimed_sb_num) + $unsigned(sb_commit_pt);
 assign data_match = sb_q[matched_sb_num].result;
 
+// shifting logics
+/* verilator lint_off UNUSED */
+logic [SB_ENTRY*2-1:0]    shift_temp;
+assign shift_temp = {match_vector, match_vector} >> sb_commit_pt;
+assign trimed_match_vector = shift_temp[0+:SB_ENTRY];
+/* verilator lint_on UNUSED */
 always_comb
   begin
     // default assignments
@@ -108,33 +115,29 @@ always_comb
 always_comb
   begin
     match_vector = '0;
+
+    for (int unsigned i = 0; i < SB_ENTRY; i++)
+        // computing match vector
+        if (sb_q[i].wb == 1'b1 && (sb_q[i].address == exe_ld_bypass_addr_i))
+            match_vector[i] = 1'b1;
+  end
+
+// matched logics
+always_comb
+  begin
     address_match = '0;
     matched_trimed_sb_num = '0;
 
     for (int unsigned i = 0; i < SB_ENTRY; i++)
       begin
-        // computing match vector
-        if (sb_q[i].wb && sb_q[i].address == exe_ld_bypass_addr_i)
-            match_vector[i] = 1'b1;
-
         // finding match
-        if (trimed_match_vector[i] && ($clog2(SB_ENTRY))'(i) < trimed_sb_num)
+        if (trimed_match_vector[i] == 1'b1 && ($clog2(SB_ENTRY))'(i) <= trimed_sb_num)
           begin
             address_match = 1'b1;
             matched_trimed_sb_num  = ($clog2(SB_ENTRY))'(i);
           end
       end
   end
-
-rotate_left
-#(
-  .width_p(SB_ENTRY)
-) 
-  shifter 
-(  .data_i(match_vector)
- , .rot_i (sb_commit_pt)
- , .o     (trimed_match_vector)
-);
 
 // sequential processes
 always_ff @(posedge clk_i)
