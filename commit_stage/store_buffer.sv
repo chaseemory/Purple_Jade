@@ -126,12 +126,14 @@ always_comb
       end
   end
 
-rotate_left #(
+rotate_left
+#(
   .width_p(SB_ENTRY)
-) shifter (
-   .data_i(match_vector)
-  , .rot_i (sb_commit_pt)
-  , .o     (trimed_match_vector)
+) 
+  shifter 
+(  .data_i(match_vector)
+ , .rot_i (sb_commit_pt)
+ , .o     (trimed_match_vector)
 );
 
 // sequential processes
