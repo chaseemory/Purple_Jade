@@ -1,4 +1,4 @@
-#include "Vstore_buffer.h"
+#include "Vrotate_left.h"
 #include "verilated.h"
 
 #include <iostream>
@@ -9,7 +9,7 @@ using namespace std;
 
 static vluint64_t main_time = 0;
 
-static void tick(Vstore_buffer* top) {
+static void tick(Vrotate_left* top) {
     top->clk_i = ((top->clk_i == 0) ? 1 : 0);
     top->eval();
 }
@@ -17,7 +17,7 @@ static void tick(Vstore_buffer* top) {
 int main(int argc, char** argv, char** env) {
     Verilated::commandArgs(argc, argv);
     Verilated::traceEverOn(true);
-    Vstore_buffer* top = new Vstore_buffer;
+    Vrotate_left* top = new Vrotate_left;
     top->clk_i = 1;
     top->eval();
     tick(top);
