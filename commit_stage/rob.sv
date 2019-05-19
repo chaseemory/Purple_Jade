@@ -12,6 +12,7 @@ module rob
  , input                                    rename_rob_valid_i
  , input  [RENAME_ROB_ENTRY_WIDTH-1:0]      rename_rob_entry_i
  , output                                   rob_rename_ready_o
+ , output [$clog2(ROB_ENTRY)-1:0]           rob_rename_entry_num_o
  // rob-physical register interface
  , output                                   rob_phys_valid_o
  , output [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_cl_o
@@ -57,6 +58,7 @@ assign rob_rename_ready_o = (rob_num != 0) & ~rob_mispredict_o;
 // committing a store instruction
 assign committing_instr  = rob_q[rob_commit_pt];
 assign rob_sb_valid_o = committing_instr.wb & committing_instr.is_store & ~rob_mispredict_o;
+assign rob_rename_entry_num_o = rob_alloc_pt;
 
 // committing a reg write instruction
 // clear freed register

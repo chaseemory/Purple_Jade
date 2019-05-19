@@ -23,6 +23,9 @@ module store_buffer
  , output                                   sb_mem_v_o
  , output [WORD_SIZE_P-1:0]                 sb_mem_addr_o
  , output [WORD_SIZE_P-1:0]                 sb_mem_data_o
+ // sb to rename to clear pending store bits
+ , output                                   sb_rename_clear_st_v_o
+ , output                                   sb_rename_clear_st_num_o
 );
 
 // store buffer

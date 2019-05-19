@@ -23,6 +23,9 @@ module rename_stage
  , output [RENAME_ROB_ENTRY_WIDTH-1:0]		rename_rob_o
  , output  									rename_rob_v_o
  , output  									rename_sb_v_o
+ // previous store info interfaces
+ , input									sb_st_clear_valid_i
+ , input  [$clog2(SB_ENTRY)-1:0]            sb_st_clear_entry_i
 );
 
 decoded_instruction_t decoded;
@@ -60,7 +63,11 @@ assign roll_back = mispredict_i & commit_v_i;
 
 // load sb entry
 logic [$clog2(SB_ENTRY)-1:0]    sb_num_q, sb_num_n;
-// TODO : update sb number logics
+logic 							prev_store_cleared, prev_store_cleared_n;
+// update sb num on a valid store
+assign sb_num_n = (rename_sb_v_o) ? sb_num_i : sb_num_q;
+assign prev_store_cleared_n = (rename_sb_v_o) ? 1'b1 :
+  ((sb_st_clear_valid_i && sb_st_clear_entry_i == sb_num_q) ? 1'b0 : prev_store_cleared);
 
 // valid ready signals
 logic  renamed_v, renamed_v_r;
@@ -77,7 +84,9 @@ assign renamed.bcc_op = decoded.bcc_op;
 assign renamed.w_v = decoded.w_v;
 assign renamed.imm = decoded.imm;
 assign renamed.rob_dest = rob_num_i;
-assign renamed.sb_dest = sb_num_q;
+assign renamed.sb_dest = (rename_sb_v_o) ? sb_num_i : sb_num_q;  // on store use sb_num_i
+// waiting for a store and is a valid load
+assign renamed.is_wfs = prev_store_cleared_n && decoded.opcode == `LDR_OP && decoded.func_unit == `MEM_FU;
 assign renamed.branch_speculation = decoded.branch_speculation;
 
 // rename rob assignments
@@ -94,7 +103,7 @@ assign rename_rob.bcc_op = decoded.bcc_op;
 assign rename_rob.resolved_pc = '0;
 assign rename_rob.flag_mask = decoded.flags;
 assign rename_rob.flags = '0;
-assign rename_rob.is_store = (decoded.opcode == `STR_OP);
+assign rename_rob.is_store = decoded.opcode == `STR_OP && decoded.func_unit == `MEM_FU;
 assign rename_rob.w_v = decoded.w_v;
 assign rename_rob.alloc_reg = decoded.dest_id;
 assign rename_rob.freed_reg = lut_spec_q[decoded.dest_id];
@@ -186,6 +195,7 @@ always_ff @(posedge clk_i)
 		renamed_r <= '0;
 		renamed_v_r <= '0;
 		sb_num_q    <= '0;
+		prev_store_cleared <= '0;
 	  end 
 	else
 	  begin
@@ -197,6 +207,7 @@ always_ff @(posedge clk_i)
 		renamed_r <= renamed_n;
 		renamed_v_r <= renamed_v;
 		sb_num_q <= sb_num_n;
+		prev_store_cleared <= prev_store_cleared_n;
 	  end	
   end
 
