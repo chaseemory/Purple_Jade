@@ -29,16 +29,15 @@ module rename_stage
 );
 
 decoded_instruction_t decoded;
-renamed_instruction_t renamed, renamed_r, renamed_n;
+renamed_instruction_t renamed;
 commit_rename_t commit_entry;
 rename_rob_t rename_rob;
 
 // io assignment
 assign decoded = decoded_i;
-assign renamed_o = renamed_r;
+assign renamed_o = renamed;
 assign commit_entry = commit_rename_i;
 assign rename_rob_o = rename_rob;
-assign renamed_n = (issue_rename_ready_i) ? renamed : renamed_r;
 
 // speculative renaming lookup tables and freelist
 logic [NUM_ARCH_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] lut_spec_n, lut_spec_q;
@@ -70,10 +69,8 @@ assign prev_store_cleared_n = (rename_sb_v_o) ? 1'b1 :
   ((sb_st_clear_valid_i && sb_st_clear_entry_i == sb_num_q) ? 1'b0 : prev_store_cleared);
 
 // valid ready signals
-logic  renamed_v, renamed_v_r;
 assign rename_decode_ready_o = (fl_spec_num != 0) && (!roll_back) && issue_rename_ready_i && rob_ready_i;
-assign renamed_v = (issue_rename_ready_i) ? (rename_rob_v_o) : renamed_v_r;
-assign renamed_v_o = renamed_v_r;
+assign renamed_v_o = issue_rename_ready_i && rename_rob_v_o;
 assign rename_rob_v_o = rename_decode_ready_o & decoded_v_i;
 
 assign renamed.pc = decoded.pc;
@@ -127,7 +124,7 @@ always_comb
  	renamed.dest_id  =  {{REG_PAD_WIDTH{1'b0}}, decoded.dest_id};
 
   	// renaming logics
-  	if (renamed_v)
+  	if (renamed_v_o)
   	  begin
   	  	// translating sources
   	  	renamed.source_1 = lut_spec_q[decoded.source_1];
@@ -192,8 +189,6 @@ always_ff @(posedge clk_i)
 		fl_spec_read_pt  <= '0;
 		fl_spec_write_pt  <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
 		fl_spec_num <= ($clog2(NUM_PHYS_REG)+1)'(NUM_PHYS_REG-NUM_ARCH_REG);
-		renamed_r <= '0;
-		renamed_v_r <= '0;
 		sb_num_q    <= '0;
 		prev_store_cleared <= '0;
 	  end 
@@ -204,8 +199,7 @@ always_ff @(posedge clk_i)
 		fl_spec_read_pt  <= fl_spec_read_pt_n;
 		fl_spec_write_pt  <= fl_spec_write_pt_n;
 		fl_spec_num <= fl_spec_num_n;
-		renamed_r <= renamed_n;
-		renamed_v_r <= renamed_v;
+
 		sb_num_q <= sb_num_n;
 		prev_store_cleared <= prev_store_cleared_n;
 	  end	

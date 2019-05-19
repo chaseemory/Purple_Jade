@@ -26,6 +26,9 @@ module store_buffer
  // sb to rename to clear pending store bits
  , output                                   sb_rename_clear_st_v_o
  , output                                   sb_rename_clear_st_num_o
+ // sb to issue store check
+ , output [SB_ENTRY-1:0]                    sb_wb_vector_o
+ , output [$clog2(SB_ENTRY)-1:0]            sb_commit_pt_o
 );
 
 // store buffer
@@ -69,6 +72,14 @@ logic [SB_ENTRY*2-1:0]    shift_temp;
 assign shift_temp = {match_vector, match_vector} >> sb_commit_pt;
 assign trimed_match_vector = shift_temp[0+:SB_ENTRY];
 /* verilator lint_on UNUSED */
+
+generate
+    genvar i;
+    for (i = 0; i < SB_ENTRY; i++)
+        assign sb_wb_vector_o[i] = sb_q[i].wb;
+endgenerate
+assign sb_commit_pt_o = sb_commit_pt;
+
 always_comb
   begin
     // default assignments
