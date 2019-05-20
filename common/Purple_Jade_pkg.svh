@@ -203,11 +203,15 @@ typedef struct packed {
   logic                                   w_v;
 } reg_wb_t;
 
+parameter REG_WB_WIDTH = $bits(reg_wb_t);
+
 typedef struct packed {
   logic                                   valid;
   logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
   logic [WORD_SIZE_P-1:0]                 spec_pc;
 } lsu_rob_wb_t;
+
+parameter LSU_ROB_WB_WIDTH = $bits(lsu_rob_wb_t);
 
 // CDB to SB type
 typedef struct packed {

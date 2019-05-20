@@ -16,9 +16,9 @@ module store_buffer
  , input  [CDB_SB_WIDTH-1:0]                exe_sb_i
  // load bypass interfaces
  , input  [WORD_SIZE_P-1:0]                 exe_ld_bypass_addr_i
- , input  [$clog2(SB_ENTRY)-1:0]            exe_ld_pass_sb_num_i
- , output                                   sb_ld_pass_valid_o							
- , output [WORD_SIZE_P-1:0]                 sb_ld_pass_value_o
+ , input  [$clog2(SB_ENTRY)-1:0]            exe_ld_bypass_sb_num_i
+ , output                                   sb_ld_bypass_valid_o							
+ , output [WORD_SIZE_P-1:0]                 sb_ld_bypass_value_o
  // sb to memory interfaces
  , output                                   sb_mem_v_o
  , output [WORD_SIZE_P-1:0]                 sb_mem_addr_o
@@ -53,8 +53,8 @@ assign sb_mem_data_o = sb_q[sb_commit_pt].result;
 // sb to execute bypass
 logic address_match;
 logic [WORD_SIZE_P-1:0] data_match;
-assign sb_ld_pass_valid_o = address_match & ~rob_mispredict_i;
-assign sb_ld_pass_value_o = data_match;
+assign sb_ld_bypass_valid_o = address_match & ~rob_mispredict_i;
+assign sb_ld_bypass_value_o = data_match;
 
 // bypass variables
 logic [SB_ENTRY-1:0]             match_vector;
@@ -62,7 +62,7 @@ logic [SB_ENTRY-1:0]             trimed_match_vector;
 logic [$clog2(SB_ENTRY)-1:0]     trimed_sb_num, matched_trimed_sb_num, matched_sb_num;
 
 // bypass logic assignments
-assign trimed_sb_num = $unsigned(exe_ld_pass_sb_num_i) - $unsigned(sb_commit_pt);
+assign trimed_sb_num = $unsigned(exe_ld_bypass_sb_num_i) - $unsigned(sb_commit_pt);
 assign matched_sb_num = $unsigned(matched_trimed_sb_num) + $unsigned(sb_commit_pt);
 assign data_match = sb_q[matched_sb_num].result;
 
