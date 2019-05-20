@@ -1,3 +1,14 @@
+/*
+ * prev_st_check.sv
+ *
+ * Given a vector of store buffer entry number (issue_sb_num_vector_i), this module will
+ * ouput st_clear_vector_o. Each bit in st_clear_vector_o will indicate whether stores
+ * prior to a store buffer entry number is all written back.
+ *
+ * CAUTIONS : Once a bit in st_clear_vector_o is high, be sure to latch it.
+ * Value after the bit becomes high might be garbage.
+ */
+
 `include "Purple_Jade_pkg.svh";
 
 module prev_st_check 
@@ -6,7 +17,7 @@ module prev_st_check
 (
  // from scheduler
 `ifdef DEBUG
- , input  [$clog2(SB_ENTRY)-1:0]                        issue_sb_num_vector_i [ISSUE_ENTRY-1:0]
+   input  [$clog2(SB_ENTRY)-1:0]                        issue_sb_num_vector_i [ISSUE_ENTRY-1:0]
 `else
  , input  [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]       issue_sb_num_vector_i
 `endif
@@ -35,7 +46,7 @@ generate
     for (i = 0; i < ISSUE_ENTRY; i++)
       begin
         assign trimed_issue_sb_num_vector[i] = $unsigned(issue_sb_num_vector_i[i]) - $unsigned(sb_commit_pt_i);
-        assign wb_mask_vector[i] = (SB_ENTRY)'(-1) << (trimed_issue_sb_num_vector[i] + 1);
+        assign wb_mask_vector[i] = ((SB_ENTRY)'(-1) << (trimed_issue_sb_num_vector[i] + 1)) | trimed_wb_vector;
         assign st_clear_vector_o[i] = &wb_mask_vector[i];
       end
 endgenerate
