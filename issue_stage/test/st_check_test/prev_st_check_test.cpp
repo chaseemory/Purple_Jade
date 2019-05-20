@@ -23,7 +23,7 @@ int main(int argc, char** argv, char** env) {
     top->issue_sb_num_vector_i[3] = 5;
     top->issue_sb_num_vector_i[4] = 6;
     top->issue_sb_num_vector_i[5] = 7;
-    top->sb_wb_vector_i = 0xd8;
+    top->sb_wb_vector_i = 0xdc;
     top->sb_commit_pt_i = 3;
     tick(top);
     assert((top->st_clear_vector_o & 0x1) == 0);

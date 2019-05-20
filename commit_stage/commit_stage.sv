@@ -18,7 +18,6 @@ module commit_stage
  , output logic [WORD_SIZE_P-1:0]						rs2_data_o
  // rename store buffer setup
  , input                                                issue_sb_v_i
- , input  [STORE_BUFFER_WIDTH-1:0]                      issue_sb_i
  , output [$clog2(SB_ENTRY)-1:0]                        sb_issue_entry_num_o	
  , output                                               sb_issue_ready_o
  // execute-write back interfaces
@@ -28,6 +27,7 @@ module commit_stage
  , input  [ROB_WB_WIDTH-1:0]                            cdb_i [NUM_FU-1:0]
  // execute-memory interface
  , input  [WORD_SIZE_P-1:0]                             exe_mem_addr_i
+ , input  [$clog2(SB_ENTRY)-1:0]                        exe_ld_pass_sb_num_i
  , output [WORD_SIZE_P-1:0]                             exe_mem_data_o
  // rename-rob interface
  , input                                                rename_rob_valid_i
@@ -40,6 +40,9 @@ module commit_stage
  // rename-commit interface
  , output                                               rob_rename_valid_o
  , output [COMMIT_RENAME_WIDTH-1:0]                     rob_rename_entry_o
+ , output [$clog2(ROB_ENTRY)-1:0]                       rob_rename_entry_num_o
+ , output                                               sb_rename_clear_st_v_o
+ , output [$clog2(SB_ENTRY)-1:0]                        sb_rename_clear_st_num_o
  // rob-fe misprediction interface
  , output                                               rob_mispredict_o
  , output [WORD_SIZE_P-1:0]                             rob_fe_redirected_pc_o
@@ -47,6 +50,8 @@ module commit_stage
  , output                                               rob_debug_valid_o								
  , output [DEBUG_WIDTH-1:0]                             rob_debug_o
 `endif
+ , output [SB_ENTRY-1:0]                                sb_wb_vector_o
+ , output [$clog2(SB_ENTRY)-1:0]                        sb_commit_pt_o
 );
 
 // rob <-> arch_state
