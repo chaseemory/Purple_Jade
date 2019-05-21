@@ -43,13 +43,13 @@ always_comb
 
 // sequential process
 always_ff @(posedge clk_i)
-  	if (reset_i)
-  	  begin
+    if (reset_i)
+      begin
         out <= '0;
         cdb_o <= '0;
       end
-  	else
-  	  begin
+    else
+      begin
         out <= out_n;
         cdb_o <= reg_wb.cdb;
       end

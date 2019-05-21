@@ -1,4 +1,3 @@
-`include "Purple_Jade_pkg.svh"
 /*
  * fu_lsu.sv
  *
@@ -6,6 +5,8 @@
  * Stage 1 : Address computatioin
  * Stage 2 : Bypassing logic
  */
+
+`include "Purple_Jade_pkg.svh"
 
 module fu_lsu
 (input                                      clk_i
@@ -80,7 +81,7 @@ assign sb_wb.address = mem_addr_r;
 assign sb_wb.result = result;
 
 // valid bits assignments
-assign valid_pipe_n = (misprediction_i) ? '0 : {valid_pipe[NUM_STAGE-1], exe_v_i};
+assign valid_pipe_n = (misprediction_i) ? '0 : {valid_pipe[0], exe_v_i};
 assign sb_v = (misprediction_i) ? '0 : (exe_v_i && (opcode_i == `STR_OP));
 
 // result computations

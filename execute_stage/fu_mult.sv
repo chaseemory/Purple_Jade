@@ -35,10 +35,10 @@ assign reg_wb.cdb = out_n.cdb;
 assign reg_wb.w_v = exe_v_r[1]; 
 
 // register shifting
-assign exe_v_n = (mispredict_i) ? '0 : {exe_v_r[1], exe_v_i};
-assign rob_dest_n = {rob_dest_r[1], rob_dest_i};
-assign reg_dest_n = {reg_dest_r[1], reg_dest_i};
-assign result_n = {result_r[1], operand1_i * operand2_i};
+assign exe_v_n = (mispredict_i) ? '0 : {exe_v_r[0], exe_v_i};
+assign rob_dest_n = {rob_dest_r[0], rob_dest_i};
+assign reg_dest_n = {reg_dest_r[0], reg_dest_i};
+assign result_n = {result_r[0], operand1_i * operand2_i};
 
 // sequential process
 always_ff @(posedge clk_i)
@@ -58,5 +58,4 @@ always_ff @(posedge clk_i)
         result_r <= result_n;    
       end
   end
-
 endmodule // fu_mult

@@ -73,8 +73,8 @@ always_comb
 
 // sequential process
 always_ff @(posedge clk_i)
-  	if (reset_i)
+    if (reset_i)
         out <= '0;
-  	else
+    else
         out <= out_n;
 endmodule // fu_logic

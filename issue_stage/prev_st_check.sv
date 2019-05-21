@@ -3,7 +3,7 @@
  *
  * Given a vector of store buffer entry number (issue_sb_num_vector_i), this module will
  * ouput st_clear_vector_o. Each bit in st_clear_vector_o will indicate whether stores
- * prior to a store buffer entry number is all written back.
+ * prior to a store buffer entry number are all written back.
  *
  * CAUTIONS : Once a bit in st_clear_vector_o is high, be sure to latch it.
  * Value after the bit becomes high might be garbage.
