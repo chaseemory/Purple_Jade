@@ -120,8 +120,6 @@ int main(int argc, char** argv, char** env) {
     tick(top);
     tick(top);
     tick(top);
-    tick(top);
-    tick(top);
     assert(top->lsu_sb_v_o == 0x1);
     delete top; 
     return 0;
