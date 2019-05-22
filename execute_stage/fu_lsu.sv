@@ -33,7 +33,7 @@ module fu_lsu
  , output [WORD_SIZE_P-1:0]                 lsu_addr_o
  , input  [WORD_SIZE_P-1:0]                 mem_data_i
  // mis-prediction
- , input                                    misprediction_i
+ , input                                    mispredict_i
 );
 
 // local parameter
@@ -81,8 +81,8 @@ assign sb_wb.address = mem_addr_r;
 assign sb_wb.result = result;
 
 // valid bits assignments
-assign valid_pipe_n = (misprediction_i) ? '0 : {valid_pipe[0], exe_v_i};
-assign sb_v = (misprediction_i) ? '0 : (exe_v_i && (opcode_i == `STR_OP));
+assign valid_pipe_n = (mispredict_i) ? '0 : {valid_pipe[0], exe_v_i};
+assign sb_v = (mispredict_i) ? '0 : (exe_v_i && (opcode_i == `STR_OP));
 
 // result computations
 always_comb

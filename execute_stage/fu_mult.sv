@@ -49,13 +49,15 @@ always_ff @(posedge clk_i)
         exe_v_r <= '0;
         reg_dest_r <= '0;
         result_r <= '0;
+        out <= '0;
       end
     else
       begin
         rob_dest_r <= rob_dest_n;
         exe_v_r <= exe_v_n;
         reg_dest_r <= reg_dest_n;
-        result_r <= result_n;    
+        result_r <= result_n;
+        out <= out_n;   
       end
   end
 endmodule // fu_mult

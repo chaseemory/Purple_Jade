@@ -1,8 +1,8 @@
 FLD = $(shell pwd)/../../
-name = fu_mult
+name = execute_stage
 vev = verilator
 source = $(FLD)$(name).sv
-inc_dir = +incdir+$(FLD)../common/ +incdir+$(FLD)../rename_stage +incdir+$(FLD)
+inc_dir = +incdir+$(FLD)../common/ +incdir+$(FLD)../rename_stage +incdir+$(FLD) +incdir+$(FLD)../issue
 vev_op = --trace -Wall --cc
 exe_op = --exe
 header = $(FLD)../common/Purple_Jade_pkg.svh
