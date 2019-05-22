@@ -27,7 +27,7 @@ module fu_lsu
  // bypass logic: exe <-> mem order buffer
  , output [WORD_SIZE_P-1:0]                 exe_ld_bypass_addr_o
  , output [$clog2(SB_ENTRY)-1:0]            exe_ld_bypass_sb_num_o
- , input                                    sb_ld_bypass_valid_i							
+ , input                                    sb_ld_bypass_valid_i
  , input  [WORD_SIZE_P-1:0]                 sb_ld_bypass_value_i
  // exe <-> mem interfaces
  , output [WORD_SIZE_P-1:0]                 lsu_addr_o
@@ -87,16 +87,16 @@ assign sb_v = (mispredict_i) ? '0 : (exe_v_i && (opcode_i == `STR_OP));
 // result computations
 always_comb
   begin
-  	// default assignment
-  	result = mem_data_r;
+    // default assignment
+    result = mem_data_r;
     
     if (opcode_r == `LDR_OP)
       begin
-      	result = mem_data_i;
+        result = mem_data_i;
 
-      	// if bypassing is valid
-      	if (sb_ld_bypass_valid_i)
-      		result = sb_ld_bypass_value_i;
+        // if bypassing is valid
+        if (sb_ld_bypass_valid_i)
+            result = sb_ld_bypass_value_i;
       end
   end
 

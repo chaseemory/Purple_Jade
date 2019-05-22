@@ -50,5 +50,4 @@ generate
         assign st_clear_vector_o[i] = &wb_mask_vector[i];
       end
 endgenerate
-
 endmodule // prev_st_check
