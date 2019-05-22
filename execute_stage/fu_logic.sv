@@ -44,7 +44,7 @@ assign neg_res = ~operand1_i;
 // shift computations
 assign lsls_res = operand1_i << operand2_i;
 assign lsrs_res = operand1_i >> operand2_i;
-assign asrs_res = operand1_i >>> operand2_i;
+assign asrs_res = $signed(operand1_i) >>> operand2_i;
 
 // rotation
 /* verilator lint_off UNUSED */
