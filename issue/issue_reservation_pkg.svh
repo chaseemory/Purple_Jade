@@ -3,6 +3,8 @@
 `ifndef _ISSUE_RESERVATION_PKG_
 `define _ISSUE_RESERVATION_PKG_
 
+parameter issue_entries = 32;
+
 typedef struct packed
 {
   logic [$clog2(NUM_PHYS_REG)-1:0]        dest_id;
