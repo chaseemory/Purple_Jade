@@ -7,9 +7,12 @@ module fe_top
   ( input   logic clk_i
   , input   logic reset_i
   , input   logic ready_i
+  , input 	logic mis_predict
+  , input 	logic [WORD_SIZE_P-1:0] branch_mis_target
   , output  logic [DECODED_INSTRUCTION_WIDTH-1:0] final_decoded_instruction
   , output  logic valid_o
   );
+  
 
   logic stall;
   logic take_branch;
