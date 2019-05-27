@@ -84,7 +84,7 @@ assign renamed.imm = decoded.imm;
 assign renamed.rob_dest = rob_num_i;
 assign renamed.sb_dest = (rename_sb_v_o) ? sb_num_i : sb_num_q;  // on store use sb_num_i
 // waiting for a store and is a valid load
-assign renamed.is_wfs = prev_store_cleared_n && decoded.opcode == `LDR_OP && decoded.func_unit == `MEM_FU;
+assign renamed.is_wfs = !(prev_store_cleared_n && decoded.opcode == `LDR_OP && decoded.func_unit == `MEM_FU);
 assign renamed.branch_speculation = decoded.branch_speculation;
 
 // rename rob assignments
