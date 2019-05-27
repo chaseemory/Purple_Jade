@@ -168,10 +168,6 @@ typedef struct packed
   logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
   } issued_instruction_t;
 
-
-parameter ROB_ENTRY = 64;
-parameter SB_ENTRY = 16;
-
 typedef struct packed                               
 {       
   logic                                   valid;
