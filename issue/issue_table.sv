@@ -239,7 +239,7 @@ module issue_table
     new_instr.w_v                 = instruction_i.w_v;
     new_instr.imm                 = instruction_i.imm;
     new_instr.rob_dest            = instruction_i.rob_dest;
-
+    new_instr.sb_dest             = instruction_i.sb_dest;
   end // setup_new_instruction  
 
 

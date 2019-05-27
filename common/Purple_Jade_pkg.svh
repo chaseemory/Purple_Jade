@@ -168,6 +168,7 @@ typedef struct packed
   logic                                   w_v;
   logic                                   imm;
   logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
+  logic [$clog2(SB_ENTRY)-1:0]            sb_dest;
   } issued_instruction_t;
 
 typedef struct packed                               
