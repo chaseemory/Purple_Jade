@@ -122,9 +122,9 @@ typedef struct packed
 
 parameter DECODED_INSTRUCTION_WIDTH       = $bits(decoded_instruction_t);
 
-parameter NUM_PHYS_REG                    = 128;
-parameter ROB_ENTRY = 64;
-parameter SB_ENTRY = 16;
+parameter NUM_PHYS_REG                    = 16;
+parameter ROB_ENTRY = 8;
+parameter SB_ENTRY = 4;
 
 typedef struct packed
 {
@@ -148,6 +148,8 @@ typedef struct packed
 
 parameter RENAMED_INSTRUCTION_WIDTH       = $bits(renamed_instruction_t);
 
+parameter ISSUE_ENTRY = 32;
+
 typedef struct packed
 {
   logic [$clog2(NUM_PHYS_REG)-1:0]        dest_id;
@@ -168,9 +170,6 @@ typedef struct packed
   logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
   } issued_instruction_t;
 
-
-parameter ROB_ENTRY = 64;
-parameter SB_ENTRY = 16;
 
 typedef struct packed                               
 {       

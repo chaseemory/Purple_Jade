@@ -1180,7 +1180,8 @@ void Vissue_table_bsg_priority_encode__W20_L1::_settle__TOP__issue_table__DOT__n
 	= (2U & (IData)(this->__PVT__b__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__addrs));
     this->__PVT__b__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__addrs 
 	= (1U & (IData)(this->__PVT__b__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__right__DOT__genblk1__DOT__aligned__DOT__addrs));
-    this->__PVT__a__DOT__scan__DOT__t[0U] = VL_STREAML_FAST_III(32,32,32,vlTOPp->issue_table__DOT__valid_inst, 0);
+    this->__PVT__a__DOT__scan__DOT__t[0U] = VL_STREAML_FAST_III(32,32,32,
+								(~ vlTOPp->issue_table__DOT__valid_inst), 0);
     this->__PVT__a__DOT__scan__DOT__genblk3__DOT__genblk1__DOT__scanN__DOT__row__BRA__0__KET____DOT__shifted 
 	= (0x7fffffffU & ((this->__PVT__a__DOT__scan__DOT__t[1U] 
 			   << 0x1fU) | (this->__PVT__a__DOT__scan__DOT__t[0U] 
@@ -1684,7 +1685,8 @@ VL_INLINE_OPT void Vissue_table_bsg_priority_encode__W20_L1::_sequent__TOP__issu
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vissue_table_bsg_priority_encode__W20_L1::_sequent__TOP__issue_table__DOT__new_selector__6\n"); );
     Vissue_table* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
     // Body
-    this->__PVT__a__DOT__scan__DOT__t[0U] = VL_STREAML_FAST_III(32,32,32,vlTOPp->issue_table__DOT__valid_inst, 0);
+    this->__PVT__a__DOT__scan__DOT__t[0U] = VL_STREAML_FAST_III(32,32,32,
+								(~ vlTOPp->issue_table__DOT__valid_inst), 0);
 }
 
 VL_INLINE_OPT void Vissue_table_bsg_priority_encode__W20_L1::_combo__TOP__issue_table__DOT__new_selector__8(Vissue_table__Syms* __restrict vlSymsp) {

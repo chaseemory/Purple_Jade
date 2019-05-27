@@ -1,5 +1,4 @@
 `include "Purple_Jade_pkg.svh"
-`include "issue_reservation_pkg.svh"
 
 module issue_table
   ( // Misc inputs
@@ -27,39 +26,39 @@ module issue_table
   , output  logic [NUM_FU-1:0]    valid_o
 
   // Store Buffer Interface
-  , output  logic [issue_entries-1:0][$clog2(SB_ENTRY)-1:0]  issue_sb_num_vector_o
-  , input   logic                       [issue_entries-1:0]  st_clear_vector_i
+  , output  logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]  issue_sb_num_vector_o
+  , input   logic                       [ISSUE_ENTRY-1:0]  st_clear_vector_i
 
   // CDB Interface
-  , input   CDB_t [NUM_FU-1:0]    cdb
+  , input   CDB_t     cdb [NUM_FU-1:0]
   );
 
   // House Keeping Values
-  logic                      [$clog2(issue_entries):0] inst_count;
-  logic                      [$clog2(issue_entries):0] inst_count_n;
+  logic                      [$clog2(ISSUE_ENTRY):0] inst_count;
+  logic                      [$clog2(ISSUE_ENTRY):0] inst_count_n;
 
   // ISSUE TABLE
-  issued_instruction_t             [issue_entries-1:0] tabled_inst;
-  logic                            [issue_entries-1:0] valid_inst;
-  logic                            [issue_entries-1:0] inst_ready;
-  logic                    [$clog2(issue_entries)-1:0] chosen;
+  issued_instruction_t             [ISSUE_ENTRY-1:0] tabled_inst;
+  logic                            [ISSUE_ENTRY-1:0] valid_inst;
+  logic                            [ISSUE_ENTRY-1:0] inst_ready;
+  logic                    [$clog2(ISSUE_ENTRY)-1:0] chosen;
 
   // ORDER TABLE
-  logic   [issue_entries:0][$clog2(issue_entries)-1:0] instr_order_table;
-  logic [issue_entries-1:0][$clog2(issue_entries)-1:0] instr_order_table_n;
+  logic   [ISSUE_ENTRY:0][$clog2(ISSUE_ENTRY)-1:0] instr_order_table;
+  logic [ISSUE_ENTRY-1:0][$clog2(ISSUE_ENTRY)-1:0] instr_order_table_n;
 
-  logic                              [issue_entries:0] order_inst_v;
-  logic                            [issue_entries-1:0] order_inst_v_n;
+  logic                              [ISSUE_ENTRY:0] order_inst_v;
+  logic                            [ISSUE_ENTRY-1:0] order_inst_v_n;
 
-  logic                            [issue_entries-1:0] order_inst_less;
-  logic                            [issue_entries-1:0] ordered_instr_ready;
+  logic                            [ISSUE_ENTRY-1:0] order_inst_less;
+  logic                            [ISSUE_ENTRY-1:0] ordered_instr_ready;
 
-  logic                      [$clog2(issue_entries):0] chosen_ordered;
+  logic                      [$clog2(ISSUE_ENTRY):0] chosen_ordered;
 
   // STORE BUFFER NON-SENSE 
-  logic      [issue_entries-1:0][$clog2(SB_ENTRY)-1:0] store_buff_table;
-  logic                            [issue_entries-1:0] store_buff_table_v;
-  logic                            [issue_entries-1:0] store_buff_table_v_n;
+  logic      [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0] store_buff_table;
+  logic                            [ISSUE_ENTRY-1:0] store_buff_table_v;
+  logic                            [ISSUE_ENTRY-1:0] store_buff_table_v_n;
 
   /*  DETERMINE NEXT STATE OF VALID BITS FOR STORE BUFFER TABLE
       Assign next state of Store buffer valid when either the table is valid or the
@@ -68,9 +67,9 @@ module issue_table
   */
   always_comb begin : store_buff_table_v_next_logic
 
-    for(int unsigned w = 0; w < issue_entries; w++) begin
+    for(int unsigned w = 0; w < ISSUE_ENTRY; w++) begin
       store_buff_table_v_n[w] = (store_buff_table_v[w] | st_clear_vector_i[w]);
-    end // for(int unsigned w = 0; w < issue_entries; w++)
+    end // for(int unsigned w = 0; w < ISSUE_ENTRY; w++)
 
   end // store_buff_table_v_next_logic
 
@@ -81,12 +80,12 @@ module issue_table
       First compare all tags on the bus to determine if there are any matches
       Then use encoder to determine index in the data that is the match and if any match
   */
-  logic [issue_entries-1:0][NUM_FU-1:0] src1_tag_match;
-  logic [issue_entries-1:0][NUM_FU-1:0] src2_tag_match;
+  logic [ISSUE_ENTRY-1:0][NUM_FU-1:0] src1_tag_match;
+  logic [ISSUE_ENTRY-1:0][NUM_FU-1:0] src2_tag_match;
   
   always_comb begin : tag_match
 
-    for(int unsigned q = 0; q < issue_entries; q++) begin : instruction_to_match
+    for(int unsigned q = 0; q < ISSUE_ENTRY; q++) begin : instruction_to_match
 
       for(int unsigned r = 0; r < NUM_FU; r++) begin : FU_to_match
         src1_tag_match[q][r] = (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id);
@@ -97,15 +96,15 @@ module issue_table
 
   end // tag_match
   
-  logic [issue_entries-1:0][$clog2(NUM_FU)-1:0] src1_tag_index;
-  logic [issue_entries-1:0][$clog2(NUM_FU)-1:0] src2_tag_index;
-  logic [issue_entries-1:0] src1_tag_v;
-  logic [issue_entries-1:0] src2_tag_v;
+  logic [ISSUE_ENTRY-1:0][$clog2(NUM_FU)-1:0] src1_tag_index;
+  logic [ISSUE_ENTRY-1:0][$clog2(NUM_FU)-1:0] src2_tag_index;
+  logic [ISSUE_ENTRY-1:0] src1_tag_v;
+  logic [ISSUE_ENTRY-1:0] src2_tag_v;
 
   generate
 
     genvar u;
-    for(u = 0; u < issue_entries; u++) begin : src_tag_match_encode
+    for(u = 0; u < ISSUE_ENTRY; u++) begin : src_tag_match_encode
 
       bsg_encode_one_hot #(.width_p(NUM_FU)
                           ,.lo_to_hi_p(1)
@@ -134,14 +133,14 @@ module issue_table
         to determine which instruction to issue
       Then we dereference the pointer in the order table, to see which tabled instruction to choose
   */
-  //logic [issue_entries-1:0] ready_ordered_instr;
+  //logic [ISSUE_ENTRY-1:0] ready_ordered_instr;
   always_comb begin : determine_which_instructions_are_ready
 
-    for(int unsigned m = 0; m < issue_entries; m++) begin : tabled_ready_instructions
+    for(int unsigned m = 0; m < ISSUE_ENTRY; m++) begin : tabled_ready_instructions
       inst_ready[m] = (tabled_inst[m].source_1_v & tabled_inst[m].source_2_v & valid_inst[m] & store_buff_table_v[m]);
     end // ready_instructions     
 
-    for(int unsigned s = 0; s < issue_entries; s++) begin : feed_ordered_instructions_into_decoder
+    for(int unsigned s = 0; s < ISSUE_ENTRY; s++) begin : feed_ordered_instructions_into_decoder
       ordered_instr_ready[s] = (inst_ready[instr_order_table[s]] & order_inst_v[s]);
     end // feed_ordered_instructions_into_decoder
 
@@ -149,16 +148,16 @@ module issue_table
 
 
   logic chosen_valid;
-  bsg_priority_encode #(.width_p(issue_entries)
+  bsg_priority_encode #(.width_p(ISSUE_ENTRY)
                        ,.lo_to_hi_p(1)
                       ) chosen_selector
 
     ( .i(ordered_instr_ready)
-    , .addr_o(chosen_ordered[$clog2(issue_entries)-1:0])
+    , .addr_o(chosen_ordered[$clog2(ISSUE_ENTRY)-1:0])
     , .v_o(chosen_valid)
     );
-  assign chosen_ordered[$clog2(issue_entries)] = ~chosen_valid; // Chosen will be larger than table if invalid, next state counts on this
-  assign chosen                                = instr_order_table[chosen_ordered[$clog2(issue_entries)-1:0]];
+  assign chosen_ordered[$clog2(ISSUE_ENTRY)] = ~chosen_valid; // Chosen will be larger than table if invalid, next state counts on this
+  assign chosen                                = instr_order_table[chosen_ordered[$clog2(ISSUE_ENTRY)-1:0]];
 
 
 
@@ -169,11 +168,11 @@ module issue_table
   */  
   always_comb begin : shift_ordered_table
 
-    for(int unsigned k = 0; k < issue_entries; k++) begin : do_we_shift_order_table_entry
+    for(int unsigned k = 0; k < ISSUE_ENTRY; k++) begin : do_we_shift_order_table_entry
       order_inst_less[k] = (k < chosen_ordered);
     end // do_we_shift_instruction
 
-    for(int unsigned j = 0; j < issue_entries; j++) begin : shift_order_table_entry
+    for(int unsigned j = 0; j < ISSUE_ENTRY; j++) begin : shift_order_table_entry
       case(order_inst_less[j])
         1'b0: begin
           instr_order_table_n[j]  = instr_order_table[j+1];
@@ -188,8 +187,8 @@ module issue_table
     end // shift_order_table_entry
 
     if(accepting_new_instruction) begin : place_new_instruction_in_ordered_table
-      instr_order_table_n[inst_count_n] = new_instr_loc; // Put pointer to new instruction in ordered table
-      order_inst_v_n[inst_count_n[4:0]] = 1'b1;
+      instr_order_table_n[inst_count] = new_instr_loc; // Put pointer to new instruction in ordered table
+      order_inst_v_n[inst_count[4:0]] = 1'b1;
     end // place_new_instruction_in_ordered_table
 
   end // shift_ordered_table
@@ -245,13 +244,13 @@ module issue_table
 
 
   // DETERMINE WHERE NEXT INSTRUCTION WILL GO
-  logic [$clog2(issue_entries)-1:0] new_instr_loc;
-  logic                             new_instr_loc_v;
-  bsg_priority_encode #(.width_p(issue_entries)
+  logic [$clog2(ISSUE_ENTRY)-1:0] new_instr_loc;
+  logic                           new_instr_loc_v;
+  bsg_priority_encode #(.width_p(ISSUE_ENTRY)
                        ,.lo_to_hi_p(1)
                       ) new_selector
 
-    ( .i(valid_inst)
+    ( .i(~valid_inst)
     , .addr_o(new_instr_loc)
     , .v_o(new_instr_loc_v)
     );
@@ -261,7 +260,7 @@ module issue_table
   assign accepting_new_instruction  = (ready_o & valid_i);
   assign issuing_instruction        = chosen_valid;         // A valid instruction has been chose to issue by Decoder
 
-  assign ready_o_n                  = (inst_count_n != issue_entries); // Dont accept new instructions if we are full next cycle
+  assign ready_o_n                  = (inst_count_n != ISSUE_ENTRY); // Dont accept new instructions if we are full next cycle
 
   always_comb begin : instruction_count_logic
 
@@ -294,11 +293,11 @@ module issue_table
   always_ff @(posedge clk_i) begin
 
     if(reset_i) begin : reset_logic
-      for(int unsigned i = 0; i < issue_entries; i++)   begin : reset
+      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)   begin : reset
         valid_inst[i]   <= '0;
         order_inst_v[i] <= '0;
-        instr_order_table[issue_entries] <= '0;
-        order_inst_v[issue_entries]      <= '0;
+        instr_order_table[ISSUE_ENTRY] <= '0;
+        order_inst_v[ISSUE_ENTRY]      <= '0;
       end // reset
 
     inst_count      <= '0;
@@ -308,12 +307,12 @@ module issue_table
 
     else begin : normal_operation
 
-      for(int unsigned l = 0; l < issue_entries; l++)   begin : shift_ordered_instruction_and_insert_new_instruction
+      for(int unsigned l = 0; l < ISSUE_ENTRY; l++)   begin : shift_ordered_instruction_and_insert_new_instruction
         instr_order_table[l]  <= instr_order_table_n[l];
         order_inst_v[l]       <= order_inst_v_n[l];
       end // shift_ordered_instruction_and_insert_new_instruction
       
-      for(int unsigned x = 0; x < issue_entries; x++)   begin : update_store_buff_valid
+      for(int unsigned x = 0; x < ISSUE_ENTRY; x++)   begin : update_store_buff_valid
         store_buff_table_v[x] <= store_buff_table_v_n[x];
       end // update_store_buff_valid
 
@@ -332,7 +331,7 @@ module issue_table
         store_buff_table_v[chosen]  <= '0;
       end // clear_issued_instr_location
 
-      for(int unsigned v = 0; v < issue_entries; v++)   begin : ingest_data_on_CDB
+      for(int unsigned v = 0; v < ISSUE_ENTRY; v++)   begin : ingest_data_on_CDB
 
         if(src1_tag_v[v] & ~tabled_inst[v].source_1_v)  begin : ingest_data_1
           tabled_inst[v].source_1_data <= cdb[src1_tag_index[v]].result;

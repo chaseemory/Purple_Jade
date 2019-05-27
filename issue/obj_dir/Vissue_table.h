@@ -94,27 +94,30 @@ VL_MODULE(Vissue_table) {
     // propagate new values into/out from the Verilated model.
     VL_IN8(clk_i,0,0);
     VL_IN8(reset_i,0,0);
-    VL_OUT8(new_instr_addr_1,6,0);
-    VL_OUT8(new_instr_addr_2,6,0);
+    VL_OUT8(new_instr_addr_1,3,0);
+    VL_OUT8(new_instr_addr_2,3,0);
     VL_IN8(new_instr_data_1_v,0,0);
     VL_IN8(new_instr_data_2_v,0,0);
     VL_IN8(valid_i,0,0);
     VL_OUT8(ready_o,0,0);
     VL_OUT8(valid_o,6,0);
+    VL_OUT64(issue_sb_num_vector_o,63,0);
     VL_IN16(new_instr_data_1,15,0);
     VL_IN16(new_instr_data_2,15,0);
-    VL_INW(instruction_i,73,0,3);
-    VL_OUTW(instruction_o,107,0,4);
-    VL_INW(cdb,314,0,10);
+    VL_IN(st_clear_vector_i,31,0);
+    VL_IN64(instruction_i,62,0);
+    VL_OUTW(instruction_o,93,0,3);
+    VL_IN(cdb[7],24,0);
     
     // LOCAL SIGNALS
     // Internals; generally not touched by application code
+    VL_SIG8(issue_table__DOT__inst_count,5,0);
+    VL_SIG8(issue_table__DOT__inst_count_n,5,0);
     VL_SIG8(issue_table__DOT__chosen,4,0);
     VL_SIGW(issue_table__DOT__instr_order_table,164,0,6);
     VL_SIGW(issue_table__DOT__instr_order_table_n,159,0,5);
-    VL_SIG8(issue_table__DOT__inst_count,5,0);
-    VL_SIG8(issue_table__DOT__inst_count_n,5,0);
     VL_SIG8(issue_table__DOT__chosen_ordered,5,0);
+    VL_SIG64(issue_table__DOT__store_buff_table,63,0);
     VL_SIGW(issue_table__DOT__src1_tag_match,223,0,7);
     VL_SIGW(issue_table__DOT__src2_tag_match,223,0,7);
     VL_SIGW(issue_table__DOT__src1_tag_index,95,0,3);
@@ -125,16 +128,19 @@ VL_MODULE(Vissue_table) {
     VL_SIG(issue_table__DOT__order_inst_v_n,31,0);
     VL_SIG(issue_table__DOT__order_inst_less,31,0);
     VL_SIG(issue_table__DOT__ordered_instr_ready,31,0);
+    VL_SIG(issue_table__DOT__store_buff_table_v,31,0);
+    VL_SIG(issue_table__DOT__store_buff_table_v_n,31,0);
     VL_SIG(issue_table__DOT__src1_tag_v,31,0);
     VL_SIG(issue_table__DOT__src2_tag_v,31,0);
-    VL_SIG(issue_table__DOT__tag_match__DOT__unnamedblk1__DOT__q,31,0);
-    VL_SIG(issue_table__DOT__tag_match__DOT__unnamedblk1__DOT__instruction_to_match__DOT__unnamedblk2__DOT__r,31,0);
-    VL_SIG(issue_table__DOT__reset_logic__DOT__unnamedblk7__DOT__i,31,0);
-    VL_SIG(issue_table__DOT__normal_operation__DOT__unnamedblk8__DOT__l,31,0);
-    VL_SIG(issue_table__DOT__normal_operation__DOT__unnamedblk9__DOT__v,31,0);
-    VL_SIGW(issue_table__DOT__tabled_inst,3455,0,108);
+    VL_SIG(issue_table__DOT__tag_match__DOT__unnamedblk2__DOT__q,31,0);
+    VL_SIG(issue_table__DOT__tag_match__DOT__unnamedblk2__DOT__instruction_to_match__DOT__unnamedblk3__DOT__r,31,0);
+    VL_SIG(issue_table__DOT__reset_logic__DOT__unnamedblk9__DOT__i,31,0);
+    VL_SIG(issue_table__DOT__normal_operation__DOT__unnamedblk10__DOT__l,31,0);
+    VL_SIG(issue_table__DOT__normal_operation__DOT__unnamedblk11__DOT__x,31,0);
+    VL_SIG(issue_table__DOT__normal_operation__DOT__unnamedblk12__DOT__v,31,0);
+    VL_SIGW(issue_table__DOT__tabled_inst,3007,0,94);
     VL_SIG64(issue_table__DOT__order_inst_v,32,0);
-    VL_SIGW(issue_table__DOT__new_instr,107,0,4);
+    VL_SIGW(issue_table__DOT__new_instr,93,0,3);
     
     // LOCAL VARIABLES
     // Internals; generally not touched by application code
@@ -152,8 +158,8 @@ VL_MODULE(Vissue_table) {
     VL_SIGW(__Vchglast__TOP__issue_table__DOT__chosen_selector__a__DOT__scan__DOT__t,191,0,6);
     VL_SIGW(__Vchglast__TOP__issue_table__DOT__new_selector__a__DOT__scan__DOT__t,191,0,6);
     VL_SIG(__Vm_traceActivity,31,0);
-    VL_SIGW(issue_table__DOT____Vlvbound10,107,0,4);
-    VL_SIGW(issue_table__DOT____Vlvbound11,107,0,4);
+    VL_SIGW(issue_table__DOT____Vlvbound10,93,0,3);
+    VL_SIGW(issue_table__DOT____Vlvbound11,93,0,3);
     
     // INTERNAL VARIABLES
     // Internals; generally not touched by application code
