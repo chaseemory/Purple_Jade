@@ -11,10 +11,7 @@
 
 `include "Purple_Jade_pkg.svh";
 
-module prev_st_check 
-#(parameter ISSUE_ENTRY = 32 
-)
-(
+module prev_st_check (
  // from scheduler
 `ifdef DEBUG
    input  [$clog2(SB_ENTRY)-1:0]                        issue_sb_num_vector_i [ISSUE_ENTRY-1:0]
