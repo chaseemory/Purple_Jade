@@ -27,7 +27,7 @@ module commit_stage
  , input  [ROB_WB_WIDTH-1:0]                            cdb_i [NUM_FU-1:0]
  // execute-memory interface
  , input  [WORD_SIZE_P-1:0]                             exe_mem_addr_i
- , input  [$clog2(SB_ENTRY)-1:0]                        exe_ld_pass_sb_num_i
+ , input  [$clog2(SB_ENTRY)-1:0]                        exe_ld_bypass_sb_num_i
  , output [WORD_SIZE_P-1:0]                             exe_mem_data_o
  // rename-rob interface
  , input                                                rename_rob_valid_i
@@ -35,8 +35,8 @@ module commit_stage
  , output                                               rob_rename_ready_o
  // load bypass interfaces
  , input  [WORD_SIZE_P-1:0]                             exe_ld_bypass_addr_i
- , output                                               sb_ld_pass_valid_o							
- , output [WORD_SIZE_P-1:0]                             sb_ld_pass_value_o
+ , output                                               sb_ld_bypass_valid_o							
+ , output [WORD_SIZE_P-1:0]                             sb_ld_bypass_value_o
  // rename-commit interface
  , output                                               rob_rename_valid_o
  , output [COMMIT_RENAME_WIDTH-1:0]                     rob_rename_entry_o
