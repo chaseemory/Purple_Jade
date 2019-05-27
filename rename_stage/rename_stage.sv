@@ -123,7 +123,7 @@ always_comb
     renamed.source2_imm = decoded.source2_imm;
     renamed.source_1 =  {{REG_PAD_WIDTH{1'b0}}, decoded.source_1};
     renamed.dest_id  =  {{REG_PAD_WIDTH{1'b0}}, decoded.dest_id};
-
+    
     // renaming logics
     if (renamed_v_o)
       begin
