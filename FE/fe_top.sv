@@ -12,6 +12,7 @@ module fe_top
   , output  logic [DECODED_INSTRUCTION_WIDTH-1:0] final_decoded_instruction
   , output  logic valid_o
   );
+  
 
   logic stall;
   logic take_branch;
