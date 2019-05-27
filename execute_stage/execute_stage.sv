@@ -1,7 +1,8 @@
 `include "Purple_Jade_pkg.svh"
-`include "issue_reservation_pkg.svh"
 
-module execute_stage
+module execute_stage #(
+    parameter ISSUE_INSTRUTION_WIDTH = $bits(issued_instruction_t)
+)
 (input                                      clk_i
  , input                                    reset_i
  , input                                    issue_exe_v_i
