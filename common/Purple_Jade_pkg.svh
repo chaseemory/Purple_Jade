@@ -170,7 +170,6 @@ typedef struct packed
   logic [$clog2(ROB_ENTRY)-1:0]           rob_dest;
   } issued_instruction_t;
 
-
 typedef struct packed                               
 {       
   logic                                   valid;
