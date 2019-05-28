@@ -15,7 +15,7 @@ module be_top
 
 // renamed <-> issue
 logic                                               rename_issue_v;
-logic [RENAMED_INSTRUCTION_WIDTH]                   rename_issue_entry;
+logic [RENAMED_INSTRUCTION_WIDTH-1:0]               rename_issue_entry;
 logic                                               issue_renamed_ready;
 
 // rename <-> commit/freeing registers
@@ -174,7 +174,7 @@ commit_stage commit
  , .exe_sb_v_i              (lsu_sb_v)
  , .exe_sb_i                (lsu_sb_entry)
  // rob write back
- . .cdb_i                   (exe_rob_wb)
+ , .cdb_i                   (exe_rob_wb)
  // execute memory
  , .exe_mem_addr_i          (lsu_mem_addr)
  , .exe_mem_data_o          (mem_lsu_data)
