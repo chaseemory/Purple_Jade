@@ -69,8 +69,8 @@ assign sb_num_n = (rename_sb_v_o) ? sb_num_i : sb_num_q;
 assign prev_store_cleared_n = (rename_sb_v_o) ? 1'b1 :
   ((sb_st_clear_valid_i && sb_st_clear_entry_i == sb_num_q) ? 1'b0 : prev_store_cleared);
 
-// valid ready signals
-assign rename_decode_ready_o = (fl_spec_num != 0) && (!roll_back) && issue_rename_ready_i && rob_ready_i;
+// valid ready signals: demanding
+assign rename_decode_ready_o = (fl_spec_num != 0) && (!roll_back) && issue_rename_ready_i && rob_ready_i && decoded_v_i;
 assign renamed_v_o = issue_rename_ready_i && rename_rob_v_o;
 assign rename_rob_v_o = rename_decode_ready_o & decoded_v_i;
 
