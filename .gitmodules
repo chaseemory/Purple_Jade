@@ -1,3 +1,6 @@
 [submodule "basejump_stl"]
 	path = basejump_stl
 	url = git@github.com:chaseemory/basejump_stl.git
+[submodule "Purple_Jade_Tests"]
+	path = Purple_Jade_Tests
+	url = https://github.com/iihihiuh/Purple_Jade_Tests
