@@ -1,5 +1,4 @@
 `include "Purple_Jade_pkg.svh";
-`include "rob_def.svh"
 
 module store_buffer
 (input                                      clk_i

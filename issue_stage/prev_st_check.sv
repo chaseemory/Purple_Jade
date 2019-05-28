@@ -13,11 +13,7 @@
 
 module prev_st_check (
  // from scheduler
-`ifdef DEBUG
-   input  [$clog2(SB_ENTRY)-1:0]                        issue_sb_num_vector_i [ISSUE_ENTRY-1:0]
-`else
- , input  [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]       issue_sb_num_vector_i
-`endif
+   input  [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]       issue_sb_num_vector_i
  , input  [SB_ENTRY-1:0]                                sb_wb_vector_i
  , input  [$clog2(SB_ENTRY)-1:0]                        sb_commit_pt_i
  , output [ISSUE_ENTRY-1:0]                             st_clear_vector_o

@@ -1,5 +1,4 @@
 `include "Purple_Jade_pkg.svh";
-`include "rob_def.svh"
 `include "rename_def.svh";
 
 module rob

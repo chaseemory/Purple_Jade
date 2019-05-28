@@ -1,4 +1,4 @@
-`include "../common/Purple_Jade_pkg.svh"
+`include "Purple_Jade_pkg.svh"
 
 `ifndef _FE_DEF_PKG_
 `define _FE_DEF_PKG_

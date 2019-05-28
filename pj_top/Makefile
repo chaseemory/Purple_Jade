@@ -8,10 +8,7 @@ top_level = pj_top
 pj_test_bin_dir = $(fld)../Purple_Jade_Tests/test/bin/
 
 # include lookup folders
-inc_dir += +incdir+$(fld)../common/
-inc_dir += +incdir+$(fld)../rename_stage/
-inc_dir += +incdir+$(fld)../FE/
-inc_dir += +incdir+$(fld)../commit_stage/
+inc_dir += +incdir+$(fld)../include/
 inc_dir += +incdir+$(fld)../basejump_stl/bsg_misc/
 
 
@@ -19,6 +16,7 @@ inc_dir += +incdir+$(fld)../basejump_stl/bsg_misc/
 vev_op += $(inc_dir)
 vev_op += --trace -Wall --cc
 vev_op += -f $(filelist)
+vev_op += -Wno-fatal
 vev_op += --top-module $(top_level)
 # execution options
 exe_op = --exe
@@ -35,5 +33,11 @@ unquoted = $(pj_test_bin_dir)$(TEST)
 TEST_BIN = $(addprefix \",$(addsuffix \",$(unquoted)))
 vev_op += -DTEST_BIN=$(TEST_BIN)
 
+# junk
+junk = obj_dir *.vcd 
+
 all:
 	$(vev) $(vev_op) $(exe_op) $(top_level)_test.cpp
+
+clean:
+	rm -rf $(junk)

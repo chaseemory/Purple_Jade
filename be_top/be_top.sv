@@ -29,7 +29,7 @@ logic [$clog2(SB_ENTRY)-1:0]                        sb_rename_num;
 logic [RENAME_ROB_ENTRY_WIDTH-1:0]                  rename_rob_entry;
 logic                                               rename_rob_v;
 logic                                               rename_sb_v;
-
+logic                                               rob_ready, sb_ready;
 assign rob_sb_rename_ready = rob_ready & sb_ready;
 
 // rename <-> commit/sb
@@ -37,7 +37,7 @@ logic                                               sb_st_clear_valid;
 logic [$clog2(SB_ENTRY)-1:0]                        sb_st_clear_entry;
 
 // issued <-> execute
-logic                                               issue_exe_v;
+logic  [NUM_FU-1:0]                                 issue_exe_v;
 issued_instruction_t                                issue_exe_entry;
 
 // issued <-> store check
@@ -45,10 +45,14 @@ logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]       issue_sb_num_vector;
 logic [ISSUE_ENTRY-1:0]                             st_clear_vector;
 
 // issue <-> execute common data bus
-CDB_t [NUM_FU-1:0]                                  cdb;
+CDB_t                                               cdb [NUM_FU-1:0];
 
 // execute <-> commit/write physical reg
+`ifdef DEBUG
+reg_wb_t                                            reg_wb [NUM_FU-1:0];
+`else 
 reg_wb_t [NUM_FU-1:0]                               reg_wb;
+`endif
 logic    [NUM_FU-1:0]                               exe_reg_w_v;
 logic    [NUM_FU-1:0][$clog2(NUM_PHYS_REG)-1:0]     exe_reg_addr;
 logic    [NUM_FU-1:0][WORD_SIZE_P-1:0]              exe_reg_data;
@@ -72,8 +76,11 @@ logic                                               rs2_valid;
 logic [WORD_SIZE_P-1:0]						        rs2_data;
 
 // execute <-> commit/rob
+`ifdef DEBUG
+rob_wb_t                                            exe_rob_wb [NUM_FU-1:0];
+`else
 rob_wb_t [NUM_FU-1:0]                               exe_rob_wb;
-
+`endif
 // execute <-> commit/sb
 logic                                               lsu_sb_v;
 logic [CDB_SB_WIDTH-1:0]                            lsu_sb_entry;
@@ -200,6 +207,8 @@ commit_stage commit
  // to prev store check
  , .sb_wb_vector_o          (sb_wb_vector)
  , .sb_commit_pt_o          (sb_commit_pt)
+ , .rob_debug_valid_o       ()
+ , .rob_debug_o             ()
  , .*
 );
 endmodule // be_top

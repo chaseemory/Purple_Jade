@@ -1,6 +1,5 @@
 `include "Purple_Jade_pkg.svh";
 `include "rename_def.svh";
-`include "rob_def.svh"
 
 module commit_stage
 (input                                                  clk_i

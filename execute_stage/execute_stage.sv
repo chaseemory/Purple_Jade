@@ -5,7 +5,7 @@ module execute_stage #(
 )
 (input                                      clk_i
  , input                                    reset_i
- , input                                    issue_exe_v_i
+ , input  [NUM_FU-1:0]                      issue_exe_v_i
  , input  [ISSUE_INSTRUTION_WIDTH-1:0]      issue_exe_i
 `ifdef DEBUG
  , output [CDB_WIDTH-1:0]                   cdb_o [NUM_FU-1:0]
@@ -35,9 +35,6 @@ module execute_stage #(
 issued_instruction_t issued;
 assign issued = issue_exe_i;
 
-// valid bits
-logic [NUM_FU-1:0] exe_valid_vector;
-assign exe_valid_vector = {(NUM_FU-1)'(0), issue_exe_v_i} << issued.func_unit;
 /* verilator lint_on UNUSED */
 
 // operand2
@@ -58,7 +55,7 @@ assign cdb_o[`LOGICAL_FU] = exe_rob_o[`LOGICAL_FU][ROB_WB_WIDTH-1-:CDB_WIDTH];
 assign cdb_o[`MUL_FU] = exe_rob_o[`MUL_FU][ROB_WB_WIDTH-1-:CDB_WIDTH];
 
 fu_alu alu_fu
-( .exe_v_i   (exe_valid_vector[`ALU_FU])
+( .exe_v_i   (issue_exe_v_i[`ALU_FU])
  ,.opcode_i  (issued.opcode)
  ,.operand1_i(issued.source_1_data)
  ,.operand2_i(operand2)
@@ -70,7 +67,7 @@ fu_alu alu_fu
 );
 
 fu_logic logic_fu
-( .exe_v_i    (exe_valid_vector[`LOGICAL_FU])
+( .exe_v_i    (issue_exe_v_i[`LOGICAL_FU])
  ,.opcode_i   (issued.opcode)
  ,.operand1_i (issued.source_1_data)
  ,.operand2_i (operand2)
@@ -82,7 +79,7 @@ fu_logic logic_fu
 );
 
 fu_branch branch_fu
-( .exe_v_i     (exe_valid_vector[`BRANCH_FU])
+( .exe_v_i     (issue_exe_v_i[`BRANCH_FU])
  ,.opcode_i    (issued.opcode)
  ,.operand1_i  (issued.source_1_data)
  ,.operand2_i  (operand2)
@@ -95,7 +92,7 @@ fu_branch branch_fu
 );
 
 fu_mult mult_fu
-( .exe_v_i    (exe_valid_vector[`MUL_FU])
+( .exe_v_i    (issue_exe_v_i[`MUL_FU])
  ,.operand1_i (issued.source_1_data)
  ,.operand2_i (operand2)
  ,.rob_dest_i (issued.rob_dest)
@@ -106,7 +103,7 @@ fu_mult mult_fu
 );
 
 fu_lsu lsu_fu
-( .exe_v_i    (exe_valid_vector[`MEM_FU])
+( .exe_v_i    (issue_exe_v_i[`MEM_FU])
  ,.opcode_i   (issued.opcode)
  ,.operand1_i (issued.source_1_data)
  ,.operand2_i (issued.source2_imm_data)
