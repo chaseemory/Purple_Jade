@@ -15,7 +15,7 @@ module fe_top
   
 
   logic stall;
-  logic take_branch;
+  logic take_branch_local, take_branch;
 
   assign stall = ~ready_i;
 
@@ -34,7 +34,7 @@ module fe_top
     , .pc_2_i(program_counter_n_p2)
     , .branch_target_i(branch_target)
     , .reset_i(reset_i)
-    , .branch_take(take_branch)
+    , .branch_take(take_branch_local)
     , .stall(stall)
     , .pc_next(program_counter_n)
     );
@@ -164,7 +164,8 @@ module fe_top
   // ~~~~~~~~~~~~~~~~~~~~~~BRANCH~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  assign branch_target = branch_offset_branch_r + instruction_decoded_branch.pc;
+
+  assign branch_target = (mis_predict) ? branch_mis_target : (branch_offset_branch_r + instruction_decoded_branch.pc);
 
   logic speculative_branch;
 
@@ -172,18 +173,20 @@ module fe_top
     ( .sign_bit_i(branch_offset_branch_r[WORD_SIZE_P-1])
     , .is_branch_i(is_branch_branch_r)
     , .branch_op_code_i(instruction_decoded_branch.opcode[1:0])
-    , .take_branch_o(take_branch)
+    , .take_branch_local_o(take_branch_local)
     , .speculative_o(speculative_branch)
     );
 
   // TODO: INSERT RETURN ADDRESS STACK HERE AS WELL
 
+  assign take_branch = take_branch_local | mis_predict;
+
   assign flush_d_b = take_branch;
   assign flush_f_d = take_branch;
 
-  always_comb instruction_decoded_branch.branch_speculation = take_branch;
+  always_comb instruction_decoded_branch.branch_speculation = take_branch_local;
 
-  assign valid_o = ( (~speculative_branch & is_branch_branch_r) | (instruction_decoded_branch.func_unit == `NOOP_FU) ) ? 1'b0 : valid_d_b;
+  assign valid_o = ((~speculative_branch & is_branch_branch_r) | (instruction_decoded_branch.func_unit == `NOOP_FU) | mis_predict) ? 1'b0 : valid_d_b;
 
   assign final_decoded_instruction = instruction_decoded_branch;
 
