@@ -95,6 +95,8 @@ logic [WORD_SIZE_P-1:0]                             sb_ld_bypass_value;
 logic [SB_ENTRY-1:0]                                sb_wb_vector;
 logic [$clog2(SB_ENTRY)-1:0]                        sb_commit_pt;
 
+/* verilator lint_off UNOPTFLAT */
+
 rename_stage rename
 (  .renamed_o            (rename_issue_entry)
  , .renamed_v_o          (rename_issue_v)
@@ -211,4 +213,5 @@ commit_stage commit
  , .rob_debug_o             ()
  , .*
 );
+/* verilator lint_on UNOPTFLAT */
 endmodule // be_top

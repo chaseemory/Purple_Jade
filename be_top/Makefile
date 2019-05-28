@@ -2,7 +2,7 @@
 vev = verilator
 fld = $(shell pwd)/
 filelist = $(fld)filelist.verilator
-top_level = pj_top
+top_level = be_top
 
 # folders
 pj_test_bin_dir = $(fld)../Purple_Jade_Tests/test/bin/

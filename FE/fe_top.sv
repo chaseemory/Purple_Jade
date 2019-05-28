@@ -173,7 +173,7 @@ module fe_top
     ( .sign_bit_i(branch_offset_branch_r[WORD_SIZE_P-1])
     , .is_branch_i(is_branch_branch_r)
     , .branch_op_code_i(instruction_decoded_branch.opcode[1:0])
-    , .take_branch_local_o(take_branch_local)
+    , .take_branch_o(take_branch_local)
     , .speculative_o(speculative_branch)
     );
 
