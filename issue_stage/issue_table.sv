@@ -88,8 +88,10 @@ module issue_table
     for(int unsigned q = 0; q < ISSUE_ENTRY; q++) begin : instruction_to_match
 
       for(int unsigned r = 0; r < NUM_FU; r++) begin : FU_to_match
-        src1_tag_match[q][r] = (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id);
-        src2_tag_match[q][r] = (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source2_imm[$clog2(NUM_PHYS_REG)-1:0]);
+        src1_tag_match[q][r] = valid_inst[q] ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id) : '0;
+        src2_tag_match[q][r] = valid_inst[q] ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source2_imm[$clog2(NUM_PHYS_REG)-1:0]) : '0;
+        // src1_tag_match[q][r] = (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id);
+        // src2_tag_match[q][r] = (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source2_imm[$clog2(NUM_PHYS_REG)-1:0]);
       end // FU_to_match
 
     end // do_we_shift_instruction
@@ -188,7 +190,7 @@ module issue_table
 
     if(accepting_new_instruction) begin : place_new_instruction_in_ordered_table
       instr_order_table_n[inst_count] = new_instr_loc; // Put pointer to new instruction in ordered table
-      order_inst_v_n[inst_count[4:0]] = 1'b1;
+      order_inst_v_n[inst_count[$clog2(ISSUE_ENTRY)-1:0]] = 1'b1;
     end // place_new_instruction_in_ordered_table
 
   end // shift_ordered_table
@@ -294,14 +296,19 @@ module issue_table
 
     if(reset_i) begin : reset_logic
       for(int unsigned i = 0; i < ISSUE_ENTRY; i++)   begin : reset
-        valid_inst[i]   <= '0;
-        order_inst_v[i] <= '0;
-        instr_order_table[ISSUE_ENTRY] <= '0;
-        order_inst_v[ISSUE_ENTRY]      <= '0;
+        valid_inst[i]         <= '0;
+        order_inst_v[i]       <= '0;
+        instr_order_table[i]  <= '0;
+        order_inst_v[i]       <= '0;
+        tabled_inst[i]        <= '0;
+        store_buff_table[i]   <= '0;
+        store_buff_table_v[i] <= '0;
       end // reset
 
-    inst_count      <= '0;
-    ready_o         <= '0;
+      instr_order_table[ISSUE_ENTRY] <= '0;
+      order_inst_v[ISSUE_ENTRY]      <= '0;
+      inst_count      <= '0;
+      ready_o         <= '0;
 
     end // reset_logic
 
@@ -333,14 +340,14 @@ module issue_table
 
       for(int unsigned v = 0; v < ISSUE_ENTRY; v++)   begin : ingest_data_on_CDB
 
-        if(src1_tag_v[v] & ~tabled_inst[v].source_1_v)  begin : ingest_data_1
+        if(/*valid_inst[v] & */src1_tag_v[v] & ~tabled_inst[v].source_1_v)  begin : ingest_data_1
           tabled_inst[v].source_1_data <= cdb[src1_tag_index[v]].result;
           tabled_inst[v].source_1_v    <= 1'b1;
         end // ingest_data_1
 
-        if(src2_tag_v[v] & ~tabled_inst[v].source_2_v)  begin : ingest_data_2
+        if(/*valid_inst[v] & */src2_tag_v[v] & ~tabled_inst[v].source_2_v)  begin : ingest_data_2
           tabled_inst[v].source2_imm_data <= cdb[src2_tag_index[v]].result;
-          tabled_inst[v].source_2_v        <= 1'b1;
+          tabled_inst[v].source_2_v       <= 1'b1;
         end // ingest_data_2
 
       end // ingest_data_on_CDB
