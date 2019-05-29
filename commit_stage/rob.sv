@@ -17,6 +17,7 @@ module rob
  // rob-physical register interface
  , output                                   rob_phys_valid_o
  , output [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_cl_o
+ , output [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_set_o
  // rob-store buffer interface: pop signal to store buffer
  , output                                   rob_sb_valid_o
  , output                                   rob_mispredict_o
@@ -67,7 +68,7 @@ assign rob_rename_entry_num_o = rob_alloc_pt;
 // committing_instr.freed is going to be freed, value contained is no longer valid
 assign rob_phys_valid_o = committing_instr.wb & committing_instr.w_v & ~committing_instr.is_store & ~rob_mispredict_o;
 assign rob_phys_reg_cl_o = committing_instr.freed_reg;
-
+assign rob_phys_reg_set_o = committing_instr.addr[0+:$clog2(NUM_PHYS_REG)];
 // misprediction detection variables
 logic 					prev_spec_branch_n, prev_spec_branch;
 logic [WORD_SIZE_P-1:0] predicted_pc_n, predicted_pc;

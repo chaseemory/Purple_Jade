@@ -7,7 +7,7 @@ module fu_branch
  , input                                    reset_i
  , input                                    exe_v_i
  , input  [WIDTH_OP-1:0]                    opcode_i
- , input  [WIDTH_OP-1:0]                    pc_i
+ , input  [WORD_SIZE_P-1:0]                 pc_i
  , input  [WORD_SIZE_P-1:0]                 operand1_i
  , input  [WORD_SIZE_P-1:0]                 operand2_i
  , input  [$clog2(ROB_ENTRY)-1:0]           rob_dest_i

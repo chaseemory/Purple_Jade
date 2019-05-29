@@ -12,6 +12,8 @@ module arch_state
  // rob register clear
  , input                                                rob_phys_valid_i
  , input [$clog2(NUM_PHYS_REG)-1:0]                     rob_phys_reg_cl_i
+ , input [$clog2(NUM_PHYS_REG)-1:0]                     rob_phys_reg_set_i
+ , input                                                rob_phys_mispredict_i
  // rob flag write interfaces
  , input                                                rob_flag_valid_i
  , input [NUM_FLAGS*2-1:0]                              rob_flag_i 
@@ -27,9 +29,11 @@ module arch_state
 );
 
 // registers
-logic [NUM_PHYS_REG-1:0][WORD_SIZE_P-1:0] reg_n, reg_q;
-logic [NUM_PHYS_REG-1:0]                  valid, valid_n;
-logic [NUM_FLAGS-1:0]                     flag, flag_n /*verilator public*/;		                                       
+logic [NUM_PHYS_REG-1:0][WORD_SIZE_P-1:0] reg_n, reg_q   /*verilator public*/;
+logic [NUM_PHYS_REG-1:0]                  valid          /*verilator public*/;
+logic [NUM_PHYS_REG-1:0]                  valid_n        /*verilator public*/;
+logic [NUM_PHYS_REG-1:0]                  valid_arch, valid_arch_n;
+logic [NUM_FLAGS-1:0]                     flag, flag_n   /*verilator public*/;		                                       
 
 //flag variables
 logic [NUM_FLAGS-1:0]                     flags, flag_mask;
@@ -69,6 +73,7 @@ always_comb
     reg_n = reg_q;
     valid_n = valid;
     flag_n = flag;
+    valid_arch_n = valid_arch;
 
     // during execution write data
     // and valid bit
@@ -82,7 +87,16 @@ always_comb
       end
   	// commit stage free a register
     if (rob_phys_valid_i)
+      begin
+        // replicating non-speculative valids
         valid_n[rob_phys_reg_cl_i] = 1'b0;  // set clear
+        valid_arch_n[rob_phys_reg_cl_i] = 1'b0;
+        valid_arch_n[rob_phys_reg_set_i] = 1'b1;
+      end
+
+    // roll back on misprediction
+    if (rob_phys_mispredict_i)
+        valid_n = valid_arch;
   end
 
 // sequential process
@@ -90,15 +104,17 @@ always_ff @(posedge clk_i)
   begin
     if(reset_i)
       begin
-        reg_q <= '{default:0};
-        valid <= 128'h0000_0000_0000_0000_0000_0000_0000_ffff;
-        flag  <= '0;
+        reg_q      <= '{default:0};
+        valid      <= 128'h0000_0000_0000_0000_0000_0000_0000_ffff;
+        valid_arch <= 128'h0000_0000_0000_0000_0000_0000_0000_ffff;
+        flag       <= '0;
       end
     else 
       begin
-        reg_q <= reg_n;
-        valid <= valid_n;
-        flag  <= flag_n;
+        reg_q      <= reg_n;
+        valid      <= valid_n;
+        valid_arch <= valid_arch_n;
+        flag       <= flag_n;
       end
   end
 endmodule

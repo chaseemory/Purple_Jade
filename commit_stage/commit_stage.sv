@@ -58,6 +58,7 @@ module commit_stage
 // rob <-> arch_state
 logic                                   rob_phys_valid;
 logic [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_cl;
+logic [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_set;
 logic                                   rob_flag_valid;
 logic [NUM_FLAGS*2-1:0]                 rob_flag;
 logic [NUM_FLAGS-1:0]                   flag_rob;
@@ -77,6 +78,7 @@ rob reorder_buffer
  , .rob_flag_valid_o      (rob_flag_valid)
  , .rob_flag_o            (rob_flag)
  , .flag_rob_i			  (flag_rob)
+ , .rob_phys_reg_set_o    (rob_phys_reg_set)
  , .*
 ); /*verilator public_module*/
 
@@ -86,6 +88,8 @@ arch_state states
  , .rob_flag_valid_i 	  (rob_flag_valid)
  , .rob_flag_i       	  (rob_flag)
  , .flag_rob_o       	  (flag_rob)
+ , .rob_phys_reg_set_i   (rob_phys_reg_set)
+ , .rob_phys_mispredict_i(rob_mispredict_o)
  , .*
 );
 

@@ -178,8 +178,8 @@ typedef struct packed
   logic                                   wb; /* CDB write back ?  */
 `ifdef DEBUG // for debug purpose
   logic [WORD_SIZE_P-1:0]                 result;  // keep it for debug purpose
-  logic [WORD_SIZE_P-1:0]                 addr;    // keep it for debug purpose
 `endif
+  logic [WORD_SIZE_P-1:0]                 addr;
   logic                                   is_spec;
   logic                                   is_cond_branch;
   logic [$clog2(BRANCH_CC_NUM)-1:0]       bcc_op;

@@ -102,7 +102,7 @@ static void printRenamed(Vpj_top* top) {
     cout << "| w_v   " << ((decoded >> 0x1) & 0x1);
     cout << "| dest  " << ((decoded >> 53) & 0xf) << " -> " << ((renamed[2] >> 3) & 0x7f); 
     cout << "| rs1  " << ((decoded >> 49) & 0xf) << " -> " <<  (((renamed[1] >> 28) & 0xf) | ((renamed[2] & 0x7) << 4));
-    if (decoded & 0x1)
+    if (!(decoded & 0x1))
         cout << "| rs2  " << ((decoded >> 33) & 0xf) << " -> " << ((renamed[1] >> 12) & 0x7f);
     cout << endl; 
 }
@@ -136,6 +136,16 @@ static void printRobWb(Vpj_top* top) {
         cout << "| sb#  " << ((wb >> 32) & 0xf);
         cout << "| addr  " << ((wb >> 16) & 0xffff);
         cout << "| data  " << (wb & 0xffff);
+    }
+}
+
+static void printReg(Vpj_top* top) {
+    vluint32_t* v = top->pj_top->back_end->commit->states->valid;
+    vluint32_t* r = top->pj_top->back_end->commit->states->reg_q;
+    for (int i = 0; i < 128; i++) {
+        vluint32_t vi = (v[i / 32] >> (i % 32)) & 0x1;
+        vluint32_t ri = (v[i / 2] >> ((i % 2) * 16)) & 0xffff;
+        cout <<  i << " " << ((vi) ? 1 : 0)  << "  " << ri << endl;
     }
 }
 
@@ -185,7 +195,7 @@ int main(int argc, char** argv, char** env) {
                 ss << setw(4) << setfill('0') << hex << 0;
                 ss << setw(4) << setfill('0') << hex << 0;            
             }
-            ss << setw(4) << setfill('0') << hex << flag(top);
+            ss << setw(1) << hex << flag(top);
             cycle(top);
             if (line.compare(ss.str()) != 0) {
                 cout << "ERROR: Trace mismatch on instr number " << instr << endl;
@@ -206,6 +216,12 @@ int main(int argc, char** argv, char** env) {
                 // print lut
                 continue;
             }
+
+            if (cmd == string("reg")) {
+                printReg(top);
+                continue;
+            }
+
             cout << "CYCLE " << dec << cycle_count << hex << endl;
             // renaming instr
             if (top->pj_top->back_end->__PVT__rename_issue_v) {
