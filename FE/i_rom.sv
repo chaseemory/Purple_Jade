@@ -1,6 +1,8 @@
 // A ROM for instructions
 // Async Reads
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+`endif
 
 module i_rom
   #(localparam  ADDR_WIDTH_LP = $clog2(I_ROM_DEPTH_P)

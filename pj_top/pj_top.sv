@@ -1,4 +1,6 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+`endif
 
 module pj_top
 (input                                        clk_i
@@ -53,5 +55,4 @@ be_top back_end
  , .be_fe_redirected_pc_o(be_fe_redirected_pc)
  , .*
 );
-
 endmodule

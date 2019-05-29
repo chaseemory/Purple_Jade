@@ -123,8 +123,8 @@ typedef struct packed
 parameter DECODED_INSTRUCTION_WIDTH       = $bits(decoded_instruction_t);
 
 parameter NUM_PHYS_REG                    = 128;
-parameter ROB_ENTRY 					  = 64;
-parameter SB_ENTRY 						  = 16;
+parameter ROB_ENTRY 					            = 64;
+parameter SB_ENTRY 						            = 16;
 
 typedef struct packed
 {

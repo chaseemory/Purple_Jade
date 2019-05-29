@@ -6,7 +6,9 @@
  * Stage 2 : Bypassing logic
  */
 
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+`endif
 
 module fu_lsu
 (input                                      clk_i

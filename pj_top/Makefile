@@ -18,6 +18,8 @@ vev_op += $(inc_dir)
 vev_op += -f $(filelist)
 vev_op += -Wno-fatal
 vev_op += --top-module $(top_level)
+vev_op += -DVERILATOR
+
 # execution options
 exe_op = --exe
 

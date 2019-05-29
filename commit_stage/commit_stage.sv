@@ -1,5 +1,7 @@
-`include "Purple_Jade_pkg.svh";
+`ifdef VERILATOR
+`include "Purple_Jade_pkg.svh"
 `include "rename_def.svh";
+`endif
 
 module commit_stage
 (input                                                  clk_i

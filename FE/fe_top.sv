@@ -1,5 +1,7 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
 `include "FE_def.svh"
+`endif
 
 module fe_top 
   #(parameter place_holder = -1

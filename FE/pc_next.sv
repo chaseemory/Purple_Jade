@@ -1,4 +1,6 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+`endif
 
 module pc_next
   ( input   logic [WORD_SIZE_P-1:0] pc_i, pc_2_i, branch_target_i

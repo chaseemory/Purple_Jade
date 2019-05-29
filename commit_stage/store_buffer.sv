@@ -1,4 +1,6 @@
-`include "Purple_Jade_pkg.svh";
+`ifdef VERILATOR
+`include "Purple_Jade_pkg.svh"
+`endif
 
 module store_buffer
 (input                                      clk_i
@@ -124,7 +126,11 @@ always_comb
         sb_n = '{default: 0};
         sb_alloc_pt_n = '0;
         sb_commit_pt_n = '0;
+        `ifdef VERILATOR
         sb_num_n = ($clog2(SB_ENTRY)+1)'(SB_ENTRY);
+        `else 
+        sb_num_n = 5'd16;
+        `endif
       end
   end
 
@@ -148,11 +154,19 @@ always_comb
     for (int unsigned i = 0; i < SB_ENTRY; i++)
       begin
         // finding match
+        `ifdef VERILATOR
         if (trimed_match_vector[i] == 1'b1 && ($clog2(SB_ENTRY))'(i) <= trimed_sb_num)
           begin
             address_match = 1'b1;
             matched_trimed_sb_num  = ($clog2(SB_ENTRY))'(i);
           end
+        `else
+        if (trimed_match_vector[i] == 1'b1 && i <= trimed_sb_num)
+          begin
+            address_match = 1'b1;
+            matched_trimed_sb_num  = i;
+          end
+        `endif
       end
   end
 
@@ -164,7 +178,11 @@ always_ff @(posedge clk_i)
         sb_q             <= '{default: 0};
         sb_alloc_pt      <= '0;
         sb_commit_pt     <= '0;
+        `ifdef VERILATOR
         sb_num           <= ($clog2(SB_ENTRY)+1)'(SB_ENTRY);
+        `else 
+        sb_num           <= 5'd16;
+        `endif
       end 
     else 
       begin

@@ -1,5 +1,7 @@
-`include "Purple_Jade_pkg.svh";
+`ifdef VERILATOR
+`include "Purple_Jade_pkg.svh"
 `include "rename_def.svh";
+`endif
 
 module rob
 (input                                      clk_i
@@ -161,8 +163,13 @@ always_comb
             for (int unsigned j = 0; j < NUM_FU; j++)
               begin
                 // not written back, rob entry match
+                `ifdef VERILATOR
                 if (!rob_q[i].wb && cdb[j].cdb.valid 
                     && cdb[j].rob_dest == $clog2(ROB_ENTRY)'(i))
+                `else 
+                if (!rob_q[i].wb && cdb[j].cdb.valid 
+                    && cdb[j].rob_dest == i)
+                `endif 
                   begin
                     rob_n[i].wb = 1'b1;  // written back
                     rob_n[i].flags = cdb[j].cdb.flags;
