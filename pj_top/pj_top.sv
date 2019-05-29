@@ -22,8 +22,6 @@ logic                                 fifo_be_valid;
 logic                                 be_fifo_ready;
 logic [DECODED_INSTRUCTION_WIDTH-1:0] fifo_be_data;
 
-/* verilator lint_off UNOPTFLAT */
-
 fe_top front_end
 (  .ready_i                  (fifo_fe_ready)
  , .mis_predict              (be_fe_mispredict)
@@ -31,7 +29,7 @@ fe_top front_end
  , .final_decoded_instruction(fe_fifo_data)
  , .valid_o                  (fe_fifo_valid)
  , .*
-);
+); /*verilator public_module*/
 
 bsg_fifo_1r1w_small 
 #(  .width_p(DECODED_INSTRUCTION_WIDTH)

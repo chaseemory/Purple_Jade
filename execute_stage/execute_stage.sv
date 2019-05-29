@@ -81,6 +81,7 @@ fu_logic logic_fu
 fu_branch branch_fu
 ( .exe_v_i     (issue_exe_v_i[`BRANCH_FU])
  ,.opcode_i    (issued.opcode)
+ ,.pc_i        (issued.pc)
  ,.operand1_i  (issued.source_1_data)
  ,.operand2_i  (operand2)
  ,.rob_dest_i  (issued.rob_dest)

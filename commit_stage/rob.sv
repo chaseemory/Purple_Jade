@@ -18,10 +18,10 @@ module rob
  // rob-store buffer interface: pop signal to store buffer
  , output                                   rob_sb_valid_o
  , output                                   rob_mispredict_o
- , output [WORD_SIZE_P-1:0]                 rob_fe_redirected_pc_o
+ , output [WORD_SIZE_P-1:0]                 rob_fe_redirected_pc_o /*verilator public*/
  // rename-commit interface
- , output                                   rob_rename_valid_o
- , output [COMMIT_RENAME_WIDTH-1:0]         rob_rename_entry_o
+ , output                                   rob_rename_valid_o  /*verilator public*/
+ , output [COMMIT_RENAME_WIDTH-1:0]         rob_rename_entry_o  /*verilator public*/
  // commit-flag interface
  , output                                   rob_flag_valid_o
  , output [NUM_FLAGS*2-1:0]                 rob_flag_o
@@ -34,7 +34,7 @@ module rob
 );
 
 // input output casting
-rob_wb_t cdb [NUM_FU-1:0];
+rob_wb_t cdb [NUM_FU-1:0] /*verilator public*/;
 assign cdb = cdb_i;
 
 // rob
@@ -49,7 +49,7 @@ logic  [$clog2(ROB_ENTRY)-1:0]          rob_commit_pt, rob_commit_pt_n;
 logic  [$clog2(ROB_ENTRY):0]            rob_num, rob_num_n;
 
 // instruction being committed
-rob_t                                   committing_instr;
+rob_t                                   committing_instr/*verilator public*/;
 
 // ready valid signals
 assign rob_rename_ready_o = (rob_num != 0) & ~rob_mispredict_o;

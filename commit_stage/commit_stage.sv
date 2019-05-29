@@ -61,7 +61,7 @@ logic [NUM_FLAGS*2-1:0]                 rob_flag;
 logic [NUM_FLAGS-1:0]                   flag_rob;
 
 // rob <-> store_buffer
-logic                                   rob_sb_valid;
+logic                                   rob_sb_valid /*verilator public*/;
 
 // store buffer <-> memory
 logic                                   sb_mem_v;
@@ -76,7 +76,7 @@ rob reorder_buffer
  , .rob_flag_o            (rob_flag)
  , .flag_rob_i			  (flag_rob)
  , .*
-);
+); /*verilator public_module*/
 
 arch_state states
 (  .rob_phys_valid_i	  (rob_phys_valid)
@@ -94,7 +94,7 @@ store_buffer sb
  , .sb_mem_addr_o         (sb_mem_addr)
  , .sb_mem_data_o         (sb_mem_data)
  , .*
-);
+); /*verilator public_module*/
 
 bsg_mem_1r1w_sync #( 
    .width_p               (WORD_SIZE_P)

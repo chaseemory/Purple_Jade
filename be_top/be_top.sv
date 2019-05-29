@@ -5,7 +5,7 @@ module be_top
 (input                                        clk_i
  , input                                      reset_i
  // fe/fifo <-> be/rename interface
- , input  [DECODED_INSTRUCTION_WIDTH-1:0]     decoded_i
+ , input  [DECODED_INSTRUCTION_WIDTH-1:0]     decoded_i /*verilator public*/
  , input                                      decoded_v_i
  , output                                     rename_decode_ready_o
  // be/rob <-> fe/pc_next interface
@@ -15,7 +15,7 @@ module be_top
 
 // renamed <-> issue
 logic                                               rename_issue_v;
-logic [RENAMED_INSTRUCTION_WIDTH-1:0]               rename_issue_entry;
+logic [RENAMED_INSTRUCTION_WIDTH-1:0]               rename_issue_entry /*verilator public*/;
 logic                                               issue_renamed_ready;
 
 // rename <-> commit/freeing registers
@@ -38,7 +38,7 @@ logic [$clog2(SB_ENTRY)-1:0]                        sb_st_clear_entry;
 
 // issued <-> execute
 logic  [NUM_FU-1:0]                                 issue_exe_v;
-issued_instruction_t                                issue_exe_entry;
+issued_instruction_t                                issue_exe_entry /*verilator public*/;
 
 // issued <-> store check
 logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]       issue_sb_num_vector;

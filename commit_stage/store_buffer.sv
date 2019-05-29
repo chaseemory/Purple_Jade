@@ -11,20 +11,20 @@ module store_buffer
  , output [$clog2(SB_ENTRY)-1:0]            sb_issue_entry_num_o	
  , output                                   sb_issue_ready_o
  // execute-write back interfaces
- , input                                    exe_sb_v_i
- , input  [CDB_SB_WIDTH-1:0]                exe_sb_i
+ , input                                    exe_sb_v_i  /*verilator public*/
+ , input  [CDB_SB_WIDTH-1:0]                exe_sb_i    /*verilator public*/
  // load bypass interfaces
  , input  [WORD_SIZE_P-1:0]                 exe_ld_bypass_addr_i
  , input  [$clog2(SB_ENTRY)-1:0]            exe_ld_bypass_sb_num_i
  , output                                   sb_ld_bypass_valid_o							
  , output [WORD_SIZE_P-1:0]                 sb_ld_bypass_value_o
  // sb to memory interfaces
- , output                                   sb_mem_v_o
- , output [WORD_SIZE_P-1:0]                 sb_mem_addr_o
- , output [WORD_SIZE_P-1:0]                 sb_mem_data_o
+ , output                                   sb_mem_v_o     /*verilator public*/
+ , output [WORD_SIZE_P-1:0]                 sb_mem_addr_o  /*verilator public*/
+ , output [WORD_SIZE_P-1:0]                 sb_mem_data_o  /*verilator public*/
  // sb to rename to clear pending store bits
- , output                                   sb_rename_clear_st_v_o
- , output [$clog2(SB_ENTRY)-1:0]            sb_rename_clear_st_num_o
+ , output                                   sb_rename_clear_st_v_o    /*verilator public*/
+ , output [$clog2(SB_ENTRY)-1:0]            sb_rename_clear_st_num_o  /*verilator public*/
  // sb to issue store check
  , output [SB_ENTRY-1:0]                    sb_wb_vector_o
  , output [$clog2(SB_ENTRY)-1:0]            sb_commit_pt_o

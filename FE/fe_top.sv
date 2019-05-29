@@ -23,7 +23,7 @@ module fe_top
   // ~~~~~~~~~~~~~~~~~i_rom / PC / FETCH~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  logic [WORD_SIZE_P-1:0] instruction_fetch_r, program_counter_fetch_r, program_counter_n, program_counter_n_p2, branch_target;
+  logic [WORD_SIZE_P-1:0] instruction_fetch_r, program_counter_fetch_r, program_counter_n, program_counter_n_p2, branch_target /*verilator public*/ ; 
 
   // assign program_counter_n_p2 = {program_counter_fetch_r[WORD_SIZE_P-1:1]+1'b1, 1'b0}; // Incrementing is faster than adding
   assign program_counter_n_p2 = program_counter_fetch_r[WORD_SIZE_P-1:0]+1'b1; // Incrementing is faster than adding
@@ -43,7 +43,7 @@ module fe_top
     ( .clk_i
     , .pc_i(program_counter_n)
     , .o(program_counter_fetch_r)
-    );
+    ); /*verilator public_module*/
 
   i_rom instruction_mem
     ( .r_addr_i(program_counter_fetch_r[15:0])
