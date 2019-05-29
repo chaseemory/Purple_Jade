@@ -9,7 +9,9 @@
  * Value after the bit becomes high might be garbage.
  */
 
-`include "Purple_Jade_pkg.svh";
+`ifdef VERILATOR
+`include "Purple_Jade_pkg.svh"
+`endif
 
 module prev_st_check (
  // from scheduler

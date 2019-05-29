@@ -1,5 +1,7 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
 `include "rename_def.svh"
+`endif
 
 module be_top
 (input                                        clk_i

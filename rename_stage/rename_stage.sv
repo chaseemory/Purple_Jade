@@ -1,5 +1,7 @@
-`include "Purple_Jade_pkg.svh";
+`ifdef VERILATOR
+`include "Purple_Jade_pkg.svh"
 `include "rename_def.svh";
+`endif
 
 module rename_stage 
 (input                                        clk_i
@@ -156,7 +158,11 @@ always_comb
         lut_spec_n         = lut_q;
         fl_spec_read_pt_n  = fl_read_pt;
         fl_spec_write_pt_n = fl_write_pt;
+        `ifdef VERILATOR
         fl_spec_num_n      = ($clog2(NUM_PHYS_REG)+1)'(NUM_PHYS_REG-NUM_ARCH_REG);
+        `else 
+        fl_spec_num_n      = 8'd112;
+        `endif
         fl_spec_n          = fl_q;            
       end
   end
@@ -184,13 +190,19 @@ always_ff @(posedge clk_i)
   begin
     if (reset_i)
       begin
-        fl_read_pt  <= '0;
-        fl_write_pt  <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
-        fl_spec_read_pt  <= '0;
-        fl_spec_write_pt  <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
-        fl_spec_num <= ($clog2(NUM_PHYS_REG)+1)'(NUM_PHYS_REG-NUM_ARCH_REG);
-        sb_num_q    <= '0;
-        prev_store_cleared <= '0;
+        fl_read_pt          <= '0;
+        fl_spec_read_pt     <= '0;
+        `ifdef VERILATOR
+        fl_write_pt         <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
+        fl_spec_write_pt    <= $clog2(NUM_PHYS_REG)'(NUM_PHYS_REG-NUM_ARCH_REG);
+        fl_spec_num         <= ($clog2(NUM_PHYS_REG)+1)'(NUM_PHYS_REG-NUM_ARCH_REG);
+        `else 
+        fl_write_pt         <= 7'd112;
+        fl_spec_write_pt    <= 7'd112;
+        fl_spec_num         <= 8'd112;
+        `endif
+        sb_num_q            <= '0;
+        prev_store_cleared  <= '0;
       end 
     else
       begin

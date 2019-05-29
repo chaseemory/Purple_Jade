@@ -1,4 +1,6 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+`endif
 
 module flag
 (input    [WORD_SIZE_P-1:0] result_i

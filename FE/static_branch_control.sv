@@ -1,9 +1,9 @@
 module static_branch_control
-  ( input       sign_bit_i
-  , input       is_branch_i
-  , input [1:0] branch_op_code_i
-  , output      take_branch_o
-  , output      speculative_o
+  ( input         sign_bit_i
+  , input         is_branch_i
+  , input [1:0]   branch_op_code_i
+  , output logic  take_branch_o
+  , output logic  speculative_o
   );
 
   always_comb begin

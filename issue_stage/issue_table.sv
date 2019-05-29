@@ -1,64 +1,66 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+`endif
 
 module issue_table
   ( // Misc inputs
-    input   logic                 clk_i
-  , input   logic                 reset_i
+    input   logic                                         clk_i
+  , input   logic                                         reset_i
 
   // Interface to ROB/REG FILE
-  , output  logic [$clog2(NUM_PHYS_REG)-1:0] new_instr_addr_1
-  , output  logic [$clog2(NUM_PHYS_REG)-1:0] new_instr_addr_2
+  , output  logic [$clog2(NUM_PHYS_REG)-1:0]              new_instr_addr_1
+  , output  logic [$clog2(NUM_PHYS_REG)-1:0]              new_instr_addr_2
 
-  , input   logic                            new_instr_data_1_v
-  , input   logic                            new_instr_data_2_v
+  , input   logic                                         new_instr_data_1_v
+  , input   logic                                         new_instr_data_2_v
 
-  , input   logic [WORD_SIZE_P-1:0]          new_instr_data_1
-  , input   logic [WORD_SIZE_P-1:0]          new_instr_data_2
+  , input   logic [WORD_SIZE_P-1:0]                       new_instr_data_1
+  , input   logic [WORD_SIZE_P-1:0]                       new_instr_data_2
 
   // Renaming logic interface
-  , input   renamed_instruction_t instruction_i
-  , input   logic                 valid_i
-  , output  logic                 ready_o
+  , input   renamed_instruction_t                         instruction_i
+  , input   logic                                         valid_i
+  , output  logic                                         ready_o
 
   // Functional Unit interface
-  , output  issued_instruction_t  instruction_o
+  , output  issued_instruction_t                          instruction_o
   // , input   logic [NUM_FU-1:0]    ready_i
-  , output  logic [NUM_FU-1:0]    valid_o
+  , output  logic [NUM_FU-1:0]                            valid_o
 
   // Store Buffer Interface
-  , output  logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]  issue_sb_num_vector_o
-  , input   logic                       [ISSUE_ENTRY-1:0]  st_clear_vector_i
+  , output  logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0] issue_sb_num_vector_o
+  , input   logic [ISSUE_ENTRY-1:0]                       st_clear_vector_i
 
   // CDB Interface
-  , input   CDB_t     cdb [NUM_FU-1:0]
+  , input   CDB_t [NUM_FU-1:0]                            cdb 
   );
 
   // House Keeping Values
-  logic                      [$clog2(ISSUE_ENTRY):0] inst_count;
-  logic                      [$clog2(ISSUE_ENTRY):0] inst_count_n;
+  logic [$clog2(ISSUE_ENTRY):0]                     inst_count;
+  logic [$clog2(ISSUE_ENTRY):0]                     inst_count_n;
 
   // ISSUE TABLE
-  issued_instruction_t             [ISSUE_ENTRY-1:0] tabled_inst;
-  logic                            [ISSUE_ENTRY-1:0] valid_inst;
-  logic                            [ISSUE_ENTRY-1:0] inst_ready;
-  logic                    [$clog2(ISSUE_ENTRY)-1:0] chosen;
+  issued_instruction_t [ISSUE_ENTRY-1:0]            tabled_inst;
+  logic [ISSUE_ENTRY-1:0]                           valid_inst;
+  logic [ISSUE_ENTRY-1:0]                           inst_ready;
+  logic [$clog2(ISSUE_ENTRY)-1:0]                   chosen;
 
   // ORDER TABLE
-  logic   [ISSUE_ENTRY:0][$clog2(ISSUE_ENTRY)-1:0] instr_order_table;
-  logic [ISSUE_ENTRY-1:0][$clog2(ISSUE_ENTRY)-1:0] instr_order_table_n;
+  logic [ISSUE_ENTRY:0][$clog2(ISSUE_ENTRY)-1:0]    instr_order_table;
+  logic [ISSUE_ENTRY-1:0][$clog2(ISSUE_ENTRY)-1:0]  instr_order_table_n;
 
-  logic                              [ISSUE_ENTRY:0] order_inst_v;
-  logic                            [ISSUE_ENTRY-1:0] order_inst_v_n;
+  logic [ISSUE_ENTRY:0]                             order_inst_v;
+  logic [ISSUE_ENTRY-1:0]                           order_inst_v_n;
 
-  logic                            [ISSUE_ENTRY-1:0] order_inst_less;
-  logic                            [ISSUE_ENTRY-1:0] ordered_instr_ready;
+  logic [ISSUE_ENTRY-1:0]                           order_inst_less;
+  logic [ISSUE_ENTRY-1:0]                           ordered_instr_ready;
 
-  logic                      [$clog2(ISSUE_ENTRY):0] chosen_ordered;
+  logic [$clog2(ISSUE_ENTRY):0]                     chosen_ordered;
 
   // STORE BUFFER NON-SENSE 
-  logic      [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0] store_buff_table;
-  logic                            [ISSUE_ENTRY-1:0] store_buff_table_v;
-  logic                            [ISSUE_ENTRY-1:0] store_buff_table_v_n;
+  logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]     store_buff_table;
+  logic [ISSUE_ENTRY-1:0]                           store_buff_table_v;
+  logic [ISSUE_ENTRY-1:0]                           store_buff_table_v_n;
 
   /*  DETERMINE NEXT STATE OF VALID BITS FOR STORE BUFFER TABLE
       Assign next state of Store buffer valid when either the table is valid or the
@@ -100,8 +102,8 @@ module issue_table
   
   logic [ISSUE_ENTRY-1:0][$clog2(NUM_FU)-1:0] src1_tag_index;
   logic [ISSUE_ENTRY-1:0][$clog2(NUM_FU)-1:0] src2_tag_index;
-  logic [ISSUE_ENTRY-1:0] src1_tag_v;
-  logic [ISSUE_ENTRY-1:0] src2_tag_v;
+  logic [ISSUE_ENTRY-1:0]                     src1_tag_v;
+  logic [ISSUE_ENTRY-1:0]                     src2_tag_v;
 
   generate
 

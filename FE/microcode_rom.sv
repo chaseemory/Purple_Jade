@@ -1,5 +1,7 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
 `include "FE_def.svh"
+`endif
 
 module microcode_rom #(
     parameter INPUT_WIDTH_P = -1
