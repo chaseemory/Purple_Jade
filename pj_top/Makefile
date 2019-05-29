@@ -50,6 +50,9 @@ build:
 sim_trace:
 	$(sim) $(unquoted) $(sim_op)
 
+jade_run: sim_trace
+	obj_dir/V$(top_level) trace.tr
+
 # very poetic in Chinese: 玉步
 jade_step: sim_trace
 	obj_dir/V$(top_level) trace.tr -d

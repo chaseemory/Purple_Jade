@@ -15,7 +15,7 @@ module arch_state
  , input [$clog2(NUM_PHYS_REG)-1:0]                     rob_phys_reg_set_i
  , input                                                rob_phys_mispredict_i
  // rob flag write interfaces
- , input                                                rob_flag_valid_i
+ , input                                                rob_flag_valid_i /*verilator public*/
  , input [NUM_FLAGS*2-1:0]                              rob_flag_i 
  // rob  flag read
  , output [NUM_FLAGS-1:0]                               flag_rob_o
@@ -36,7 +36,7 @@ logic [NUM_PHYS_REG-1:0]                  valid_arch, valid_arch_n;
 logic [NUM_FLAGS-1:0]                     flag, flag_n   /*verilator public*/;		                                       
 
 //flag variables
-logic [NUM_FLAGS-1:0]                     flags, flag_mask;
+logic [NUM_FLAGS-1:0]                     flags /*verilator public*/, flag_mask;
 assign flags = rob_flag_i[NUM_FLAGS-1:0];
 assign flag_mask = rob_flag_i[NUM_FLAGS*2-1:NUM_FLAGS];
 assign flag_n = (rob_flag_valid_i) ? (flag_mask & flags) | (~flag_mask & flag): flag;

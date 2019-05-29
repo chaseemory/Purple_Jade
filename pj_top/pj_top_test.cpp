@@ -1,3 +1,4 @@
+#include "Vpj_top_rename_stage.h"
 #include "Vpj_top_arch_state.h"
 #include "Vpj_top_rob.h"
 #include "Vpj_top_store_buffer.h"
@@ -13,6 +14,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <cstdlib>
 
 #define ROB_ENTRY 64
 
@@ -69,9 +71,15 @@ static vluint64_t mem_addr(Vpj_top* top) {
 static vluint64_t mem_data(Vpj_top* top) {
     return top->pj_top->back_end->commit->sb->sb_mem_data_o;
 }
+
 static vluint64_t flag(Vpj_top* top) {
     return (top->pj_top->back_end->commit->states->flag_n) & 0xf;
 }
+static vluint64_t flag_mask(Vpj_top* top) {
+    vluint32_t* rob = top->pj_top->back_end->commit->reorder_buffer->committing_instr;
+    return (rob[0] >> 17) & 0xf;
+}
+
 
 static string printFU(vluint64_t fu) {
     string res = string("");
@@ -126,7 +134,10 @@ static void printRobWb(Vpj_top* top) {
                 cout << "Rob_wb" << endl;
                 first = false;
             }
+            vluint32_t* rob = top->pj_top->back_end->commit->reorder_buffer->rob_q[(cdb[i] & 0x3f)];
+            cout << "| pc  " << ((rob[2] >> 12) & 0xffff);
             cout << "| num " << (cdb[i] & 0x3f) << " | value  " << ((cdb[i] >> 6) & 0xffff);
+            cout << "| flag " << ((cdb[i] >> 22) & 0xf);
             cout << "| FU  " << printFU(i) << endl;
         }
     }
@@ -139,13 +150,38 @@ static void printRobWb(Vpj_top* top) {
     }
 }
 
-static void printReg(Vpj_top* top) {
+static void printReg(Vpj_top* top, int num=0, bool one=false) {
     vluint32_t* v = top->pj_top->back_end->commit->states->valid;
     vluint32_t* r = top->pj_top->back_end->commit->states->reg_q;
-    for (int i = 0; i < 128; i++) {
-        vluint32_t vi = (v[i / 32] >> (i % 32)) & 0x1;
-        vluint32_t ri = (v[i / 2] >> ((i % 2) * 16)) & 0xffff;
-        cout <<  i << " " << ((vi) ? 1 : 0)  << "  " << ri << endl;
+    if (!one) {
+        for (int i = 0; i < 128; i++) {
+            vluint32_t vi = (v[i / 32] >> (i % 32)) & 0x1;
+            vluint32_t ri = (v[i / 2] >> ((i % 2) * 16)) & 0xffff;
+            cout << hex << i << " " << ((vi) ? 1 : 0)  << "  " << ri << endl;
+        }
+    } else {
+        vluint32_t vi = (v[num / 32] >> (num % 32)) & 0x1;
+        vluint32_t ri = (v[num / 2] >> ((num % 2) * 16)) & 0xffff;
+        cout << hex << num << " " << ((vi) ? 1 : 0)  << "  " << ri << endl;
+    }
+}
+
+static vluint64_t ripLut(vluint32_t* lut, int num) {
+    if ((num / 32) == ((num + 6) / 32)) {
+        return (lut[num / 32] >> (num % 32)) & 0x7f;
+    } else {
+        vluint32_t lower = (lut[num / 32] >> (num % 32)) & 0x7f;
+        vluint32_t upper = (lut[(num + 6) / 32] << (32 - (num % 32)));
+        return (lower | upper) & 0x7f;
+    }
+}
+
+static void printLut(Vpj_top* top, bool spec=true) {
+    vluint32_t* lut = (spec) ? top->pj_top->back_end->rename->lut_spec_q
+                             : top->pj_top->back_end->rename->lut_q;
+
+    for (int i = 0; i < 16; i++) {
+        cout << hex << i << " " << ripLut(lut, i * 7) << endl;
     }
 }
 
@@ -208,23 +244,39 @@ int main(int argc, char** argv, char** env) {
         // step
         vluint64_t cycle_count = 0;
         getline(trace, line);
-        for (std::string cmd; getline(std::cin, cmd);) {
+        for (std::string cmd_line; getline(std::cin, cmd_line);) {
+            stringstream ss(cmd_line);
+            string cmd;
+            ss >> cmd;
             if (cmd == string("quit"))
                 break;
             // printing what happened
             if (cmd == string("lut")) {
                 // print lut
+                string rep;
+                ss >> rep;
+                if (!rep.size()) {
+                    printLut(top);
+                } else {
+                    printLut(top, false);
+                }
+                cout << endl;
                 continue;
             }
 
             if (cmd == string("reg")) {
-                printReg(top);
+                string num;
+                ss >> num;
+                if (!num.size()) {
+                    printReg(top);
+                } else {
+                    printReg(top, strtol(num.c_str(), NULL, 16), true);
+                }
                 continue;
             }
-
             cout << "CYCLE " << dec << cycle_count << hex << endl;
             // renaming instr
-            if (top->pj_top->back_end->__PVT__rename_issue_v) {
+            if (top->pj_top->back_end->rename->__PVT__renamed_v_o) {
                 cout << "Renamed" << endl;
                 printRenamed(top);
             }
@@ -257,7 +309,8 @@ int main(int argc, char** argv, char** env) {
                     cout << setw(4) << " " << hex << mem_data(top);
                 }
                 cout << "   flag ";
-                cout << setw(4) << " " << hex << flag(top); 
+                cout << setw(4) << " " << hex << flag(top) << " " << (int) top->pj_top->back_end->commit->states->rob_flag_valid_i; 
+                cout << " " << flag_mask(top) << " " << (int) top->pj_top->back_end->commit->states->flags;
             }
             cout << endl;
             // check if is committing
