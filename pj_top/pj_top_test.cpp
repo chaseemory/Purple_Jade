@@ -72,7 +72,7 @@ static vluint64_t mem_data(Vpj_top* top) {
     return top->pj_top->back_end->commit->sb->sb_mem_data_o;
 }
 
-static vluint64_t flag(Vpj_top* top) {
+static vluint32_t flag(Vpj_top* top) {
     return (top->pj_top->back_end->commit->states->flag_n) & 0xf;
 }
 static vluint64_t flag_mask(Vpj_top* top) {
@@ -309,8 +309,8 @@ int main(int argc, char** argv, char** env) {
                     cout << setw(4) << " " << hex << mem_data(top);
                 }
                 cout << "   flag ";
-                cout << setw(4) << " " << hex << flag(top) << " " << (int) top->pj_top->back_end->commit->states->rob_flag_valid_i; 
-                cout << " " << flag_mask(top) << " " << (int) top->pj_top->back_end->commit->states->flags;
+                cout << " " << hex << (int) top->pj_top->back_end->commit->states->flag_n << " " << (int) top->pj_top->back_end->commit->states->rob_flag_valid_i; 
+                cout << " " << flag_mask(top) << " " << (int) top->pj_top->back_end->commit->states->new_flag;
             }
             cout << endl;
             // check if is committing
