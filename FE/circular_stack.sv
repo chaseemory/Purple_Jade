@@ -1,11 +1,12 @@
 /*  Return address stack for using with branch and link instructions
     and branch exchange instructions
 */
-module return_address_stack 
+module circular_stack 
   #( parameter ELS_P = -1
    , parameter WIDTH_P = -1
   )
-  ( input   logic               push_i
+  ( input   logic               clk_i
+  , input   logic               push_i
   , input   logic               pop_i
   , input   logic               reset_i
   , input   logic [WIDTH_P-1:0] address_i
@@ -21,21 +22,24 @@ module return_address_stack
 
 
   always_comb begin : next_state_logic
-    casez({push_i, pop_i})
-      2'b01: begin : pop_i
+    case({push_i, pop_i})
+      2'b01: begin : pop_i_proc
         curr_ptr_n  = curr_ptr - 1'b1;
         next_ptr_n  = next_ptr - 1'b1;
-      2'b10: begin : push_i
+      end // pop_i
+      2'b10: begin : push_i_proc
         curr_ptr_n  = curr_ptr + 1'b1;
         next_ptr_n  = next_ptr + 1'b1;
+      end // push_i
       default: begin : no_change
         curr_ptr_n  = curr_ptr;
         next_ptr_n  = next_ptr;
       end // no_change
+    endcase
   end // next_state_logic
   
 
-  always_ff @(posedge clk) begin : next_state
+  always_ff @(posedge clk_i) begin : next_state
 
     if(reset_i) begin : reset_logic
       curr_ptr  <= ELS_P - 1;
