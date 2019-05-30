@@ -353,6 +353,9 @@ int main(int argc, char** argv, char** env) {
                 cout << "| flag ";
                 cout << " " << hex << (int) top->pj_top->back_end->commit->states->flag_n << " " << (int) top->pj_top->back_end->commit->states->rob_flag_valid_i; 
                 cout << " " << flag_mask(top) << " " << (int) top->pj_top->back_end->commit->states->new_flag << endl;
+                vluint32_t* rob = top->pj_top->back_end->commit->reorder_buffer->committing_instr;
+                if (getbits(rob, 42, 1))
+                    cout << "| predicted pc " << getbits(rob, 93, 16) << endl;
             }
 
             if (top->pj_top->be_fe_mispredict) {
