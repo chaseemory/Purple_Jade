@@ -80,6 +80,16 @@ static vluint64_t flag_mask(Vpj_top* top) {
     return (rob[0] >> 17) & 0xf;
 }
 
+static vluint32_t getbits(vluint32_t* vec, int start, int len) {
+    vluint32_t mask = ~(0xffffffff << len);
+    if ((start / 32) == ((start + len - 1) / 32)) {
+        return (vec[start / 32] >> (start % 32)) & mask;
+    } else {
+        vluint32_t lower = (vec[start / 32] >> (start % 32)) & mask;
+        vluint32_t upper = (vec[(start + len - 1) / 32] << (32 - (start % 32)));
+        return (lower | upper) & mask;
+    }
+}
 
 static string printFU(vluint64_t fu) {
     string res = string("");
@@ -103,30 +113,32 @@ static string printFU(vluint64_t fu) {
 }
 
 static void printRenamed(Vpj_top* top) {
-    vluint64_t decoded = top->pj_top->back_end->decoded_i;
+    vluint32_t* decoded = top->pj_top->back_end->decoded_i;
     vluint32_t* renamed = top->pj_top->back_end->rename_issue_entry;
-    cout << "| pc " << setw(4) << hex  << ((decoded >> 17) & 0xffff);
+    cout << "| pc " << setw(4) << hex  << getbits(decoded, 17, 16);
     cout << "| rob# " << ((renamed[0] >> 5) & 0x3f);
-    cout << "| w_v   " << ((decoded >> 0x1) & 0x1);
-    cout << "| dest  " << ((decoded >> 53) & 0xf) << " -> " << ((renamed[2] >> 3) & 0x7f); 
-    cout << "| rs1  " << ((decoded >> 49) & 0xf) << " -> " <<  (((renamed[1] >> 28) & 0xf) | ((renamed[2] & 0x7) << 4));
-    if (!(decoded & 0x1))
-        cout << "| rs2  " << ((decoded >> 33) & 0xf) << " -> " << ((renamed[1] >> 12) & 0x7f);
-    cout << endl; 
+    cout << "| w_v   " << getbits(decoded, 1, 1);
+    cout << "| dest  " << getbits(decoded, 53, 4) << " -> " << ((renamed[2] >> 3) & 0x7f); 
+    cout << "| rs1  " << getbits(decoded, 49, 4) << " -> " <<  (((renamed[1] >> 28) & 0xf) | ((renamed[2] & 0x7) << 4));
+    if (!(decoded[0] & 0x1))
+        cout << "| rs2  " << getbits(decoded, 33, 4) << " -> " << ((renamed[1] >> 12) & 0x7f);
+    cout << endl;
+    vluint32_t* rob = top->pj_top->back_end->rename_rob_entry;
+    if (getbits(rob, 42, 1))
+        cout << "| predicted pc " << getbits(decoded, 57, 16) << endl;
 }
 
 static void printDecoded(Vpj_top* top) {
-    vluint64_t decoded = top->pj_top->back_end->decoded_i;
-    vluint32_t decoded_v = top->pj_top->back_end->decoded_v_i;
+    vluint32_t* decoded = top->pj_top->fe_fifo_data;
+    vluint32_t decoded_v = top->pj_top->fe_fifo_valid;
     if (!decoded_v)
         cout << "decoded not valid" << endl;
-
-    cout << "| pc " << setw(4) << hex  << ((decoded >> 17) & 0xffff);
-    cout << "| w_v   " << ((decoded >> 0x1) & 0x1);
-    cout << "| dest  " << ((decoded >> 53) & 0xf); 
-    cout << "| rs1  " << ((decoded >> 49) & 0xf);
-    if (!(decoded & 0x1))
-        cout << "| rs2  " << ((decoded >> 33) & 0xf);
+    cout << "| pc " << setw(4) << hex  << getbits(decoded, 17, 16);
+    cout << "| w_v   " << getbits(decoded, 1, 1);
+    cout << "| dest  " << getbits(decoded, 53, 4); 
+    cout << "| rs1  " << getbits(decoded, 49, 4);
+    if (!(decoded[0] & 0x1))
+        cout << "| rs2  " << getbits(decoded, 33, 4);
     cout << endl; 
 }
 
@@ -222,7 +234,7 @@ int main(int argc, char** argv, char** env) {
     if (argc != 3) {
         while (getline(trace, line)) {
             std::stringstream ss;
-            while (!is_committing(top)) {
+            while (!(is_committing(top) | top->pj_top->be_fe_mispredict)) {
                 cycle(top);
             }
             // parsing committing instructions
@@ -309,44 +321,47 @@ int main(int argc, char** argv, char** env) {
             if (top->pj_top->back_end->rename->__PVT__renamed_v_o) {
                 cout << "Renamed" << endl;
                 printRenamed(top);
+                cout << endl;
             }
-            cout << endl;
             // issuing instr
             if (top->pj_top->back_end->__PVT__issue_exe_v) {
                 cout << "Issued" << endl;
                 printIssued(top);
+                 cout << endl;
             }
-            cout << endl;
 
             // instructions writting back
             printRobWb(top);
             cout << endl;
 
             // committing instructions
-            if (is_committing(top)) {
-                cout << "Committed :" << endl << " pc ";
+            if (is_committing(top) | top->pj_top->be_fe_mispredict) {
+                cout << "Committed :" << endl << "| pc ";
                 cout << setw(4) << hex << pc(top);
                 vluint64_t reg_write = w_v(top);
                 if (reg_write) {
-                    cout << "   reg ";
+                    cout << "| reg ";
                     cout << setw(4) << hex << reg_w(top);
                     cout << setw(4) << " " << hex << reg_data(top);
                 }
                 vluint64_t mem_write = mem_v(top);
                 if (mem_write) {
-                    cout << "    mem ";
+                    cout << "| mem ";
                     cout << setw(4) << hex << mem_addr(top);
                     cout << setw(4) << " " << hex << mem_data(top);
                 }
-                cout << "   flag ";
+                cout << "| flag ";
                 cout << " " << hex << (int) top->pj_top->back_end->commit->states->flag_n << " " << (int) top->pj_top->back_end->commit->states->rob_flag_valid_i; 
-                cout << " " << flag_mask(top) << " " << (int) top->pj_top->back_end->commit->states->new_flag;
+                cout << " " << flag_mask(top) << " " << (int) top->pj_top->back_end->commit->states->new_flag << endl;
+                vluint32_t* rob = top->pj_top->back_end->commit->reorder_buffer->committing_instr;
+                if (getbits(rob, 42, 1))
+                    cout << "| predicted pc " << getbits(rob, 93, 16) << endl;
             }
 
             if (top->pj_top->be_fe_mispredict) {
                 cout << "Misprediction redirecting to " << hex << (vluint32_t) top->pj_top->be_fe_redirected_pc << endl;
             }
-
+            cout << setfill('-') << setw(20) << "-" << setfill(' ') <<endl;
             cout << endl;
             // check if is committing
             if (is_committing(top)) {

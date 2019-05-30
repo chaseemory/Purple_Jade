@@ -37,7 +37,7 @@ module microcode_rom #(
       10'b0100000100: o = {1'b1,`ASRS_OP   ,`LOGICAL_FU  ,4'b1110  ,2'd0     ,2'd1   ,4'd8       ,1'b0}; // ASRS
       10'b0100000111: o = {1'b1,`RORS_OP   ,`LOGICAL_FU  ,4'b1110  ,2'd0     ,2'd1   ,4'd8       ,1'b0}; // RORS
 
-      10'b01100?????: o = {1'b0,`STR_OP    ,`MEM_FU      ,4'b0000  ,2'd0     ,2'd0   ,4'd3       ,1'b1}; // STR
+      10'b01100?????: o = {1'b0,`STR_OP    ,`MEM_FU      ,4'b0000  ,2'd0     ,2'd0   ,4'd9       ,1'b0}; // STR
       10'b01101?????: o = {1'b1,`LDR_OP    ,`MEM_FU      ,4'b0000  ,2'd0     ,2'd0   ,4'd3       ,1'b1}; // LDR
 
       10'b1101??????: o = {1'b0,`BCC_OP    ,`BRANCH_FU   ,4'b0000  ,2'd0     ,2'bxx  ,4'd4       ,1'b1}; // B <CC>

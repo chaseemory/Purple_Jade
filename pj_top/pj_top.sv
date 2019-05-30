@@ -11,9 +11,9 @@ module pj_top
 localparam fifo_size = 32;
 
 // fe <-> fifo
-logic                                 fe_fifo_valid;
-logic                                 fifo_fe_ready;
-logic [DECODED_INSTRUCTION_WIDTH-1:0] fe_fifo_data;
+logic                                 fe_fifo_valid /*verilator public*/;
+logic                                 fifo_fe_ready ;
+logic [DECODED_INSTRUCTION_WIDTH-1:0] fe_fifo_data  /*verilator public*/;
 
 // be <-> fe
 logic                                 be_fe_mispredict     /*verilator public*/;

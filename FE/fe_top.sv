@@ -35,7 +35,7 @@ module fe_top
     , .pc_2_i(program_counter_n_p2)
     , .branch_target_i(branch_target)
     , .reset_i(reset_i)
-    , .branch_take(take_branch_local)
+    , .branch_take(take_branch)
     , .stall(stall)
     , .pc_next(program_counter_n)
     );
