@@ -125,6 +125,7 @@ module fe_top
   assign instruction_decoded_decode.bcc_op              = instruction_decode_r[11:8];
   assign instruction_decoded_decode.pc                  = program_counter_decode_r;
   assign instruction_decoded_decode.branch_speculation  = 1'b0;
+  assign instruction_decoded_decode.predicted_pc        = '0;
 
   logic [WORD_SIZE_P-1:0] branch_offset_decode;
   assign is_branch_decode = (instruction_decoded_decode.func_unit == `BRANCH_FU);
@@ -137,7 +138,7 @@ module fe_top
       ,.data_o(branch_offset_decode)
       );
 
-
+  
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~~~D / B/BE PIPE~~~~~~~~~~~~~~~~~~~~~~
@@ -186,7 +187,8 @@ module fe_top
   assign flush_d_b = take_branch;
   assign flush_f_d = take_branch;
 
-  always_comb instruction_decoded_branch.branch_speculation = take_branch_local;
+  assign instruction_decoded_branch.branch_speculation = take_branch_local;
+  assign instruction_decoded_branch.predicted_pc = take_branch_local ? branch_target : '0;
 
   assign valid_o = ((~speculative_branch & is_branch_branch_r) | (instruction_decoded_branch.func_unit == `NOOP_FU) | mis_predict) ? 1'b0 : valid_d_b;
 
