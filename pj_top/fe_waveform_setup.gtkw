@@ -1,0 +1,35 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Thu May 30 02:03:57 2019
+[*]
+[dumpfile] "/home/chase/ee478/Purple_Jade/pj_top/Vpj_top.vcd"
+[dumpfile_mtime] "Thu May 30 01:59:12 2019"
+[dumpfile_size] 1078177
+[savefile] "/home/chase/ee478/Purple_Jade/pj_top/fe_waveform_setup.gtkw"
+[timestart] 0
+[size] 2551 1021
+[pos] -1 -1
+*-3.612893 66 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] pj_top.
+[treeopen] pj_top.front_end.
+[sst_width] 356
+[signals_width] 214
+[sst_expanded] 1
+[sst_vpaned_height] 300
+@28
+pj_top.front_end.reset_i
+pj_top.clk_i
+@25
+pj_top.front_end.program_counter_n[15:0]
+@24
+pj_top.front_end.instruction_decoded_branch.pc[15:0]
+pj_top.front_end.instruction_decoded_branch.func_unit[2:0]
+pj_top.front_end.instruction_decoded_branch.opcode[2:0]
+pj_top.front_end.instruction_decoded_branch.dest_id[3:0]
+pj_top.front_end.instruction_decoded_branch.source_1[3:0]
+pj_top.front_end.instruction_decoded_branch.source2_imm[15:0]
+@28
+pj_top.front_end.valid_o
+pj_top.front_end.instruction_decoded_branch.imm
+[pattern_trace] 1
+[pattern_trace] 0

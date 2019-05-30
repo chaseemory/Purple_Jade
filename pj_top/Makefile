@@ -13,7 +13,7 @@ inc_dir += +incdir+$(fld)../include/
 inc_dir += +incdir+$(fld)../basejump_stl/bsg_misc/
 
 # verilator options
-vev_op += --trace -Wall --cc
+vev_op += --trace --trace-structs -Wall --cc
 vev_op += $(inc_dir)
 vev_op += -f $(filelist)
 vev_op += -Wno-fatal
@@ -46,6 +46,13 @@ all: build
 build:
 	$(vev) $(vev_op) $(exe_op) $(top_level)_test.cpp
 	make -j -C obj_dir -f V$(top_level).mk V$(top_level)
+
+simple:
+	$(vev) $(vev_op) $(exe_op) $(top_level)_test_simple.cpp
+	make -j -C obj_dir -f V$(top_level).mk V$(top_level)
+
+run_simple:
+	./obj_dir/Vpj_top
 
 sim_trace:
 	$(sim) $(unquoted) $(sim_op)
