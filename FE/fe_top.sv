@@ -27,8 +27,7 @@ module fe_top
 
   logic [WORD_SIZE_P-1:0] instruction_fetch_r, program_counter_n, program_counter_n_p2, branch_target; 
   logic [WORD_SIZE_P-1:0] program_counter_fetch_r /*verilator public*/ ;
-  // assign program_counter_n_p2 = {program_counter_fetch_r[WORD_SIZE_P-1:1]+1'b1, 1'b0}; // Incrementing is faster than adding
-  assign program_counter_n_p2 = program_counter_fetch_r[WORD_SIZE_P-1:0]+1'b1; // Incrementing is faster than adding
+  assign program_counter_n_p2 = program_counter_fetch_r[WORD_SIZE_P-1:0] + 1'b1; // Incrementing is faster than adding
 
 
   pc_next next_pc
