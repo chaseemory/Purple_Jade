@@ -4,10 +4,10 @@
 `define _FE_DEF_PKG_
 
 
-parameter NUM_EXTENDED                    = 9;
+parameter NUM_EXTENDED                    = 10;
 parameter NUM_DEST_SRC                    = 4;
 parameter NUM_S1_SRC                      = 4;
-parameter NUM_S2_IMM_SRC                  = 9;
+parameter NUM_S2_IMM_SRC                  = 10;
 
 parameter WIDTH_DEST                      = $clog2(NUM_DEST_SRC);
 parameter WIDTH_S1                        = $clog2(NUM_S1_SRC);
