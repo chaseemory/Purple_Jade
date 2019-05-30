@@ -39,7 +39,7 @@ assign reg_wb.cdb.result = result;
 // target address computations
 always_comb
   begin
-    result = operand1_i;
+    result = operand2_i;
     if (opcode_i == `BCC_OP)
         result = $signed(pc_i) + $signed(operand2_i) + 1;
 

@@ -70,8 +70,7 @@ assign rob_phys_valid_o = committing_instr.wb & committing_instr.w_v & ~committi
 assign rob_phys_reg_cl_o = committing_instr.freed_reg;
 assign rob_phys_reg_set_o = committing_instr.addr[0+:$clog2(NUM_PHYS_REG)];
 // misprediction detection variables
-logic 					prev_spec_branch_n, prev_spec_branch;
-logic [WORD_SIZE_P-1:0] predicted_pc_n, predicted_pc;
+logic [WORD_SIZE_P-1:0] predicted_pc;
 logic [WORD_SIZE_P-1:0]	condition_pc;
 logic 					condition_taken;
 logic 					N, Z, V, C;  // current flags
@@ -83,12 +82,9 @@ assign V = flag_rob_i[v];
 
 // condition_pc is targeted address for conditional branch
 assign condition_pc = (condition_taken) ? (committing_instr.resolved_pc) : (committing_instr.pc + 1);
-assign prev_spec_branch_n = (committing_instr.wb & ~rob_mispredict_o) ? committing_instr.is_spec : prev_spec_branch;  // previous instruction commited is a speculative
-assign predicted_pc_n = (committing_instr.wb & ~rob_mispredict_o) ? ((committing_instr.is_cond_branch) ? condition_pc  // correct address to jump to
-		: committing_instr.resolved_pc) : predicted_pc;
+assign predicted_pc = (committing_instr.is_cond_branch) ? condition_pc : committing_instr.resolved_pc;
 // previous speculative branch and current pc does not match
-assign rob_mispredict_o = (committing_instr.pc != predicted_pc) && (rob_num != ROB_ENTRY) && committing_instr.valid
-							&& prev_spec_branch;  // mismatch of pcs
+assign rob_mispredict_o = (committing_instr.predicted_pc != predicted_pc) && committing_instr.valid && committing_instr.is_spec;  // mismatch of pcs
 assign rob_fe_redirected_pc_o = predicted_pc;
 
 // to renaming
@@ -220,8 +216,6 @@ always_ff @(posedge clk_i)
         rob_alloc_pt     <= '0;
         rob_commit_pt    <= '0;
         rob_num          <= ($clog2(ROB_ENTRY)+1)'(ROB_ENTRY);
-        prev_spec_branch <= '0;
-        predicted_pc     <= '0;
       end     
     else 
       begin
@@ -229,8 +223,6 @@ always_ff @(posedge clk_i)
         rob_alloc_pt     <= rob_alloc_pt_n;
         rob_commit_pt    <= rob_commit_pt_n;
         rob_num          <= rob_num_n;
-        prev_spec_branch <= prev_spec_branch_n;
-        predicted_pc     <= predicted_pc_n;
       end
   end
 endmodule

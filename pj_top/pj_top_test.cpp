@@ -129,8 +129,8 @@ static void printRenamed(Vpj_top* top) {
 }
 
 static void printDecoded(Vpj_top* top) {
-    vluint32_t* decoded = top->pj_top->back_end->decoded_i;
-    vluint32_t decoded_v = top->pj_top->back_end->decoded_v_i;
+    vluint32_t* decoded = top->pj_top->fe_fifo_data;
+    vluint32_t decoded_v = top->pj_top->fe_fifo_valid;
     if (!decoded_v)
         cout << "decoded not valid" << endl;
     cout << "| pc " << setw(4) << hex  << getbits(decoded, 17, 16);
