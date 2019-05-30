@@ -107,6 +107,7 @@ parameter v = 0;
 
 typedef struct packed
 {
+  logic [WORD_SIZE_P-1:0]                 predicted_pc;
   logic [$clog2(NUM_ARCH_REG)-1:0]        dest_id;
   logic [$clog2(NUM_ARCH_REG)-1:0]        source_1;
   logic [WORD_SIZE_P-1:0]                 source2_imm;
@@ -172,7 +173,8 @@ typedef struct packed
   } issued_instruction_t;
 
 typedef struct packed                               
-{       
+{
+  logic [WORD_SIZE_P-1:0]                 predicted_pc;
   logic                                   valid;
   logic [WORD_SIZE_P-1:0]                 pc;                                      
   logic                                   wb; /* CDB write back ?  */

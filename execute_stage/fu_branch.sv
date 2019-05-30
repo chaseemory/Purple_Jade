@@ -42,6 +42,9 @@ always_comb
     result = operand1_i;
     if (opcode_i == `BCC_OP)
         result = $signed(pc_i) + $signed(operand2_i) + 1;
+
+    if (opcode_i == `BL_OP)
+      result = $signed(pc_i) + 2;
   end
 
 // sequential process

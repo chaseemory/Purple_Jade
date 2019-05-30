@@ -32,8 +32,8 @@ static void cycle(Vpj_top* top) {
     tick(top);
 }
 
-static void fetchingPC(Vpj_top* top) {
-    cout << top->pj_top->front_end->__PVT__program_counter_fetch_r << endl;
+static vluint32_t fetchingPC(Vpj_top* top) {
+    return top->pj_top->front_end->program_counter_fetch_r;
 }
 
 static bool is_committing(Vpj_top* top) {
@@ -112,6 +112,21 @@ static void printRenamed(Vpj_top* top) {
     cout << "| rs1  " << ((decoded >> 49) & 0xf) << " -> " <<  (((renamed[1] >> 28) & 0xf) | ((renamed[2] & 0x7) << 4));
     if (!(decoded & 0x1))
         cout << "| rs2  " << ((decoded >> 33) & 0xf) << " -> " << ((renamed[1] >> 12) & 0x7f);
+    cout << endl; 
+}
+
+static void printDecoded(Vpj_top* top) {
+    vluint64_t decoded = top->pj_top->back_end->decoded_i;
+    vluint32_t decoded_v = top->pj_top->back_end->decoded_v_i;
+    if (!decoded_v)
+        cout << "decoded not valid" << endl;
+
+    cout << "| pc " << setw(4) << hex  << ((decoded >> 17) & 0xffff);
+    cout << "| w_v   " << ((decoded >> 0x1) & 0x1);
+    cout << "| dest  " << ((decoded >> 53) & 0xf); 
+    cout << "| rs1  " << ((decoded >> 49) & 0xf);
+    if (!(decoded & 0x1))
+        cout << "| rs2  " << ((decoded >> 33) & 0xf);
     cout << endl; 
 }
 
@@ -234,7 +249,7 @@ int main(int argc, char** argv, char** env) {
             ss << setw(1) << hex << flag(top);
             cycle(top);
             if (line.compare(ss.str()) != 0) {
-                cout << "ERROR: Trace mismatch on instr number " << instr << endl;
+                cout << "ERROR: Trace mismatch on instr number " << hex << instr << endl;
                 cout << "  got "<< ss.str() << " expected " << line << endl; 
                 break;
             }
@@ -266,6 +281,16 @@ int main(int argc, char** argv, char** env) {
 
             if (cmd == string("rob_size")) {
                 cout << "rob size is " << hex << (vluint32_t)( 64 - top->pj_top->back_end->commit->reorder_buffer->rob_num_n )<< endl;
+                continue;
+            }
+
+            if (cmd == string("fe")) {
+                printDecoded(top);
+                continue;               
+            }
+
+            if (cmd == string("fpc")) {
+                cout << hex << "fetching " << fetchingPC(top) << endl;
                 continue;
             }
 

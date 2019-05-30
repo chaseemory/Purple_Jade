@@ -8,7 +8,7 @@ module be_top
  , input                                      reset_i
  // fe/fifo <-> be/rename interface
  , input  [DECODED_INSTRUCTION_WIDTH-1:0]     decoded_i /*verilator public*/
- , input                                      decoded_v_i
+ , input                                      decoded_v_i /*verilator public*/
  , output                                     rename_decode_ready_o
  // be/rob <-> fe/pc_next interface
  , output                                     be_fe_mispredict_o
