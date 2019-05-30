@@ -234,7 +234,7 @@ int main(int argc, char** argv, char** env) {
     if (argc != 3) {
         while (getline(trace, line)) {
             std::stringstream ss;
-            while (!is_committing(top) | top->pj_top->be_fe_mispredict) {
+            while (!(is_committing(top) | top->pj_top->be_fe_mispredict)) {
                 cycle(top);
             }
             // parsing committing instructions
