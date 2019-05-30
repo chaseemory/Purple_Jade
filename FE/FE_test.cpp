@@ -6,9 +6,6 @@
 
 static vluint64_t main_time = 0;
 
-#define NUM_PHY_REG 128
-#define NUM_ARCH_REG 16
-
 static void tick(Vfe_top* DUT, VerilatedVcdC* tfp, vluint64_t &time) {
     DUT->clk_i = ((DUT->clk_i == 0) ? 1 : 0);
     DUT->eval();

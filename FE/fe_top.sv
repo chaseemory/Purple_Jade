@@ -115,7 +115,7 @@ module fe_top
     );
 
   bsg_mux #(.width_p(WORD_SIZE_P)
-          , .els_p(8)
+          , .els_p(NUM_S2_IMM_SRC)
     ) src_2_imm_mux
     (.data_i(immediates)
     ,.sel_i(src_2_imm_sel)
