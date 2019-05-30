@@ -1,13 +1,15 @@
+/*  Return address stack for using with branch and link instructions
+    and branch exchange instructions
+*/
 module return_address_stack 
-  #( parameter ELS_P
-   , parameter WIDTH_P
+  #( parameter ELS_P = -1
+   , parameter WIDTH_P = -1
   )
   ( input   logic               push_i
   , input   logic               pop_i
   , input   logic               reset_i
   , input   logic [WIDTH_P-1:0] address_i
   , output  logic [WIDTH_P-1:0] address_o
-  , output  logic               valid_o
   );
 
   logic [ELS_P-1:0][WIDTH_P-1:0]  stack;
@@ -17,79 +19,40 @@ module return_address_stack
   logic [$clog2(ELS_P)-1:0]       curr_ptr_n;
   logic [$clog2(ELS_P)-1:0]       next_ptr_n;
 
-  logic [$clog2(ELS_P)-1:0]       curr_ptr_p1;
-  logic [$clog2(ELS_P)-1:0]       curr_ptr_m1;
-  logic [$clog2(ELS_P)-1:0]       next_ptr_p1;
-  logic [$clog2(ELS_P)-1:0]       next_ptr_m1;
-
-  assign curr_ptr_p1 = curr_ptr + 1'b1;
-  assign curr_ptr_m1 = curr_ptr - 1'b1;
-  assign next_ptr_p1 = next_ptr + 1'b1;
-  assign next_ptr_m1 = next_ptr - 1'b1;
-
-
-  logic                           empty;
-  logic                           full;
-  logic                           accept;
-
-  assign full = (curr_ptr == '0) & (curr_ptr_n == '0);
-  assign empty = (curr_ptr == {$clog2(ELS_P){1'b1}}) & (curr_ptr_n == {$clog2(ELS_P){1'b1}});
 
   always_comb begin : next_state_logic
     casez({push_i, pop_i})
-      2'b00: begin : no_change
-        curr_ptr_n  = curr_ptr;
-        accept      = '0;
-        //next_ptr_n = next_ptr;
-      end // no_change
       2'b01: begin : pop_i
-        curr_ptr_n  = (curr_ptr_m1 == '0) ? curr_ptr : curr_ptr_m1;
-        accept      = '0;
-        //next_ptr_n = next_ptr;
+        curr_ptr_n  = curr_ptr - 1'b1;
+        next_ptr_n  = next_ptr - 1'b1;
       2'b10: begin : push_i
-        curr_ptr_n = 
-
-      
+        curr_ptr_n  = curr_ptr + 1'b1;
+        next_ptr_n  = next_ptr + 1'b1;
+      default: begin : no_change
+        curr_ptr_n  = curr_ptr;
+        next_ptr_n  = next_ptr;
+      end // no_change
   end // next_state_logic
   
-
 
   always_ff @(posedge clk) begin : next_state
 
     if(reset_i) begin : reset_logic
-      curr_ptr <= {$clog2(ELS_P){1'b1}};
-      next_ptr <= {$clog2(ELS_P){1'b1}};
+      curr_ptr  <= ELS_P - 1;
+      next_ptr  <= '0;
       for(int unsigned i = 0; i < ELS_P; i++) begin : reset_stack
         stack[i] <= '0;
       end // reset_stack
     end // reset_logic
 
-    else begin
+    else begin : normal_next_state
        curr_ptr <= curr_ptr_n;
        next_ptr <= next_ptr_n;
-       if(pop_i & valid_o) stack[curr_ptr] <= '0;
+       if(push_i) stack[next_ptr] <= address_i;
     end
 
   end // next_state
 
-  assign valid_o = ~empty;
+  assign address_o = stack[curr_ptr];
 
 endmodule // return_address_stack
-
-
-// always_comb begin : next_state_logic
-//     casez({full, empty, push_i, pop_i})
-//       4'b0101: begin
-//         curr_ptr_n  = curr_ptr;
-//         next_ptr_n  = next_ptr;
-//         accept      = 1'b0;
-//       end
-//       4'b0110: begin
-//         curr_ptr_n  = curr_ptr;
-//         next_ptr_n  = next_ptr - 1'b1;
-//         accept      = 1'b1;
-//       end
-//       4'b00
-
-
-//   end // next_state_logic
