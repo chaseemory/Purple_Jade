@@ -264,6 +264,11 @@ int main(int argc, char** argv, char** env) {
                 continue;
             }
 
+            if (cmd == string("rob_size")) {
+                cout << "rob size is " << hex << (vluint32_t)( 64 - top->pj_top->back_end->commit->reorder_buffer->rob_num_n )<< endl;
+                continue;
+            }
+
             if (cmd == string("reg")) {
                 string num;
                 ss >> num;
@@ -312,6 +317,11 @@ int main(int argc, char** argv, char** env) {
                 cout << " " << hex << (int) top->pj_top->back_end->commit->states->flag_n << " " << (int) top->pj_top->back_end->commit->states->rob_flag_valid_i; 
                 cout << " " << flag_mask(top) << " " << (int) top->pj_top->back_end->commit->states->new_flag;
             }
+
+            if (top->pj_top->be_fe_mispredict) {
+                cout << "Misprediction redirecting to " << hex << (vluint32_t) top->pj_top->be_fe_redirected_pc << endl;
+            }
+
             cout << endl;
             // check if is committing
             if (is_committing(top)) {

@@ -49,7 +49,7 @@ rob_t [ROB_ENTRY-1:0]                   rob_q, rob_n;
 `endif
 logic  [$clog2(ROB_ENTRY)-1:0]          rob_alloc_pt, rob_alloc_pt_n;
 logic  [$clog2(ROB_ENTRY)-1:0]          rob_commit_pt, rob_commit_pt_n;
-logic  [$clog2(ROB_ENTRY):0]            rob_num, rob_num_n;
+logic  [$clog2(ROB_ENTRY):0]            rob_num, rob_num_n /*verilator public*/;
 
 // instruction being committed
 rob_t                                   committing_instr/*verilator public*/;

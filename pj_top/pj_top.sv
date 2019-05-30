@@ -16,8 +16,8 @@ logic                                 fifo_fe_ready;
 logic [DECODED_INSTRUCTION_WIDTH-1:0] fe_fifo_data;
 
 // be <-> fe
-logic                                 be_fe_mispredict;
-logic [WORD_SIZE_P-1:0]               be_fe_redirected_pc;
+logic                                 be_fe_mispredict     /*verilator public*/;
+logic [WORD_SIZE_P-1:0]               be_fe_redirected_pc  /*verilator public*/;
 
 // fifo <-> be
 logic                                 fifo_be_valid;
