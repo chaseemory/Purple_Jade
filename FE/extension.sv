@@ -98,6 +98,6 @@ module extension
       but in this way we can sneak the immediate along with the source2 register value and
       it can be sign extended and dealt with inside the LSU
   */
-  assign immediate_o[9] = {instruction_i[(WORD_SIZE_P-1)-:5],{WORD_SIZE_P-5-$clog2(NUM_ARCH_REG){1'b0}}, instruction_i[0+:$clog2(NUM_ARCH_REG)]};
+  assign immediate_o[9] = {instruction_i[(2*$clog2(NUM_ARCH_DEST_REG))+:5],{WORD_SIZE_P-5-$clog2(NUM_ARCH_DEST_REG){1'b0}}, instruction_i[0+:$clog2(NUM_ARCH_DEST_REG)]};
 
 endmodule // extension

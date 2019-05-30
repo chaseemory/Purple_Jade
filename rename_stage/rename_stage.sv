@@ -133,7 +133,7 @@ always_comb
         // translating sources
         renamed.source_1 = lut_spec_q[decoded.source_1];
         if (!decoded.imm)
-            renamed.source2_imm = {{PHYREG_TO_WORD_PAD_WIDTH{1'b0}}, lut_spec_q[decoded.source2_imm[$clog2(NUM_ARCH_REG)-1:0]]};
+            renamed.source2_imm[$clog2(NUM_PHYS_REG)-1:0] =  lut_spec_q[decoded.source2_imm[$clog2(NUM_ARCH_REG)-1:0]];
         if (decoded.w_v)
           begin
             // allocate a free register & update speculative lut

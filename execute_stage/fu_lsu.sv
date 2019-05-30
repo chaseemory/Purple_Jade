@@ -29,23 +29,20 @@ module fu_lsu
  // bypass logic: exe <-> mem order buffer
  , output [WORD_SIZE_P-1:0]                 exe_ld_bypass_addr_o
  , output [$clog2(SB_ENTRY)-1:0]            exe_ld_bypass_sb_num_o
- , input                                    sb_ld_bypass_valid_i
- , input  [WORD_SIZE_P-1:0]                 sb_ld_bypass_value_i
+ , input                                    sb_ld_bypass_valid_i  /*verilator public*/
+ , input  [WORD_SIZE_P-1:0]                 sb_ld_bypass_value_i  /*verilator public*/
  // exe <-> mem interfaces
- , output [WORD_SIZE_P-1:0]                 lsu_addr_o
- , input  [WORD_SIZE_P-1:0]                 mem_data_i
+ , output [WORD_SIZE_P-1:0]                 lsu_addr_o  /*verilator public*/
+ , input  [WORD_SIZE_P-1:0]                 mem_data_i  /*verilator public*/
  // mis-prediction
  , input                                    mispredict_i
 );
 
-// local parameter
-parameter NUM_STAGE = 2;
-
 // pipeline registers
 logic [WORD_SIZE_P-1:0]               mem_addr_li;
-logic [WORD_SIZE_P-1:0]               mem_addr_r, mem_data_r;
-logic [NUM_STAGE-1:0]                 valid_pipe, valid_pipe_n;
-logic [WIDTH_OP-1:0]                  opcode_r;
+logic [WORD_SIZE_P-1:0]               mem_addr_r /*verilator public*/, mem_data_r;
+logic                                 valid_pipe /*verilator public*/, valid_pipe_n;
+logic [WIDTH_OP-1:0]                  opcode_r /*verilator public*/ ;
 logic [$clog2(ROB_ENTRY)-1:0]         rob_dest_r;
 logic [$clog2(NUM_PHYS_REG)-1:0]      reg_dest_r;
 logic [$clog2(SB_ENTRY)-1:0]          sb_dest_r;
@@ -56,34 +53,36 @@ reg_wb_t                reg_wb;
 CDB_sb_t                sb_wb;
 logic                   sb_v_r, sb_v;
 logic [WORD_SIZE_P-1:0] result;
+logic [WORD_SIZE_P-1:0] imm;
 
 // output assignments
 assign lsu_rob_o = out;
 assign lsu_reg_o = reg_wb;
 assign out_n.rob_dest = rob_dest_r;
-assign out_n.cdb.valid = valid_pipe[NUM_STAGE-1];
+assign out_n.cdb.valid = valid_pipe;
 assign out_n.cdb.dest = reg_dest_r;
 assign out_n.cdb.flags = '0;
 assign out_n.cdb.result = result;
-assign reg_wb.w_v = valid_pipe[0] && (opcode_r == `LDR_OP);
-assign reg_wb.cdb.valid = valid_pipe[0] && (opcode_r == `LDR_OP);
+assign reg_wb.w_v = valid_pipe && (opcode_r == `LDR_OP);
+assign reg_wb.cdb.valid = valid_pipe && (opcode_r == `LDR_OP);
 assign reg_wb.cdb.dest = reg_dest_r;
 assign reg_wb.cdb.flags = '0;
 assign reg_wb.cdb.result = result;
 
 // address computation logic
-assign mem_addr_li = $unsigned(operand1_i) + $unsigned(imm_i);
+assign imm = (opcode_i == `LDR_OP) ? imm_i : {{(WORD_SIZE_P-5){1'b0}}, imm_i[WORD_SIZE_P-1-:5]};
+assign mem_addr_li = $unsigned(operand1_i) + $unsigned(imm);
 
 // to memory and store buffer assignments
 assign exe_ld_bypass_sb_num_o = sb_dest_r;
 assign exe_ld_bypass_addr_o = mem_addr_r;
-assign lsu_addr_o = mem_addr_r;
+assign lsu_addr_o = mem_addr_li;
 assign sb_wb.sb_dest = sb_dest_r;
 assign sb_wb.address = mem_addr_r;
 assign sb_wb.result = result;
 
 // valid bits assignments
-assign valid_pipe_n = (mispredict_i) ? '0 : {valid_pipe[0], exe_v_i};
+assign valid_pipe_n = (mispredict_i) ? '0 : exe_v_i;
 assign sb_v = (mispredict_i) ? '0 : (exe_v_i && (opcode_i == `STR_OP));
 
 // result computations

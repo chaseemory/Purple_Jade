@@ -1,3 +1,5 @@
+#include "Vpj_top_fu_lsu.h"
+#include "Vpj_top_execute_stage.h"
 #include "Vpj_top_rename_stage.h"
 #include "Vpj_top_arch_state.h"
 #include "Vpj_top_rob.h"
@@ -120,6 +122,7 @@ static void printRenamed(Vpj_top* top) {
     cout << "| w_v   " << getbits(decoded, 1, 1);
     cout << "| dest  " << getbits(decoded, 53, 4) << " -> " << ((renamed[2] >> 3) & 0x7f); 
     cout << "| rs1  " << getbits(decoded, 49, 4) << " -> " <<  (((renamed[1] >> 28) & 0xf) | ((renamed[2] & 0x7) << 4));
+    cout << "| simm " << getbits(decoded, 44, 5);
     if (!(decoded[0] & 0x1))
         cout << "| rs2  " << getbits(decoded, 33, 4) << " -> " << ((renamed[1] >> 12) & 0x7f);
     cout << endl;
@@ -149,7 +152,7 @@ static void printIssued(Vpj_top* top) {
     cout << "| rs1  " << (((issued[3] & 0x7) << 4) | ((issued[2] >> 28) & 0x1f)) << " " << ((issued[2] >> 12) & 0xffff);
     cout << "| rs2  " << ((issued[1] >> 11) & 0xffff);
     cout << "| FU  " << printFU(((issued[0] >> 21) & 0x7));
-    cout << "| op  " << ((issued[0] >> 23) & 0x7) << endl;
+    cout << "| op  " << ((issued[0] >> 24) & 0x7) << endl;
 }
 
 static void printRobWb(Vpj_top* top) {
@@ -333,6 +336,16 @@ int main(int argc, char** argv, char** env) {
             // instructions writting back
             printRobWb(top);
             cout << endl;
+
+            if (top->pj_top->back_end->execute->lsu_fu->valid_pipe) {
+                if (top->pj_top->back_end->execute->lsu_fu->opcode_r == 1) {
+                    cout << "| LD addr " << hex << (vluint32_t) top->pj_top->back_end->execute->lsu_fu->mem_addr_r;
+                    cout << "| Mem read " << hex << (vluint32_t) top->pj_top->back_end->execute->lsu_fu->mem_data_i;
+                    if (top->pj_top->back_end->execute->lsu_fu->sb_ld_bypass_valid_i) 
+                        cout << "| forward " << hex << (vluint32_t) top->pj_top->back_end->execute->lsu_fu->sb_ld_bypass_value_i;
+                    cout << endl;
+                }
+            }
 
             // committing instructions
             if (is_committing(top) | top->pj_top->be_fe_mispredict) {
