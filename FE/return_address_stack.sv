@@ -17,6 +17,17 @@ module return_address_stack
   logic [$clog2(ELS_P)-1:0]       curr_ptr_n;
   logic [$clog2(ELS_P)-1:0]       next_ptr_n;
 
+  logic [$clog2(ELS_P)-1:0]       curr_ptr_p1;
+  logic [$clog2(ELS_P)-1:0]       curr_ptr_m1;
+  logic [$clog2(ELS_P)-1:0]       next_ptr_p1;
+  logic [$clog2(ELS_P)-1:0]       next_ptr_m1;
+
+  assign curr_ptr_p1 = curr_ptr + 1'b1;
+  assign curr_ptr_m1 = curr_ptr - 1'b1;
+  assign next_ptr_p1 = next_ptr + 1'b1;
+  assign next_ptr_m1 = next_ptr - 1'b1;
+
+
   logic                           empty;
   logic                           full;
   logic                           accept;
@@ -24,23 +35,23 @@ module return_address_stack
   assign full = (curr_ptr == '0) & (curr_ptr_n == '0);
   assign empty = (curr_ptr == {$clog2(ELS_P){1'b1}}) & (curr_ptr_n == {$clog2(ELS_P){1'b1}});
 
-
   always_comb begin : next_state_logic
-    casez({full, empty, push_i, pop_i})
-      4'b0101: begin
+    casez({push_i, pop_i})
+      2'b00: begin : no_change
         curr_ptr_n  = curr_ptr;
-        next_ptr_n  = next_ptr;
-        accept      = 1'b0;
-      end
-      4'b0110: begin
-        curr_ptr_n  = curr_ptr;
-        next_ptr_n  = next_ptr - 1'b1;
-        accept      = 1'b1;
-      end
-      4'b00
+        accept      = '0;
+        //next_ptr_n = next_ptr;
+      end // no_change
+      2'b01: begin : pop_i
+        curr_ptr_n  = (curr_ptr_m1 == '0) ? curr_ptr : curr_ptr_m1;
+        accept      = '0;
+        //next_ptr_n = next_ptr;
+      2'b10: begin : push_i
+        curr_ptr_n = 
 
-
+      
   end // next_state_logic
+  
 
 
   always_ff @(posedge clk) begin : next_state
@@ -64,3 +75,21 @@ module return_address_stack
   assign valid_o = ~empty;
 
 endmodule // return_address_stack
+
+
+// always_comb begin : next_state_logic
+//     casez({full, empty, push_i, pop_i})
+//       4'b0101: begin
+//         curr_ptr_n  = curr_ptr;
+//         next_ptr_n  = next_ptr;
+//         accept      = 1'b0;
+//       end
+//       4'b0110: begin
+//         curr_ptr_n  = curr_ptr;
+//         next_ptr_n  = next_ptr - 1'b1;
+//         accept      = 1'b1;
+//       end
+//       4'b00
+
+
+//   end // next_state_logic
