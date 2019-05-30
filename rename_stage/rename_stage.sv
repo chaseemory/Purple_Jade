@@ -43,11 +43,11 @@ assign commit_entry = commit_rename_i;
 assign rename_rob_o = rename_rob;
 
 // speculative renaming lookup tables and freelist
-logic [NUM_ARCH_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] lut_spec_n, lut_spec_q;
+logic [NUM_ARCH_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] lut_spec_n, lut_spec_q /*verilator public*/;
 logic [NUM_PHYS_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] fl_spec_n, fl_spec_q;
 
 // non-speculative renaming lookup tables and freelist
-logic [NUM_ARCH_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] lut_n, lut_q;
+logic [NUM_ARCH_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] lut_n, lut_q /*verilator public*/;
 logic [NUM_PHYS_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] fl_n, fl_q;
 
 // pointers for freelists

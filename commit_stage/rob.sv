@@ -42,7 +42,7 @@ assign cdb = cdb_i;
 
 // rob
 `ifdef DEBUG
-rob_t                                   rob_q [ROB_ENTRY-1:0];
+rob_t                                   rob_q [ROB_ENTRY-1:0] /*verilator public*/;
 rob_t                                   rob_n [ROB_ENTRY-1:0];
 `else
 rob_t [ROB_ENTRY-1:0]                   rob_q, rob_n;
