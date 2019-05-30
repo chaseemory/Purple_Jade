@@ -17,7 +17,30 @@ module return_address_stack
   logic [$clog2(ELS_P)-1:0]       curr_ptr_n;
   logic [$clog2(ELS_P)-1:0]       next_ptr_n;
 
-  always_comb
+  logic                           empty;
+  logic                           full;
+  logic                           accept;
+
+  assign full = (curr_ptr == '0) & (curr_ptr_n == '0);
+  assign empty = (curr_ptr == {$clog2(ELS_P){1'b1}}) & (curr_ptr_n == {$clog2(ELS_P){1'b1}});
+
+
+  always_comb begin : next_state_logic
+    casez({full, empty, push_i, pop_i})
+      4'b0101: begin
+        curr_ptr_n  = curr_ptr;
+        next_ptr_n  = next_ptr;
+        accept      = 1'b0;
+      end
+      4'b0110: begin
+        curr_ptr_n  = curr_ptr;
+        next_ptr_n  = next_ptr - 1'b1;
+        accept      = 1'b1;
+      end
+      4'b00
+
+
+  end // next_state_logic
 
 
   always_ff @(posedge clk) begin : next_state
@@ -38,6 +61,6 @@ module return_address_stack
 
   end // next_state
 
-  assign valid_o = (curr_ptr == {$clog2(ELS_P){1'b1}}) & (curr_ptr_n == {$clog2(ELS_P){1'b1}});
+  assign valid_o = ~empty;
 
-endmodule
+endmodule // return_address_stack
