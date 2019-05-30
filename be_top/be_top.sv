@@ -28,7 +28,7 @@ logic [COMMIT_RENAME_WIDTH-1:0]                     commit_rename_free_reg;
 logic                                               rob_sb_rename_ready;
 logic [$clog2(ROB_ENTRY)-1:0]                       rob_rename_num;
 logic [$clog2(SB_ENTRY)-1:0]                        sb_rename_num;
-logic [RENAME_ROB_ENTRY_WIDTH-1:0]                  rename_rob_entry;
+logic [RENAME_ROB_ENTRY_WIDTH-1:0]                  rename_rob_entry /*verilator public*/;
 logic                                               rename_rob_v;
 logic                                               rename_sb_v;
 logic                                               rob_ready, sb_ready;
