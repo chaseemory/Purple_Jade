@@ -38,3 +38,4 @@ pj_top.sv
 ../FE/pipe.sv
 ../FE/sign_extend.sv
 ../FE/zero_extend.sv
+../FE/circular_stack.sv

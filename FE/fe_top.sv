@@ -27,8 +27,7 @@ module fe_top
 
   logic [WORD_SIZE_P-1:0] instruction_fetch_r, program_counter_n, program_counter_n_p2, branch_target; 
   logic [WORD_SIZE_P-1:0] program_counter_fetch_r /*verilator public*/ ;
-  // assign program_counter_n_p2 = {program_counter_fetch_r[WORD_SIZE_P-1:1]+1'b1, 1'b0}; // Incrementing is faster than adding
-  assign program_counter_n_p2 = program_counter_fetch_r[WORD_SIZE_P-1:0]+1'b1; // Incrementing is faster than adding
+  assign program_counter_n_p2 = program_counter_fetch_r[WORD_SIZE_P-1:0] + 1'b1; // Incrementing is faster than adding
 
 
   pc_next next_pc
@@ -167,10 +166,14 @@ module fe_top
   // ~~~~~~~~~~~~~~~~~~~~~~BRANCH~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-
-  assign branch_target = (mis_predict) ? branch_mis_target : (branch_offset_branch_r + instruction_decoded_branch.pc);
-
+  logic [WORD_SIZE_P-1:0] exchanged_branch_target;
   logic speculative_branch;
+  logic br_link;
+  logic br_ex;
+
+  assign branch_target = (mis_predict) ? branch_mis_target : (br_ex ? exchanged_branch_target : (branch_offset_branch_r + instruction_decoded_branch.pc));
+
+  
 
   static_branch_control branch_control
     ( .sign_bit_i(branch_offset_branch_r[WORD_SIZE_P-1])
@@ -178,9 +181,22 @@ module fe_top
     , .branch_op_code_i(instruction_decoded_branch.opcode[1:0])
     , .take_branch_o(take_branch_local)
     , .speculative_o(speculative_branch)
+    , .br_link(br_link)
+    , .br_ex(br_ex)
     );
 
-  // TODO: INSERT RETURN ADDRESS STACK HERE AS WELL
+
+  circular_stack #(.ELS_P(8)
+                  ,.WIDTH_P(WORD_SIZE_P)
+  ) return_address_stack
+  ( .clk_i(clk_i)
+  , .push_i(br_link)
+  , .pop_i(br_ex)
+  , .reset_i(reset_i | mis_predict)
+  , .address_i(instruction_decoded_branch.pc + 1'b1)
+  , .address_o(exchanged_branch_target)
+  );
+
 
   assign take_branch = take_branch_local | mis_predict;
 
