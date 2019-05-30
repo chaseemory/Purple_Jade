@@ -84,4 +84,13 @@ module extension
 
   assign immediate_o[7] = reg_4z_lo;
 
+  logic [WORD_SIZE_P-1:0] reg_3z_lo;
+  zero_extend #(.INPUT_SIZE(3)
+  ) reg_3z
+  ( .i(instruction_i[5:3])
+  , .o(reg_3z_lo)
+  );
+
+  assign immediate_o[8] = reg_3z_lo;
+
 endmodule // extension

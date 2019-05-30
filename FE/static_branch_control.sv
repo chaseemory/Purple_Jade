@@ -22,7 +22,7 @@ module static_branch_control
       end // Branch
       4'b1?10 : begin : Branch_link    
         take_branch_o = 1'b1;
-        speculative_o = 1'b0;
+        speculative_o = 1'b1;
       end // Branch_link
       4'b1?11 : begin : Branch_exchange   // TODO: NEED RAS to do this right
         take_branch_o = 1'b0;             // OR ELSE WE HAVE NO ADDRESS TO JUMP TO
