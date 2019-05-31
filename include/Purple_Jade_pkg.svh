@@ -149,7 +149,7 @@ typedef struct packed
 
 parameter RENAMED_INSTRUCTION_WIDTH       = $bits(renamed_instruction_t);
 
-parameter ISSUE_ENTRY = 8;
+parameter ISSUE_ENTRY = 32;
 
 typedef struct packed
 {

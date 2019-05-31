@@ -301,7 +301,7 @@ int main(int argc, char** argv, char** env) {
             }
 
             if (cmd == string("rob_size")) {
-                cout << "rob size is " << hex << (vluint32_t)( 64 - top->pj_top->back_end->commit->reorder_buffer->rob_num_n )<< endl;
+                cout << "rob size is " << hex << (vluint32_t)( 64 - top->pj_top->back_end->commit->reorder_buffer->rob_num_n)<< endl;
                 continue;
             }
 
