@@ -92,8 +92,6 @@ module issue_table
       for(int unsigned r = 0; r < NUM_FU; r++) begin : FU_to_match
         src1_tag_match[q][r] = valid_inst[q] ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id) : '0;
         src2_tag_match[q][r] = valid_inst[q] ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source2_imm[$clog2(NUM_PHYS_REG)-1:0]) : '0;
-        // src1_tag_match[q][r] = (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id);
-        // src2_tag_match[q][r] = (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source2_imm[$clog2(NUM_PHYS_REG)-1:0]);
       end // FU_to_match
 
     end // do_we_shift_instruction
@@ -137,7 +135,6 @@ module issue_table
         to determine which instruction to issue
       Then we dereference the pointer in the order table, to see which tabled instruction to choose
   */
-  //logic [ISSUE_ENTRY-1:0] ready_ordered_instr;
   always_comb begin : determine_which_instructions_are_ready
 
     for(int unsigned m = 0; m < ISSUE_ENTRY; m++) begin : tabled_ready_instructions
@@ -160,9 +157,8 @@ module issue_table
     , .addr_o(chosen_ordered) //[$clog2(ISSUE_ENTRY)-1:0])
     , .v_o(chosen_valid)
     );
-  //assign chosen_ordered[$clog2(ISSUE_ENTRY)] = 0; //~chosen_valid; // Chosen will be larger than table if invalid, next state counts on this
-  assign chosen                                = instr_order_table[chosen_ordered]; //[$clog2(ISSUE_ENTRY)-1:0]];
 
+  assign chosen                                = instr_order_table[chosen_ordered]; //[$clog2(ISSUE_ENTRY)-1:0]];
 
 
   /*  SHIFT THE ORDERED TABLE IF WE MUST
@@ -348,12 +344,12 @@ module issue_table
 
       for(int unsigned v = 0; v < ISSUE_ENTRY; v++)   begin : ingest_data_on_CDB
 
-        if(/*valid_inst[v] & */src1_tag_v[v] & ~tabled_inst[v].source_1_v)  begin : ingest_data_1
+        if(src1_tag_v[v] & ~tabled_inst[v].source_1_v)  begin : ingest_data_1
           tabled_inst[v].source_1_data <= cdb[src1_tag_index[v]].result;
           tabled_inst[v].source_1_v    <= 1'b1;
         end // ingest_data_1
 
-        if(/*valid_inst[v] & */src2_tag_v[v] & ~tabled_inst[v].source_2_v)  begin : ingest_data_2
+        if(src2_tag_v[v] & ~tabled_inst[v].source_2_v)  begin : ingest_data_2
           tabled_inst[v].source2_imm_data <= cdb[src2_tag_index[v]].result;
           tabled_inst[v].source_2_v       <= 1'b1;
         end // ingest_data_2
