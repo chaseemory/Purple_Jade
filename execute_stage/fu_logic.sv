@@ -57,7 +57,7 @@ assign flag_shift_ar = $signed(operand1_i) >>> (operand2_i - 1);
 // rotation
 /* verilator lint_off UNUSED */
 logic [WORD_SIZE_P*2-1:0]    rotate_temp;
-assign rotate_temp = {operand1_i, operand1_i} >> operand2_i;
+assign rotate_temp = {operand1_i, operand1_i} >> (operand2_i & {$clog2(WORD_SIZE_P){1'b1}});
 assign rors_res = rotate_temp[0+:WORD_SIZE_P];
 /* verilator lint_on UNUSED */
 
