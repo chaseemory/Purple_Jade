@@ -125,6 +125,8 @@ static void printRenamed(Vpj_top* top) {
     cout << "| simm " << getbits(decoded, 44, 5);
     if (!(decoded[0] & 0x1))
         cout << "| rs2  " << getbits(decoded, 33, 4) << " -> " << ((renamed[1] >> 12) & 0x7f);
+    if (!getbits(renamed, 4, 1))
+        cout << "| wfs " << getbits(renamed,0 , 4);
     cout << endl;
     vluint32_t* rob = top->pj_top->back_end->rename_rob_entry;
     if (getbits(rob, 42, 1))
@@ -233,9 +235,10 @@ int main(int argc, char** argv, char** env) {
     ifstream trace(trace_name);
     string line;
     vluint64_t instr = 0;
-    cout << endl << "running....... " << endl;
-    bool passed = true;
+    bool passed = false;
     if (argc != 3) {
+        cout << endl << "running....... " << endl;
+        passed = true;
         while (getline(trace, line)) {
             std::stringstream ss;
             while (!(is_committing(top) | top->pj_top->be_fe_mispredict)) {
@@ -270,6 +273,7 @@ int main(int argc, char** argv, char** env) {
                 passed = false;
                 break;
             }
+            cout << "Matched : " << ss.str() << endl;
             instr++;
         }
     } else {
@@ -298,6 +302,16 @@ int main(int argc, char** argv, char** env) {
 
             if (cmd == string("rob_size")) {
                 cout << "rob size is " << hex << (vluint32_t)( 64 - top->pj_top->back_end->commit->reorder_buffer->rob_num_n )<< endl;
+                continue;
+            }
+
+            if (cmd == string("wfs")) {
+                cout << "wfs vector " << endl;
+                vluint32_t* v = &(top->pj_top->back_end->st_clear_vector);
+                vluint32_t* num = top->pj_top->back_end->issue_sb_num_vector;
+                for (int i = 0; i < 32; i++) {
+                    cout << "| " << getbits(num, i * 4, 4) << " " << getbits(v, i, 1) << endl;
+                }
                 continue;
             }
 

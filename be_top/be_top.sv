@@ -43,8 +43,8 @@ logic  [NUM_FU-1:0]                                 issue_exe_v;
 issued_instruction_t                                issue_exe_entry /*verilator public*/;
 
 // issued <-> store check
-logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]       issue_sb_num_vector;
-logic [ISSUE_ENTRY-1:0]                             st_clear_vector;
+logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]       issue_sb_num_vector /*verilator public*/;
+logic [ISSUE_ENTRY-1:0]                             st_clear_vector     /*verilator public*/;
 
 // issue <-> execute common data bus
 CDB_t                                               cdb [NUM_FU-1:0];
