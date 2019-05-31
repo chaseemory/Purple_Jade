@@ -61,7 +61,7 @@ localparam PHYREG_TO_WORD_PAD_WIDTH = WORD_SIZE_P - $clog2(NUM_PHYS_REG);
 
 // roll back to non speculative
 logic                                                roll_back;
-assign roll_back = mispredict_i & commit_v_i;
+assign roll_back = mispredict_i;
 
 // load sb entry
 logic [$clog2(SB_ENTRY)-1:0]    sb_num_q, sb_num_n;

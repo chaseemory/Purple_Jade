@@ -188,12 +188,12 @@ static void printReg(Vpj_top* top, int num=0, bool one=false) {
     if (!one) {
         for (int i = 0; i < 128; i++) {
             vluint32_t vi = (v[i / 32] >> (i % 32)) & 0x1;
-            vluint32_t ri = (v[i / 2] >> ((i % 2) * 16)) & 0xffff;
+            vluint32_t ri = (r[i / 2] >> ((i % 2) * 16)) & 0xffff;
             cout << hex << i << " " << ((vi) ? 1 : 0)  << "  " << ri << endl;
         }
     } else {
         vluint32_t vi = (v[num / 32] >> (num % 32)) & 0x1;
-        vluint32_t ri = (v[num / 2] >> ((num % 2) * 16)) & 0xffff;
+        vluint32_t ri = (r[num / 2] >> ((num % 2) * 16)) & 0xffff;
         cout << hex << num << " " << ((vi) ? 1 : 0)  << "  " << ri << endl;
     }
 }
