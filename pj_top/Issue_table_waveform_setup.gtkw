@@ -1,0 +1,46 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Fri May 31 03:42:45 2019
+[*]
+[dumpfile] "/home/chase/ee478/Purple_Jade/pj_top/Vpj_top.vcd"
+[dumpfile_mtime] "Fri May 31 03:35:55 2019"
+[dumpfile_size] 479286
+[savefile] "/home/chase/ee478/Purple_Jade/pj_top/Issue_table_waveform_setup.gtkw"
+[timestart] 0
+[size] 2554 1222
+[pos] -1 -1
+*-3.690814 30 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] pj_top.
+[treeopen] pj_top.back_end.
+[treeopen] pj_top.back_end.issue.
+[sst_width] 356
+[signals_width] 273
+[sst_expanded] 1
+[sst_vpaned_height] 300
+@c00022
+pj_top.back_end.issue.store_buff_table_v_n[7:0]
+@28
+(0)pj_top.back_end.issue.store_buff_table_v_n[7:0]
+(1)pj_top.back_end.issue.store_buff_table_v_n[7:0]
+(2)pj_top.back_end.issue.store_buff_table_v_n[7:0]
+(3)pj_top.back_end.issue.store_buff_table_v_n[7:0]
+(4)pj_top.back_end.issue.store_buff_table_v_n[7:0]
+(5)pj_top.back_end.issue.store_buff_table_v_n[7:0]
+(6)pj_top.back_end.issue.store_buff_table_v_n[7:0]
+(7)pj_top.back_end.issue.store_buff_table_v_n[7:0]
+@1401200
+-group_end
+@28
+pj_top.back_end.issue.clk_i
+pj_top.back_end.issue.valid_i
+@24
++{tabled_inst(0)_pc[15:0]} pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+@28
++{issue.tabled_inst(0)_source_1_v} pj_top.back_end.issue.tabled_inst(0).source_1_v
++{tabled_inst(0)_source_2_v} pj_top.back_end.issue.tabled_inst(0).source_2_v
+@24
+pj_top.back_end.issue.tabled_inst(0).func_unit[2:0]
+@29
+(7)pj_top.back_end.issue.store_buff_table_v_n[7:0]
+[pattern_trace] 1
+[pattern_trace] 0
