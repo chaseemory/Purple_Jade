@@ -105,6 +105,7 @@ store_buffer sb
 bsg_mem_1r1w_sync #( 
    .width_p               (WORD_SIZE_P)
  , .els_p                 (2**WORD_SIZE_P) 
+ , .read_write_same_addr_p(1)
 )
   mem
 (  .w_v_i   			  (sb_mem_v)
