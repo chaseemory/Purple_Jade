@@ -233,7 +233,8 @@ int main(int argc, char** argv, char** env) {
     ifstream trace(trace_name);
     string line;
     vluint64_t instr = 0;
-    cout << argc<< endl;
+    cout << endl << "running....... " << endl;
+    bool passed = true;
     if (argc != 3) {
         while (getline(trace, line)) {
             std::stringstream ss;
@@ -265,7 +266,8 @@ int main(int argc, char** argv, char** env) {
             cycle(top);
             if (line.compare(ss.str()) != 0) {
                 cout << "ERROR: Trace mismatch on instr number " << hex << instr << endl;
-                cout << "  got "<< ss.str() << " expected " << line << endl; 
+                cout << "  got "<< ss.str() << " expected " << line << endl;
+                passed = false;
                 break;
             }
             instr++;
@@ -385,6 +387,11 @@ int main(int argc, char** argv, char** env) {
             cycle(top);
         }
     }
+
+    if (passed) {
+        cout << "TEST PASSED" << endl;
+    }
+
     delete top; 
     return 0;
 }
