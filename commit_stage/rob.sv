@@ -59,14 +59,14 @@ assign rob_rename_ready_o = (rob_num != 0) & ~rob_mispredict_o;
 
 // committing a store instruction
 assign committing_instr  = rob_q[rob_commit_pt];
-assign rob_sb_valid_o = committing_instr.wb & committing_instr.is_store & ~rob_mispredict_o;
+assign rob_sb_valid_o = committing_instr.wb & committing_instr.is_store & ~rob_mispredict_o & committing_instr.valid;
 assign rob_rename_entry_num_o = rob_alloc_pt;
 
 // committing a reg write instruction
 // clear freed register
 // not a store, wb and write enabled
 // committing_instr.freed is going to be freed, value contained is no longer valid
-assign rob_phys_valid_o = committing_instr.wb & committing_instr.w_v & ~committing_instr.is_store & ~rob_mispredict_o;
+assign rob_phys_valid_o = committing_instr.wb & committing_instr.w_v & ~committing_instr.is_store & ~rob_mispredict_o & committing_instr.valid;
 assign rob_phys_reg_cl_o = committing_instr.freed_reg;
 assign rob_phys_reg_set_o = committing_instr.addr[0+:$clog2(NUM_PHYS_REG)];
 // misprediction detection variables
@@ -84,11 +84,11 @@ assign V = flag_rob_i[v];
 assign condition_pc = (condition_taken) ? (committing_instr.resolved_pc) : (committing_instr.pc + 1);
 assign predicted_pc = (committing_instr.is_cond_branch) ? condition_pc : committing_instr.resolved_pc;
 // previous speculative branch and current pc does not match
-assign rob_mispredict_o = (committing_instr.predicted_pc != predicted_pc) && committing_instr.valid && committing_instr.is_spec;  // mismatch of pcs
+assign rob_mispredict_o = (committing_instr.predicted_pc != predicted_pc) && committing_instr.valid && committing_instr.is_spec && committing_instr.wb;  // mismatch of pcs
 assign rob_fe_redirected_pc_o = predicted_pc;
 
 // to renaming
-assign rob_rename_valid_o = committing_instr.wb &  ~rob_mispredict_o;
+assign rob_rename_valid_o = committing_instr.wb &  ~rob_mispredict_o & committing_instr.valid;
 commit_rename_t rename_entry;
 assign rename_entry.w_v = committing_instr.w_v;
 // used to update non speculative renaming table
