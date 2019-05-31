@@ -198,7 +198,7 @@ module fe_top
   );
 
 
-  assign take_branch = take_branch_local | mis_predict;
+  assign take_branch = (take_branch_local & valid_f_d) | mis_predict;
 
   assign flush_d_b = take_branch;
   assign flush_f_d = take_branch;
