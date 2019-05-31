@@ -63,7 +63,7 @@ module fe_top
     ) fetch_decode_pipe
     ( .clk_i
     , .data_i({program_counter_fetch_r, instruction_fetch_r})
-    , .flush(flush_f_d | reset_i)
+    , .flush(flush_f_d | reset_i | mis_predict)
     , .stall(stall)
     , .v_i(1'b1)
     , .data_o({program_counter_decode_r, instruction_decode_r})
@@ -155,7 +155,7 @@ module fe_top
     ) decode_branch_pipe
     ( .clk_i
     , .data_i({instruction_decoded_decode, is_branch_decode, branch_offset_decode})
-    , .flush(flush_d_b | reset_i)
+    , .flush(flush_d_b | reset_i | mis_predict)
     , .stall(stall)
     , .v_i(valid_f_d)
     , .data_o({instruction_decoded_branch, is_branch_branch_r, branch_offset_branch_r})
@@ -198,16 +198,30 @@ module fe_top
   );
 
 
-  assign take_branch = (take_branch_local & valid_f_d) | mis_predict;
+  assign take_branch = (take_branch_local & valid_d_b) | mis_predict;
 
   assign flush_d_b = take_branch;
   assign flush_f_d = take_branch;
 
-  assign instruction_decoded_branch.branch_speculation = take_branch_local;
-  assign instruction_decoded_branch.predicted_pc = take_branch_local ? branch_target : '0;
-
   assign valid_o = ((~speculative_branch & is_branch_branch_r) | (instruction_decoded_branch.func_unit == `NOOP_FU) | mis_predict) ? 1'b0 : valid_d_b;
 
-  assign final_decoded_instruction = instruction_decoded_branch;
+  decoded_instruction_t instruction_final;
+
+  always_comb begin : assign_output_instruction
+    instruction_final.predicted_pc        = take_branch_local ? branch_target : instruction_decoded_branch.pc + 1'b1;
+    instruction_final.dest_id             = instruction_decoded_branch.dest_id;
+    instruction_final.source_1            = instruction_decoded_branch.source_1;
+    instruction_final.source2_imm         = instruction_decoded_branch.source2_imm;
+    instruction_final.pc                  = instruction_decoded_branch.pc;
+    instruction_final.opcode              = instruction_decoded_branch.opcode;
+    instruction_final.func_unit           = instruction_decoded_branch.func_unit;
+    instruction_final.flags               = instruction_decoded_branch.flags;
+    instruction_final.bcc_op              = instruction_decoded_branch.bcc_op;
+    instruction_final.branch_speculation  = take_branch_local;
+    instruction_final.w_v                 = instruction_decoded_branch.w_v;
+    instruction_final.imm                 = instruction_decoded_branch.imm;
+  end // assign_output_instruction
+
+  assign final_decoded_instruction = instruction_final;
 
 endmodule // fe_top
