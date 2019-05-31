@@ -55,7 +55,7 @@ module issue_table
   logic [ISSUE_ENTRY-1:0]                           order_inst_less;
   logic [ISSUE_ENTRY-1:0]                           ordered_instr_ready;
 
-  logic [$clog2(ISSUE_ENTRY):0]                     chosen_ordered;
+  logic [$clog2(ISSUE_ENTRY)-1:0]                   chosen_ordered;
 
   // STORE BUFFER NON-SENSE 
   logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]     store_buff_table;
@@ -157,11 +157,11 @@ module issue_table
                       ) chosen_selector
 
     ( .i(ordered_instr_ready)
-    , .addr_o(chosen_ordered[$clog2(ISSUE_ENTRY)-1:0])
+    , .addr_o(chosen_ordered) //[$clog2(ISSUE_ENTRY)-1:0])
     , .v_o(chosen_valid)
     );
-  assign chosen_ordered[$clog2(ISSUE_ENTRY)] = ~chosen_valid; // Chosen will be larger than table if invalid, next state counts on this
-  assign chosen                                = instr_order_table[chosen_ordered[$clog2(ISSUE_ENTRY)-1:0]];
+  //assign chosen_ordered[$clog2(ISSUE_ENTRY)] = 0; //~chosen_valid; // Chosen will be larger than table if invalid, next state counts on this
+  assign chosen                                = instr_order_table[chosen_ordered]; //[$clog2(ISSUE_ENTRY)-1:0]];
 
 
 
@@ -177,20 +177,26 @@ module issue_table
     end // do_we_shift_instruction
 
     for(int unsigned j = 0; j < ISSUE_ENTRY; j++) begin : shift_order_table_entry
-      case(order_inst_less[j])
-        1'b0: begin
+
+      case({chosen_valid, order_inst_less[j]})
+        2'b10: begin
           instr_order_table_n[j]  = instr_order_table[j+1];
           order_inst_v_n[j]       = order_inst_v[j+1];
         end
-        1'b1: begin
+        default: begin
           instr_order_table_n[j]  = instr_order_table[j];
           order_inst_v_n[j]       = order_inst_v[j];
-        end        
+        end
+
       endcase // tabled_inst_less[j]
 
     end // shift_order_table_entry
 
-    if(accepting_new_instruction) begin : place_new_instruction_in_ordered_table
+    if(accepting_new_instruction & issuing_instruction) begin : place_new_instruction_in_ordered_table
+      instr_order_table_n[inst_count - 1'b1] = new_instr_loc; // Put pointer to new instruction in ordered table
+      order_inst_v_n[inst_count[$clog2(ISSUE_ENTRY)-1:0] - 1'b1] = 1'b1;
+    end
+    else if(accepting_new_instruction) begin
       instr_order_table_n[inst_count] = new_instr_loc; // Put pointer to new instruction in ordered table
       order_inst_v_n[inst_count[$clog2(ISSUE_ENTRY)-1:0]] = 1'b1;
     end // place_new_instruction_in_ordered_table
@@ -361,6 +367,6 @@ module issue_table
   end // always_ff @(posedge clk_i)
 
   // Assign instruction outputs
-  assign instruction_o = tabled_inst[chosen];
+  assign instruction_o = chosen_valid ? tabled_inst[chosen] : '0;
 
 endmodule // issue_table

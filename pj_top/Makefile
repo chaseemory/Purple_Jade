@@ -30,7 +30,7 @@ ifeq ($(DEBUG),1)
 endif
 
 # test bin macro
-TEST = test0.bin
+TEST = test1.bin
 unquoted = $(pj_test_bin_dir)$(TEST)
 TEST_BIN = $(addprefix \",$(addsuffix \",$(unquoted)))
 vev_op += -DTEST_BIN=$(TEST_BIN)
