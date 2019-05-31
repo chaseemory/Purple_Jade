@@ -90,8 +90,8 @@ module issue_table
     for(int unsigned q = 0; q < ISSUE_ENTRY; q++) begin : instruction_to_match
 
       for(int unsigned r = 0; r < NUM_FU; r++) begin : FU_to_match
-        src1_tag_match[q][r] = valid_inst[q] ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id) : '0;
-        src2_tag_match[q][r] = valid_inst[q] ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source2_imm[$clog2(NUM_PHYS_REG)-1:0]) : '0;
+        src1_tag_match[q][r] = (valid_inst[q] & cdb[r].valid) ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id) : '0;
+        src2_tag_match[q][r] = (valid_inst[q] & cdb[r].valid) ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source2_imm[$clog2(NUM_PHYS_REG)-1:0]) : '0;
       end // FU_to_match
 
     end // do_we_shift_instruction
