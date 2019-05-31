@@ -280,7 +280,15 @@ int main(int argc, char** argv, char** env) {
         // step
         vluint64_t cycle_count = 0;
         getline(trace, line);
-        for (std::string cmd_line; getline(std::cin, cmd_line);) {
+        bool skip = false;
+        string condition;
+        int code;
+       while(true) {
+            string cmd_line;            
+            if (!skip) {
+               getline(std::cin, cmd_line);
+            }
+
             stringstream ss(cmd_line);
             string cmd;
             ss >> cmd;
@@ -335,6 +343,17 @@ int main(int argc, char** argv, char** env) {
                 }
                 continue;
             }
+
+            if (cmd == string("until")) {
+                string condition_code;
+                ss >> condition_code;
+                ss >> condition;
+                skip = true;
+                if (condition_code == string("pc"))
+                    code = 0;                            
+                continue;
+            }
+
             cout << "CYCLE " << dec << cycle_count << hex << endl;
             // renaming instr
             if (top->pj_top->back_end->rename->__PVT__renamed_v_o) {
@@ -393,6 +412,13 @@ int main(int argc, char** argv, char** env) {
             cout << setfill('-') << setw(20) << "-" << setfill(' ') <<endl;
             cout << endl;
             // check if is committing
+
+            if (skip) {
+                if (code == 0 && condition == line.substr(0, 4)) {
+                    skip = false;
+                }
+            }
+
             if (is_committing(top)) {
                 if (!getline(trace, line))
                     break;
@@ -403,7 +429,7 @@ int main(int argc, char** argv, char** env) {
     }
 
     if (passed) {
-        cout << "TEST PASSED" << endl;
+        cout << endl << "TEST PASSED" << endl;
     }
 
     delete top; 
