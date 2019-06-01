@@ -1,9 +1,12 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+`endif
 
 module fu_alu
 (input                                      clk_i
  , input                                    reset_i
  , input                                    exe_v_i
+ , input									w_v_i
  , input  [WIDTH_OP-1:0]                    opcode_i
  , input  [WORD_SIZE_P-1:0]                 operand1_i
  , input  [WORD_SIZE_P-1:0]                 operand2_i
@@ -28,7 +31,7 @@ assign out_n.cdb.dest = reg_dest_i;
 assign out_n.cdb.flags = flags;
 assign out_n.cdb.result = result;
 assign reg_wb.cdb = out_n.cdb;
-assign reg_wb.w_v = exe_v_i; 
+assign reg_wb.w_v = exe_v_i & w_v_i; 
 
 // result / flag computations
 assign result = (opcode_i == `ADD_OP) ? add_sum : sub_sum;

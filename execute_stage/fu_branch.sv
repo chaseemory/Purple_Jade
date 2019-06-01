@@ -1,10 +1,13 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+`endif
 
 module fu_branch
 (input                                      clk_i
  , input                                    reset_i
  , input                                    exe_v_i
  , input  [WIDTH_OP-1:0]                    opcode_i
+ , input  [WORD_SIZE_P-1:0]                 pc_i
  , input  [WORD_SIZE_P-1:0]                 operand1_i
  , input  [WORD_SIZE_P-1:0]                 operand2_i
  , input  [$clog2(ROB_ENTRY)-1:0]           rob_dest_i
@@ -36,9 +39,12 @@ assign reg_wb.cdb.result = result;
 // target address computations
 always_comb
   begin
-    result = operand1_i;
+    result = operand2_i;
     if (opcode_i == `BCC_OP)
-        result = $signed(operand1_i) + $signed(operand2_i);
+        result = $signed(pc_i) + $signed(operand2_i);
+
+    if (opcode_i == `BL_OP)
+      result = $signed(pc_i) + 1;
   end
 
 // sequential process

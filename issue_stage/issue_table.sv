@@ -1,64 +1,71 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+`endif
 
 module issue_table
   ( // Misc inputs
-    input   logic                 clk_i
-  , input   logic                 reset_i
+    input   logic                                         clk_i
+  , input   logic                                         reset_i
 
   // Interface to ROB/REG FILE
-  , output  logic [$clog2(NUM_PHYS_REG)-1:0] new_instr_addr_1
-  , output  logic [$clog2(NUM_PHYS_REG)-1:0] new_instr_addr_2
+  , output  logic [$clog2(NUM_PHYS_REG)-1:0]              new_instr_addr_1
+  , output  logic [$clog2(NUM_PHYS_REG)-1:0]              new_instr_addr_2
 
-  , input   logic                            new_instr_data_1_v
-  , input   logic                            new_instr_data_2_v
+  , input   logic                                         new_instr_data_1_v
+  , input   logic                                         new_instr_data_2_v
 
-  , input   logic [WORD_SIZE_P-1:0]          new_instr_data_1
-  , input   logic [WORD_SIZE_P-1:0]          new_instr_data_2
+  , input   logic [WORD_SIZE_P-1:0]                       new_instr_data_1
+  , input   logic [WORD_SIZE_P-1:0]                       new_instr_data_2
 
   // Renaming logic interface
-  , input   renamed_instruction_t instruction_i
-  , input   logic                 valid_i
-  , output  logic                 ready_o
+  , input   renamed_instruction_t                         instruction_i
+  , input   logic                                         valid_i
+  , output  logic                                         ready_o
 
   // Functional Unit interface
-  , output  issued_instruction_t  instruction_o
+  , output  issued_instruction_t                          instruction_o
   // , input   logic [NUM_FU-1:0]    ready_i
-  , output  logic [NUM_FU-1:0]    valid_o
+  , output  logic [NUM_FU-1:0]                            valid_o
 
   // Store Buffer Interface
-  , output  logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]  issue_sb_num_vector_o
-  , input   logic                       [ISSUE_ENTRY-1:0]  st_clear_vector_i
+  , output  logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0] issue_sb_num_vector_o
+  , input   logic [ISSUE_ENTRY-1:0]                       st_clear_vector_i
 
   // CDB Interface
-  , input   CDB_t     cdb [NUM_FU-1:0]
+  , input   CDB_t                                         cdb [NUM_FU-1:0]
   );
 
   // House Keeping Values
-  logic                      [$clog2(ISSUE_ENTRY):0] inst_count;
-  logic                      [$clog2(ISSUE_ENTRY):0] inst_count_n;
+  logic [$clog2(ISSUE_ENTRY):0]                     inst_count;
+  logic [$clog2(ISSUE_ENTRY):0]                     inst_count_n;
 
   // ISSUE TABLE
-  issued_instruction_t             [ISSUE_ENTRY-1:0] tabled_inst;
-  logic                            [ISSUE_ENTRY-1:0] valid_inst;
-  logic                            [ISSUE_ENTRY-1:0] inst_ready;
-  logic                    [$clog2(ISSUE_ENTRY)-1:0] chosen;
+  issued_instruction_t [ISSUE_ENTRY-1:0]            tabled_inst;
+  logic [ISSUE_ENTRY-1:0]                           valid_inst;
+  logic [ISSUE_ENTRY-1:0]                           inst_ready;
+  logic [$clog2(ISSUE_ENTRY)-1:0]                   chosen;
 
   // ORDER TABLE
-  logic   [ISSUE_ENTRY:0][$clog2(ISSUE_ENTRY)-1:0] instr_order_table;
-  logic [ISSUE_ENTRY-1:0][$clog2(ISSUE_ENTRY)-1:0] instr_order_table_n;
+  logic [ISSUE_ENTRY:0][$clog2(ISSUE_ENTRY)-1:0]    instr_order_table;
+  logic [ISSUE_ENTRY-1:0][$clog2(ISSUE_ENTRY)-1:0]  instr_order_table_n;
 
-  logic                              [ISSUE_ENTRY:0] order_inst_v;
-  logic                            [ISSUE_ENTRY-1:0] order_inst_v_n;
+  logic [ISSUE_ENTRY:0]                             order_inst_v;
+  logic [ISSUE_ENTRY-1:0]                           order_inst_v_n;
 
-  logic                            [ISSUE_ENTRY-1:0] order_inst_less;
-  logic                            [ISSUE_ENTRY-1:0] ordered_instr_ready;
+  logic [ISSUE_ENTRY-1:0]                           order_inst_less;
+  logic [ISSUE_ENTRY-1:0]                           ordered_instr_ready;
 
-  logic                      [$clog2(ISSUE_ENTRY):0] chosen_ordered;
+  logic [$clog2(ISSUE_ENTRY)-1:0]                   chosen_ordered;
+
+  logic accepting_new_instruction, issuing_instruction, ready_o_n;
+  logic [$clog2(ISSUE_ENTRY)-1:0] new_instr_loc;
+  logic                           new_instr_loc_v;
+
 
   // STORE BUFFER NON-SENSE 
-  logic      [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0] store_buff_table;
-  logic                            [ISSUE_ENTRY-1:0] store_buff_table_v;
-  logic                            [ISSUE_ENTRY-1:0] store_buff_table_v_n;
+  logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]     store_buff_table;
+  logic [ISSUE_ENTRY-1:0]                           store_buff_table_v;
+  logic [ISSUE_ENTRY-1:0]                           store_buff_table_v_n;
 
   /*  DETERMINE NEXT STATE OF VALID BITS FOR STORE BUFFER TABLE
       Assign next state of Store buffer valid when either the table is valid or the
@@ -88,8 +95,8 @@ module issue_table
     for(int unsigned q = 0; q < ISSUE_ENTRY; q++) begin : instruction_to_match
 
       for(int unsigned r = 0; r < NUM_FU; r++) begin : FU_to_match
-        src1_tag_match[q][r] = (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id);
-        src2_tag_match[q][r] = (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source2_imm[$clog2(NUM_PHYS_REG)-1:0]);
+        src1_tag_match[q][r] = (valid_inst[q] & cdb[r].valid) ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id) : '0;
+        src2_tag_match[q][r] = (valid_inst[q] & cdb[r].valid) ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source2_imm[$clog2(NUM_PHYS_REG)-1:0]) : '0;
       end // FU_to_match
 
     end // do_we_shift_instruction
@@ -98,8 +105,8 @@ module issue_table
   
   logic [ISSUE_ENTRY-1:0][$clog2(NUM_FU)-1:0] src1_tag_index;
   logic [ISSUE_ENTRY-1:0][$clog2(NUM_FU)-1:0] src2_tag_index;
-  logic [ISSUE_ENTRY-1:0] src1_tag_v;
-  logic [ISSUE_ENTRY-1:0] src2_tag_v;
+  logic [ISSUE_ENTRY-1:0]                     src1_tag_v;
+  logic [ISSUE_ENTRY-1:0]                     src2_tag_v;
 
   generate
 
@@ -133,7 +140,6 @@ module issue_table
         to determine which instruction to issue
       Then we dereference the pointer in the order table, to see which tabled instruction to choose
   */
-  //logic [ISSUE_ENTRY-1:0] ready_ordered_instr;
   always_comb begin : determine_which_instructions_are_ready
 
     for(int unsigned m = 0; m < ISSUE_ENTRY; m++) begin : tabled_ready_instructions
@@ -153,12 +159,11 @@ module issue_table
                       ) chosen_selector
 
     ( .i(ordered_instr_ready)
-    , .addr_o(chosen_ordered[$clog2(ISSUE_ENTRY)-1:0])
+    , .addr_o(chosen_ordered) //[$clog2(ISSUE_ENTRY)-1:0])
     , .v_o(chosen_valid)
     );
-  assign chosen_ordered[$clog2(ISSUE_ENTRY)] = ~chosen_valid; // Chosen will be larger than table if invalid, next state counts on this
-  assign chosen                                = instr_order_table[chosen_ordered[$clog2(ISSUE_ENTRY)-1:0]];
 
+  assign chosen                                = instr_order_table[chosen_ordered]; //[$clog2(ISSUE_ENTRY)-1:0]];
 
 
   /*  SHIFT THE ORDERED TABLE IF WE MUST
@@ -173,22 +178,28 @@ module issue_table
     end // do_we_shift_instruction
 
     for(int unsigned j = 0; j < ISSUE_ENTRY; j++) begin : shift_order_table_entry
-      case(order_inst_less[j])
-        1'b0: begin
+
+      case({chosen_valid, order_inst_less[j]})
+        2'b10: begin
           instr_order_table_n[j]  = instr_order_table[j+1];
           order_inst_v_n[j]       = order_inst_v[j+1];
         end
-        1'b1: begin
+        default: begin
           instr_order_table_n[j]  = instr_order_table[j];
           order_inst_v_n[j]       = order_inst_v[j];
-        end        
+        end
+
       endcase // tabled_inst_less[j]
 
     end // shift_order_table_entry
 
-    if(accepting_new_instruction) begin : place_new_instruction_in_ordered_table
+    if(accepting_new_instruction & issuing_instruction) begin : place_new_instruction_in_ordered_table
+      instr_order_table_n[inst_count - 1'b1] = new_instr_loc; // Put pointer to new instruction in ordered table
+      order_inst_v_n[inst_count[$clog2(ISSUE_ENTRY)-1:0] - 1'b1] = 1'b1;
+    end
+    else if(accepting_new_instruction) begin
       instr_order_table_n[inst_count] = new_instr_loc; // Put pointer to new instruction in ordered table
-      order_inst_v_n[inst_count[4:0]] = 1'b1;
+      order_inst_v_n[inst_count[$clog2(ISSUE_ENTRY)-1:0]] = 1'b1;
     end // place_new_instruction_in_ordered_table
 
   end // shift_ordered_table
@@ -244,8 +255,6 @@ module issue_table
 
 
   // DETERMINE WHERE NEXT INSTRUCTION WILL GO
-  logic [$clog2(ISSUE_ENTRY)-1:0] new_instr_loc;
-  logic                           new_instr_loc_v;
   bsg_priority_encode #(.width_p(ISSUE_ENTRY)
                        ,.lo_to_hi_p(1)
                       ) new_selector
@@ -256,7 +265,7 @@ module issue_table
     );
 
   // Instruction Count Logic / New Instruction Input Logic
-  logic accepting_new_instruction, issuing_instruction, ready_o_n;
+  
   assign accepting_new_instruction  = (ready_o & valid_i);
   assign issuing_instruction        = chosen_valid;         // A valid instruction has been chose to issue by Decoder
 
@@ -294,14 +303,19 @@ module issue_table
 
     if(reset_i) begin : reset_logic
       for(int unsigned i = 0; i < ISSUE_ENTRY; i++)   begin : reset
-        valid_inst[i]   <= '0;
-        order_inst_v[i] <= '0;
-        instr_order_table[ISSUE_ENTRY] <= '0;
-        order_inst_v[ISSUE_ENTRY]      <= '0;
+        valid_inst[i]         <= '0;
+        order_inst_v[i]       <= '0;
+        instr_order_table[i]  <= '0;
+        order_inst_v[i]       <= '0;
+        tabled_inst[i]        <= '0;
+        store_buff_table[i]   <= '0;
+        store_buff_table_v[i] <= '0;
       end // reset
 
-    inst_count      <= '0;
-    ready_o         <= '0;
+      instr_order_table[ISSUE_ENTRY] <= '0;
+      order_inst_v[ISSUE_ENTRY]      <= '0;
+      inst_count      <= '0;
+      ready_o         <= '0;
 
     end // reset_logic
 
@@ -340,7 +354,7 @@ module issue_table
 
         if(src2_tag_v[v] & ~tabled_inst[v].source_2_v)  begin : ingest_data_2
           tabled_inst[v].source2_imm_data <= cdb[src2_tag_index[v]].result;
-          tabled_inst[v].source_2_v        <= 1'b1;
+          tabled_inst[v].source_2_v       <= 1'b1;
         end // ingest_data_2
 
       end // ingest_data_on_CDB
@@ -352,6 +366,6 @@ module issue_table
   end // always_ff @(posedge clk_i)
 
   // Assign instruction outputs
-  assign instruction_o = tabled_inst[chosen];
+  assign instruction_o = chosen_valid ? tabled_inst[chosen] : '0;
 
 endmodule // issue_table

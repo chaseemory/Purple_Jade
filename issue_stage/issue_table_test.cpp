@@ -88,6 +88,14 @@ int main(int argc, char** argv, char** env) {
     DUT->clk_i = 0;
     DUT->reset_i = 1;
     DUT->valid_i = 0;
+    DUT->st_clear_vector_i = 0;
+    DUT->cdb[0] = 0b0000000000000000000000000;
+    DUT->cdb[1] = 0b0000000000000000000000000;
+    DUT->cdb[2] = 0b0000000000000000000000000;
+    DUT->cdb[3] = 0b0000000000000000000000000;
+    DUT->cdb[4] = 0b0000000000000000000000000;
+    DUT->cdb[5] = 0b0000000000000000000000000;
+    DUT->cdb[6] = 0b0000000000000000000000000;
 
     //REG FILE NEVER HAS DATA FOR TEST
     DUT->new_instr_data_1_v = 0;
@@ -118,24 +126,29 @@ int main(int argc, char** argv, char** env) {
     uint64_t pc_count = 0;
 
     // Build first instruction
-    renamed_t inst_1;
-    inst_1.dest_id = 1;
-    inst_1.source_1 = 2;            // 16 
-    inst_1.source2_imm = 3;         
-    inst_1.pc = pc_count;                  
-    inst_1.opcode = 0;    // add              
-    inst_1.func_unit = 1; //ALU           
-    inst_1.flags = 0x0;               
-    inst_1.bcc_op = 0;              
-    inst_1.branch_speculation = 0;  
-    inst_1.w_v = 1;                 //              7
-    inst_1.imm = 0;                 //              6    
-    inst_1.rob_dest = 0;            // 8 entries    5:3
-    inst_1.is_wfs = 1;              //              2
-    inst_1.sb_dest = 0; 
+    renamed_t inst;
+    inst.dest_id = 1;
+    inst.source_1 = 1;
+    inst.source2_imm = 1;
+    inst.pc = pc_count;
+    inst.opcode = 0;
+    inst.func_unit = 2; //LOGICAL           
+    inst.flags = 0x0;
+    inst.bcc_op = 0;
+    inst.branch_speculation = 0;
+    inst.w_v = 1;
+    inst.imm = 0;
+    inst.rob_dest = 0;
+    inst.is_wfs = 1;
+    inst.sb_dest = 0;
     
-    DUT->instruction_i = set_renamed_instruction(&inst_1);
+    DUT->instruction_i = set_renamed_instruction(&inst);
     DUT->valid_i = 1;
+
+
+    DUT->eval();
+
+    assert(DUT->issue_table__DOT__new_instr_loc == 0);
 
 
     tick(DUT, tfp, main_time);
@@ -148,20 +161,12 @@ int main(int argc, char** argv, char** env) {
 
     pc_count++;
 
-    renamed_t inst;
     inst.dest_id = 2;
-    inst.source_1 = 4;            // 16 
-    inst.source2_imm = 5;         
-    inst.pc = pc_count;                  
-    inst.opcode = 0;    // add              
-    inst.func_unit = 2; //LOGICAL           
-    inst.flags = 0x0;               
-    inst.bcc_op = 0;              
-    inst.branch_speculation = 0;  
-    inst.w_v = 1;                 //              7
-    inst.imm = 0;                 //              6    
-    inst.rob_dest = 0;            // 8 entries    5:3
-    inst.is_wfs = 1;              //              2
+    inst.source_1 = 2;            // 16 
+    inst.source2_imm = 2;         
+    inst.pc = pc_count;                                
+    inst.rob_dest = 0;
+    inst.is_wfs = 1;
     inst.sb_dest = 0; 
 
     DUT->instruction_i = set_renamed_instruction(&inst);
@@ -178,16 +183,17 @@ int main(int argc, char** argv, char** env) {
     pc_count++;
 
     inst.dest_id = 3;
-    inst.source_1 = 6;            // 16 
-    inst.source2_imm = 7;         
+    inst.source_1 = 3;            // 16 
+    inst.source2_imm = 3;         
     inst.pc = pc_count;                  
 
     DUT->instruction_i = set_renamed_instruction(&inst);
 
 
+
     tick(DUT, tfp, main_time);
 
-
+    
     assert(DUT->issue_table__DOT__inst_count == 3);
     assert(DUT->issue_table__DOT__valid_inst == 0x7);
     assert(DUT->valid_o == 0x00);
@@ -197,8 +203,8 @@ int main(int argc, char** argv, char** env) {
     pc_count++;
 
     inst.dest_id = 4;
-    inst.source_1 = 8;            // 16 
-    inst.source2_imm = 9;         
+    inst.source_1 = 4;            // 16 
+    inst.source2_imm = 4;         
     inst.pc = pc_count;                  
 
     DUT->instruction_i = set_renamed_instruction(&inst);
@@ -216,8 +222,8 @@ int main(int argc, char** argv, char** env) {
     pc_count++;
 
     inst.dest_id = 5;
-    inst.source_1 = 9;            // 16 
-    inst.source2_imm = 10;         
+    inst.source_1 = 5;            // 16 
+    inst.source2_imm = 5;         
     inst.pc = pc_count;                  
 
     DUT->instruction_i = set_renamed_instruction(&inst);
@@ -235,8 +241,8 @@ int main(int argc, char** argv, char** env) {
     pc_count++;
 
     inst.dest_id = 6;
-    inst.source_1 = 10;            // 16 
-    inst.source2_imm = 11;         
+    inst.source_1 = 6;            // 16 
+    inst.source2_imm = 6;         
     inst.pc = pc_count;
 
     DUT->instruction_i = set_renamed_instruction(&inst);
@@ -254,8 +260,8 @@ int main(int argc, char** argv, char** env) {
     pc_count++;
 
     inst.dest_id = 7;
-    inst.source_1 = 11;            // 16 
-    inst.source2_imm = 12;         
+    inst.source_1 = 7;            // 16 
+    inst.source2_imm = 7;         
     inst.pc = pc_count;                  
 
     DUT->instruction_i = set_renamed_instruction(&inst);
@@ -273,412 +279,85 @@ int main(int argc, char** argv, char** env) {
     pc_count++;
 
     inst.dest_id = 8;
-    inst.source_1 = 12;            // 16 
-    inst.source2_imm = 13;         
+    inst.source_1 = 8;            // 16 
+    inst.source2_imm = 8;         
     inst.pc = pc_count;                  
 
-    DUT->instruction_i = set_renamed_instruction(&inst);
+
+    tick(DUT, tfp, main_time);
+
+
+    // TESTED FULL ISSUE TABLE BUT NONE READY
+    assert(DUT->issue_table__DOT__inst_count == 8);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFF);
+    assert(DUT->valid_o == 0x00);
+    assert(DUT->ready_o == 0);
+    assert(DUT->issue_table__DOT__inst_ready == 0);
+
+
+    // NO MORE INPUTS
+    DUT->valid_i = 0;
+
+
+
+    tick(DUT, tfp, main_time);
+
+    assert(DUT->issue_table__DOT__inst_count == 8);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFF);
+    assert(DUT->valid_o == 0x00);
+    assert(DUT->ready_o == 0);
+    assert(DUT->issue_table__DOT__inst_ready == 0);
+
+    tick(DUT, tfp, main_time);
+
+    assert(DUT->issue_table__DOT__inst_count == 8);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFF);
+    assert(DUT->valid_o == 0x00);
+    assert(DUT->ready_o == 0);
+    assert(DUT->issue_table__DOT__inst_ready == 0);
+
+    tick(DUT, tfp, main_time);
+
+    assert(DUT->issue_table__DOT__inst_count == 8);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFF);
+    assert(DUT->valid_o == 0x00);
+    assert(DUT->ready_o == 0);
+    assert(DUT->issue_table__DOT__inst_ready == 0);
+
+    tick(DUT, tfp, main_time);
+
+
+
+    //Validate our First Instruction
+    DUT->cdb[0] = 0b1000100000000000000000001;
+    DUT->cdb[1] = 0b1000100000000000000000001;
+
+
 
     tick(DUT, tfp, main_time);
 
 
     assert(DUT->issue_table__DOT__inst_count == 8);
     assert(DUT->issue_table__DOT__valid_inst == 0xFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-
-    inst.dest_id = 8;
-    inst.source_1 = 12;            // 16 
-    inst.source2_imm = 13;         
-    inst.pc = pc_count;                  
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 9);
-    assert(DUT->issue_table__DOT__valid_inst == 0x1FF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 10);
-    assert(DUT->issue_table__DOT__valid_inst == 0x3FF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 11);
-    assert(DUT->issue_table__DOT__valid_inst == 0x7FF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 12);
-    assert(DUT->issue_table__DOT__valid_inst == 0xFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 13);
-    assert(DUT->issue_table__DOT__valid_inst == 0x1FFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 14);
-    assert(DUT->issue_table__DOT__valid_inst == 0x3FFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 15);
-    assert(DUT->issue_table__DOT__valid_inst == 0x7FFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 16);
-    assert(DUT->issue_table__DOT__valid_inst == 0xFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 17);
-    assert(DUT->issue_table__DOT__valid_inst == 0x1FFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 18);
-    assert(DUT->issue_table__DOT__valid_inst == 0x3FFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 19);
-    assert(DUT->issue_table__DOT__valid_inst == 0x7FFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 20);
-    assert(DUT->issue_table__DOT__valid_inst == 0xFFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 21);
-    assert(DUT->issue_table__DOT__valid_inst == 0x1FFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 22);
-    assert(DUT->issue_table__DOT__valid_inst == 0x3FFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 23);
-    assert(DUT->issue_table__DOT__valid_inst == 0x7FFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 24);
-    assert(DUT->issue_table__DOT__valid_inst == 0xFFFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 25);
-    assert(DUT->issue_table__DOT__valid_inst == 0x1FFFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 26);
-    assert(DUT->issue_table__DOT__valid_inst == 0x3FFFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 27);
-    assert(DUT->issue_table__DOT__valid_inst == 0x7FFFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 28);
-    assert(DUT->issue_table__DOT__valid_inst == 0xFFFFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 29);
-    assert(DUT->issue_table__DOT__valid_inst == 0x1FFFFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 30);
-    assert(DUT->issue_table__DOT__valid_inst == 0x3FFFFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-
-    assert(DUT->issue_table__DOT__inst_count == 31);
-    assert(DUT->issue_table__DOT__valid_inst == 0x7FFFFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 1);
-
-    pc_count++;
-    inst.dest_id = 8;        
-    inst.pc = pc_count;
-    DUT->instruction_i = set_renamed_instruction(&inst);
-
-
-    tick(DUT, tfp, main_time);
-
-    // TESTED FULL ISSUE TABLE BUT NONE READY
-    assert(DUT->issue_table__DOT__inst_count == 32);
-    assert(DUT->issue_table__DOT__valid_inst == 0xFFFFFFFF);
-    assert(DUT->valid_o == 0x00);
-    assert(DUT->ready_o == 0);
-    assert(DUT->issue_table__DOT__inst_ready == 0);
-
-    // NO MORE INPUTS
-    DUT->valid_i = 0;
-
-    //Validate our First Instruction
-    DUT->cdb[0] = 0b1001000000000000000000001;
-    DUT->cdb[1] = 0b1001100000000000000000001;
-
-
-
-    tick(DUT, tfp, main_time);
-
-    assert(DUT->issue_table__DOT__inst_count == 32);
-    assert(DUT->issue_table__DOT__valid_inst == 0xFFFFFFFF);
     assert(DUT->ready_o == 0);
     assert(DUT->issue_table__DOT__inst_ready == 1);
-    assert(DUT->valid_o == 0b000010);
+    assert(DUT->valid_o == 0b000100);
 
 
     //Validate our Second Instruction
-    DUT->cdb[0] = 0b1010100000000000000000001;
-    DUT->cdb[1] = 0b1010000000000000000000001;
-
-    DUT->eval();
+    DUT->cdb[0] = 0b1001000000000000000000001;
+    DUT->cdb[1] = 0b1001000000000000000000001;
 
 
     tick(DUT, tfp, main_time);
 
+    
+    //CLEAR CDB
+    DUT->cdb[0] = 0;
+    DUT->cdb[1] = 0;
 
-    assert(DUT->issue_table__DOT__inst_count == 31);
-    assert(DUT->issue_table__DOT__valid_inst == 0xFFFFFFFE);
+    assert(DUT->issue_table__DOT__inst_count == 7);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFE);
     assert(DUT->ready_o == 1);
     assert(DUT->issue_table__DOT__inst_ready == 2);
     assert(DUT->valid_o == 0b000100);
@@ -687,8 +366,8 @@ int main(int argc, char** argv, char** env) {
     tick(DUT, tfp, main_time);
 
 
-    assert(DUT->issue_table__DOT__inst_count == 30);
-    assert(DUT->issue_table__DOT__valid_inst == 0xFFFFFFFC);
+    assert(DUT->issue_table__DOT__inst_count == 6);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFC);
     assert(DUT->ready_o == 1);
     assert(DUT->issue_table__DOT__inst_ready == 0);
     assert(DUT->valid_o == 0b000000);
@@ -697,21 +376,207 @@ int main(int argc, char** argv, char** env) {
 
     tick(DUT, tfp, main_time);
 
-    //ADD ANOTHER INSTRUCTION
+
+    assert(DUT->issue_table__DOT__inst_count == 6);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFC);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0);
+    assert(DUT->valid_o == 0b000000);
+
+
+    //ADD SB DEPENDENT INSTRUCTION
     DUT->valid_i = 1;
 
     pc_count++;
-    inst.dest_id = 8;        
+    inst.dest_id = 0;        
     inst.pc = pc_count;
+    inst.source_1 = 0;
+    inst.source2_imm = 0;
+    inst.is_wfs = 0;
+    inst.sb_dest = 0;
+
     DUT->instruction_i = set_renamed_instruction(&inst);
 
 
 
 
     tick(DUT, tfp, main_time);
+
+    DUT->valid_i = 0;
+
+    //Validate our SB Instruction DEPENDENCIES
+    DUT->cdb[0] = 0b1000000000000000000000001;
+
+
+    assert(DUT->issue_table__DOT__inst_count == 7);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFD);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0);
+    assert(DUT->valid_o == 0b000000);
+
+
+
+    tick(DUT, tfp, main_time);
+
+    // VALIDATE SB DEPENDENCE
+    DUT->st_clear_vector_i = 1;
+
+    assert(DUT->issue_table__DOT__inst_count == 7);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFD);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0);
+    assert(DUT->valid_o == 0b000000);
+
+
+    tick(DUT, tfp, main_time);
+
+    DUT->st_clear_vector_i = 0;
+
+    assert(DUT->issue_table__DOT__inst_count == 7);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFD);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 1);             // SB INSTR READY
+    assert(DUT->valid_o == 0b000100);
+
+    //Validate our 3rd instruction ~~Random~~
+    DUT->cdb[0] = 0b1001100000000000000000001;
+
+    tick(DUT, tfp, main_time);
+
+
+    assert(DUT->issue_table__DOT__inst_count == 6);
+    assert(DUT->issue_table__DOT__valid_inst == 0xFC);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 4);
+    assert(DUT->valid_o == 0b000100);
+
+    //ADD SB DEPENDENT INSTRUCTION FOR FUTURE DO ALL THE THINGS
+    DUT->valid_i = 1;
+
+    pc_count++;
+    inst.dest_id = 1;
+    inst.pc = pc_count;
+    inst.source_1 = 0;
+    inst.source2_imm = 0;
+    inst.is_wfs = 0;
+    inst.sb_dest = 0;
+
+    DUT->instruction_i = set_renamed_instruction(&inst);
+
+
+    tick(DUT, tfp, main_time);
+
+
+    DUT->valid_i = 0;
+
+    //Validate our 4th instruction ~~Random~~ SO WE CAN ISSUE IT NEXT CYCLE
+    DUT->cdb[0] = 0b1010000000000000000000001;
+    
+
+    assert(DUT->issue_table__DOT__inst_count == 6);
+    assert(DUT->issue_table__DOT__valid_inst == 0xF9);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0);
+    assert(DUT->valid_o == 0b000000);
+
+
+    tick(DUT, tfp, main_time);
+
+    /*  This cycle we do all that things at once, accept new instruction, 
+        issue instruction, accept data on multiple CDBs and validate a SB instruction
+    */
+
+
+    //Validate our 5th-8th instruction
+    DUT->cdb[0] = 0b1010100000000000000000001;
+    DUT->cdb[1] = 0b1011000000000000000000001;
+    DUT->cdb[2] = 0b1011100000000000000000001;
+    DUT->cdb[3] = 0b1100000000000000000000001;
+    //Validate our SB instruction
+    DUT->cdb[4] = 0b1000000000000000000000001;
+    //VALIDATE SB ENTRY
+    DUT->st_clear_vector_i = 1;
+
+    
+
+
+    assert(DUT->issue_table__DOT__inst_count == 6);
+    assert(DUT->issue_table__DOT__valid_inst == 0xF9);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0b00001000);
+    assert(DUT->valid_o == 0b000100);
+
+
+    tick(DUT, tfp, main_time);
+
+
+    DUT->st_clear_vector_i = 0;
+
+    assert(DUT->issue_table__DOT__inst_count == 5);
+    assert(DUT->issue_table__DOT__valid_inst == 0xF1);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0xF1);
+    assert(DUT->valid_o == 0b000100);
+
+
+    tick(DUT, tfp, main_time);
+
+
+    assert(DUT->issue_table__DOT__inst_count == 4);
+    assert(DUT->issue_table__DOT__valid_inst == 0xE1);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0xE1);
+    assert(DUT->valid_o == 0b000100);
+
+
+    tick(DUT, tfp, main_time);
+
+
+    assert(DUT->issue_table__DOT__inst_count == 3);
+    assert(DUT->issue_table__DOT__valid_inst == 0xC1);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0xC1);
+    assert(DUT->valid_o == 0b000100);
+
+
+    tick(DUT, tfp, main_time);
+
+
+    assert(DUT->issue_table__DOT__inst_count == 2);
+    assert(DUT->issue_table__DOT__valid_inst == 0x81);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0x81);
+    assert(DUT->valid_o == 0b000100);
+
+
+    tick(DUT, tfp, main_time);
+
+
+    assert(DUT->issue_table__DOT__inst_count == 1);
+    assert(DUT->issue_table__DOT__valid_inst == 0x01);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0x01);
+    assert(DUT->valid_o == 0b000100);
+
+
+    tick(DUT, tfp, main_time);
+
+
+    assert(DUT->issue_table__DOT__inst_count == 0);
+    assert(DUT->issue_table__DOT__valid_inst == 0x00);
+    assert(DUT->ready_o == 1);
+    assert(DUT->issue_table__DOT__inst_ready == 0x00);
+    assert(DUT->valid_o == 0b000000);
+
+
+    tick(DUT, tfp, main_time);
     tick(DUT, tfp, main_time);
 
 /*****************************************************************************/
+
+    printf("\n\n\nYOU DID IT DUMMY\n\n\n");
+
+
     tfp->close();
     delete DUT;
     delete tfp;

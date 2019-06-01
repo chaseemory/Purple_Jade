@@ -107,6 +107,7 @@ parameter v = 0;
 
 typedef struct packed
 {
+  logic [WORD_SIZE_P-1:0]                 predicted_pc;
   logic [$clog2(NUM_ARCH_REG)-1:0]        dest_id;
   logic [$clog2(NUM_ARCH_REG)-1:0]        source_1;
   logic [WORD_SIZE_P-1:0]                 source2_imm;
@@ -123,8 +124,8 @@ typedef struct packed
 parameter DECODED_INSTRUCTION_WIDTH       = $bits(decoded_instruction_t);
 
 parameter NUM_PHYS_REG                    = 128;
-parameter ROB_ENTRY 					  = 64;
-parameter SB_ENTRY 						  = 16;
+parameter ROB_ENTRY 					            = 64;
+parameter SB_ENTRY 						            = 16;
 
 typedef struct packed
 {
@@ -172,14 +173,15 @@ typedef struct packed
   } issued_instruction_t;
 
 typedef struct packed                               
-{       
+{
+  logic [WORD_SIZE_P-1:0]                 predicted_pc;
   logic                                   valid;
   logic [WORD_SIZE_P-1:0]                 pc;                                      
   logic                                   wb; /* CDB write back ?  */
 `ifdef DEBUG // for debug purpose
   logic [WORD_SIZE_P-1:0]                 result;  // keep it for debug purpose
-  logic [WORD_SIZE_P-1:0]                 addr;    // keep it for debug purpose
 `endif
+  logic [WORD_SIZE_P-1:0]                 addr;
   logic                                   is_spec;
   logic                                   is_cond_branch;
   logic [$clog2(BRANCH_CC_NUM)-1:0]       bcc_op;
