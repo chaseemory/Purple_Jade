@@ -13,6 +13,14 @@ module be_top
  // be/rob <-> fe/pc_next interface
  , output                                     be_fe_mispredict_o
  , output [WORD_SIZE_P-1:0]                   be_fe_redirected_pc_o
+
+// interface for data_memory
+ , output                                     data_mem_w_v_i
+ , output [WORD_SIZE_P-1:0]                   data_mem_w_addr_i
+ , output [WORD_SIZE_P-1:0]                   data_mem_w_data_i
+ , output                                     data_mem_r_v_i
+ , output [WORD_SIZE_P-1:0]                   data_mem_r_addr_i
+ , input  [WORD_SIZE_P-1:0]                   data_mem_r_data_o
 );
 
 // renamed <-> issue
@@ -213,6 +221,13 @@ commit_stage commit
  , .sb_commit_pt_o          (sb_commit_pt)
  , .rob_debug_valid_o       ()
  , .rob_debug_o             ()
+ // Data Mem interface
+ , .data_mem_w_v_i
+ , .data_mem_w_addr_i
+ , .data_mem_w_data_i
+ , .data_mem_r_v_i
+ , .data_mem_r_addr_i
+ , .data_mem_r_data_o
  , .*
 );
 /* verilator lint_on UNOPTFLAT */

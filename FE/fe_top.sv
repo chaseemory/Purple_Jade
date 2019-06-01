@@ -6,13 +6,16 @@
 module fe_top 
   #(parameter place_holder = -1
   )
-  ( input   logic clk_i
-  , input   logic reset_i
-  , input   logic ready_i
-  , input 	logic mis_predict
-  , input 	logic [WORD_SIZE_P-1:0] branch_mis_target
+  ( input   logic                                 clk_i
+  , input   logic                                 reset_i
+  , input   logic                                 ready_i
+  , input 	logic                                 mis_predict
+  , input 	logic [WORD_SIZE_P-1:0]               branch_mis_target
   , output  logic [DECODED_INSTRUCTION_WIDTH-1:0] final_decoded_instruction
   , output  logic valid_o
+  // interface for i_rom
+  , output  logic [WORD_SIZE_P-1:0]               i_rom_r_addr_i
+  , input   logic [WORD_SIZE_P-1:0]               i_rom_data_o
   );
   
 
@@ -46,10 +49,13 @@ module fe_top
     , .o(program_counter_fetch_r)
     ); /*verilator public_module*/
 
-  i_rom instruction_mem
-    ( .r_addr_i(program_counter_fetch_r[15:0])
-    , .data_o(instruction_fetch_r)
-    );
+  assign i_rom_r_addr_i       = program_counter_fetch_r;
+  assign instruction_fetch_r  = i_rom_data_o;
+
+  // i_rom instruction_mem
+  //   ( .r_addr_i(program_counter_fetch_r[15:0])
+  //   , .data_o(instruction_fetch_r)
+  //   );
 
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
