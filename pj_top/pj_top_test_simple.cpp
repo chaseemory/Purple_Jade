@@ -60,7 +60,7 @@ int main(int argc, char** argv, char** env) {
     
     DUT->reset_i = 0;
 
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < 1200; i++) {
         tick(DUT, tfp, main_time);
     }
     
