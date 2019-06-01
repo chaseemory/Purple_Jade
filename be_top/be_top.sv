@@ -219,8 +219,10 @@ commit_stage commit
  // to prev store check
  , .sb_wb_vector_o          (sb_wb_vector)
  , .sb_commit_pt_o          (sb_commit_pt)
+ `ifdef VERILATOR
  , .rob_debug_valid_o       ()
  , .rob_debug_o             ()
+ `endif
  // Data Mem interface
  , .data_mem_w_v_i
  , .data_mem_w_addr_i

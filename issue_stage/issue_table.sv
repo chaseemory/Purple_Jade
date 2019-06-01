@@ -57,6 +57,11 @@ module issue_table
 
   logic [$clog2(ISSUE_ENTRY)-1:0]                   chosen_ordered;
 
+  logic accepting_new_instruction, issuing_instruction, ready_o_n;
+  logic [$clog2(ISSUE_ENTRY)-1:0] new_instr_loc;
+  logic                           new_instr_loc_v;
+
+
   // STORE BUFFER NON-SENSE 
   logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]     store_buff_table;
   logic [ISSUE_ENTRY-1:0]                           store_buff_table_v;
@@ -250,8 +255,6 @@ module issue_table
 
 
   // DETERMINE WHERE NEXT INSTRUCTION WILL GO
-  logic [$clog2(ISSUE_ENTRY)-1:0] new_instr_loc;
-  logic                           new_instr_loc_v;
   bsg_priority_encode #(.width_p(ISSUE_ENTRY)
                        ,.lo_to_hi_p(1)
                       ) new_selector
@@ -262,7 +265,7 @@ module issue_table
     );
 
   // Instruction Count Logic / New Instruction Input Logic
-  logic accepting_new_instruction, issuing_instruction, ready_o_n;
+  
   assign accepting_new_instruction  = (ready_o & valid_i);
   assign issuing_instruction        = chosen_valid;         // A valid instruction has been chose to issue by Decoder
 

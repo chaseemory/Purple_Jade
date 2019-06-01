@@ -8,7 +8,7 @@ module pj_top_no_mem
 
  // interface for data_memory
  , output                             data_mem_w_v_i
- , output [$clog2(WORD_SIZE_P)-1:0]   data_mem_w_addr_i
+ , output [WORD_SIZE_P-1:0]           data_mem_w_addr_i
  , output [WORD_SIZE_P-1:0]           data_mem_w_data_i
  , output                             data_mem_r_v_i
  , output [WORD_SIZE_P-1:0]           data_mem_r_addr_i
