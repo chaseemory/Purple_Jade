@@ -1,5 +1,5 @@
 # Purple_Jade
-the best processor ever designed
+the best armv6-M Thumb processor ever designed
 
 ## Prerequesite
 ```
