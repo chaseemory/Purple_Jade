@@ -154,7 +154,7 @@ static void printIssued(Vpj_top* top) {
     cout << "| rs1  " << (((issued[3] & 0x7) << 4) | ((issued[2] >> 28) & 0x1f)) << " " << ((issued[2] >> 12) & 0xffff);
     cout << "| rs2  " << ((issued[1] >> 11) & 0xffff);
     cout << "| FU  " << printFU(((issued[0] >> 21) & 0x7));
-    cout << "| op  " << ((issued[0] >> 24) & 0x7) << endl;
+    cout << "| op  " << ((issued[0] >> 24) & 0x7) << "|issue vec " << (vluint32_t) top->pj_top->back_end->execute->issue_exe_v_i<< endl;
 }
 
 static void printRobWb(Vpj_top* top) {
@@ -180,6 +180,24 @@ static void printRobWb(Vpj_top* top) {
         cout << "| addr  " << ((wb >> 16) & 0xffff);
         cout << "| data  " << (wb & 0xffff);
     }
+}
+
+static void printPregWB(Vpj_top* top) {
+    vluint32_t v =  top->pj_top->back_end->commit->states->exe_w_v_i;
+    vluint32_t addr = top->pj_top->back_end->commit->states->exe_addr_i;
+    vluint32_t* data = top->pj_top->back_end->commit->states->exe_data_i;
+    bool first = true;
+
+    for (int i = 0; i < 7; i++) {
+        if (((v >> i) & 0x1)) {
+            if (first) {
+                cout << "reg validate" << endl;
+                first = false;
+            }
+            cout << "| reg " << hex << (int) ((addr >> i * 7) & 0x7f) << " " << getbits(data, 16 * i, 16) << endl;
+        }
+    }
+
 }
 
 static void printReg(Vpj_top* top, int num=0, bool one=false) {
@@ -368,6 +386,7 @@ int main(int argc, char** argv, char** env) {
                  cout << endl;
             }
 
+            printPregWB(top);
             // instructions writting back
             printRobWb(top);
             cout << endl;
@@ -391,6 +410,7 @@ int main(int argc, char** argv, char** env) {
                     cout << "| reg ";
                     cout << setw(4) << hex << reg_w(top);
                     cout << setw(4) << " " << hex << reg_data(top);
+                    cout << "| freeing " << hex << getbits(top->pj_top->back_end->commit->reorder_buffer->committing_instr,4,7);
                 }
                 vluint64_t mem_write = mem_v(top);
                 if (mem_write) {

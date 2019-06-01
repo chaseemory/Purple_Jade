@@ -6,9 +6,9 @@ module arch_state
 (input                                                  clk_i
  , input                                                reset_i
  // execute register write back
- , input [NUM_FU-1:0]                                   exe_w_v_i
- , input [NUM_FU-1:0][$clog2(NUM_PHYS_REG)-1:0]         exe_addr_i
- , input [NUM_FU-1:0][WORD_SIZE_P-1:0]                  exe_data_i
+ , input [NUM_FU-1:0]                                   exe_w_v_i  /*verilator public*/
+ , input [NUM_FU-1:0][$clog2(NUM_PHYS_REG)-1:0]         exe_addr_i /*verilator public*/
+ , input [NUM_FU-1:0][WORD_SIZE_P-1:0]                  exe_data_i /*verilator public*/
  // rob register clear
  , input                                                rob_phys_valid_i
  , input [$clog2(NUM_PHYS_REG)-1:0]                     rob_phys_reg_cl_i

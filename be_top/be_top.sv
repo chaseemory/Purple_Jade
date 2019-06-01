@@ -138,6 +138,7 @@ issue_table issue
  , .st_clear_vector_i    (st_clear_vector)
  // common data bus
  , .cdb                  (cdb)
+ , .reset_i              (reset_i | be_fe_mispredict_o)
  , .*
 );
 
