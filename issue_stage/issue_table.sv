@@ -159,9 +159,17 @@ module issue_table
 
 
   logic chosen_valid;
-  bsg_priority_encode #(.width_p(ISSUE_ENTRY)
-                       ,.lo_to_hi_p(1)
-                      ) chosen_selector
+  // bsg_priority_encode #(.width_p(ISSUE_ENTRY)
+  //                      ,.lo_to_hi_p(1)
+  //                     ) chosen_selector
+
+  //   ( .i(ordered_instr_ready)
+  //   , .addr_o(chosen_ordered) //[$clog2(ISSUE_ENTRY)-1:0])
+  //   , .v_o(chosen_valid)
+  //   );
+
+  priority_encoder #(.els_p(ISSUE_ENTRY)
+                    ) chosen_selector
 
     ( .i(ordered_instr_ready)
     , .addr_o(chosen_ordered) //[$clog2(ISSUE_ENTRY)-1:0])
@@ -260,10 +268,17 @@ module issue_table
 
 
   // DETERMINE WHERE NEXT INSTRUCTION WILL GO
-  bsg_priority_encode #(.width_p(ISSUE_ENTRY)
-                       ,.lo_to_hi_p(1)
-                      ) new_selector
+  // bsg_priority_encode #(.width_p(ISSUE_ENTRY)
+  //                      ,.lo_to_hi_p(1)
+  //                     ) new_selector
 
+  //   ( .i(~valid_inst)
+  //   , .addr_o(new_instr_loc)
+  //   , .v_o(new_instr_loc_v)
+  //   );
+
+  priority_encoder #(.els_p(ISSUE_ENTRY)) 
+    new_selector
     ( .i(~valid_inst)
     , .addr_o(new_instr_loc)
     , .v_o(new_instr_loc_v)
