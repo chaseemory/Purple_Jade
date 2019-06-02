@@ -14,6 +14,7 @@ pj_top.sv
 ../be_top/be_top.sv
 
 ../issue_stage/issue_table.sv	
+../issue_stage/priority_encoder.sv 
 ../issue_stage/prev_st_check.sv
 
 ../commit_stage/arch_state.sv	
