@@ -47,7 +47,7 @@ logic                                               sb_st_clear_valid;
 logic [$clog2(SB_ENTRY)-1:0]                        sb_st_clear_entry;
 
 // issued <-> execute
-logic  [NUM_FU-1:0]                                 issue_exe_v;
+logic  [NUM_FU-1:0]                                 issue_exe_v /*verilator public*/;
 issued_instruction_t                                issue_exe_entry /*verilator public*/;
 
 // issued <-> store check
