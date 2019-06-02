@@ -79,9 +79,9 @@ module issue_table
   */
   always_comb begin : store_buff_table_v_next_logic
 
-    for(int unsigned w = 0; w < ISSUE_ENTRY; w++) begin
-      store_buff_table_v_n[w] = (store_buff_table_v[w] | st_clear_vector_i[w]);
-    end // for(int unsigned w = 0; w < ISSUE_ENTRY; w++)
+    for(int unsigned i = 0; i < ISSUE_ENTRY; i++) begin
+      store_buff_table_v_n[i] = (store_buff_table_v[i] | st_clear_vector_i[i]);
+    end // for(int unsigned i = 0; i < ISSUE_ENTRY; i++)
 
   end // store_buff_table_v_next_logic
 
@@ -97,11 +97,11 @@ module issue_table
   
   always_comb begin : tag_match
 
-    for(int unsigned q = 0; q < ISSUE_ENTRY; q++) begin : instruction_to_match
+    for(int unsigned i = 0; i < ISSUE_ENTRY; i++) begin : instruction_to_match
 
-      for(int unsigned r = 0; r < NUM_FU; r++) begin : FU_to_match
-        src1_tag_match[q][r] = (valid_inst[q] & cdb[r].valid) ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source_1_id) : '0;
-        src2_tag_match[q][r] = (valid_inst[q] & cdb[r].valid) ? (cdb[r].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[q].source2_imm[$clog2(NUM_PHYS_REG)-1:0]) : '0;
+      for(int unsigned j = 0; j < NUM_FU; j++) begin : FU_to_match
+        src1_tag_match[i][j] = (valid_inst[i] & cdb[j].valid) ? (cdb[j].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[i].source_1_id) : '0;
+        src2_tag_match[i][j] = (valid_inst[i] & cdb[j].valid) ? (cdb[j].dest[$clog2(NUM_PHYS_REG)-1:0] == tabled_inst[i].source2_imm[$clog2(NUM_PHYS_REG)-1:0]) : '0;
       end // FU_to_match
 
     end // do_we_shift_instruction
@@ -147,12 +147,12 @@ module issue_table
   */
   always_comb begin : determine_which_instructions_are_ready
 
-    for(int unsigned m = 0; m < ISSUE_ENTRY; m++) begin : tabled_ready_instructions
-      inst_ready[m] = (tabled_inst[m].source_1_v & tabled_inst[m].source_2_v & valid_inst[m] & store_buff_table_v[m]);
+    for(int unsigned i = 0; i < ISSUE_ENTRY; i++) begin : tabled_ready_instructions
+      inst_ready[i] = (tabled_inst[i].source_1_v & tabled_inst[i].source_2_v & valid_inst[i] & store_buff_table_v[i]);
     end // ready_instructions     
 
-    for(int unsigned s = 0; s < ISSUE_ENTRY; s++) begin : feed_ordered_instructions_into_decoder
-      ordered_instr_ready[s] = (inst_ready[instr_order_table[s]] & order_inst_v[s]);
+    for(int unsigned i = 0; i < ISSUE_ENTRY; i++) begin : feed_ordered_instructions_into_decoder
+      ordered_instr_ready[i] = (inst_ready[instr_order_table[i]] & order_inst_v[i]);
     end // feed_ordered_instructions_into_decoder
 
   end // determine_which_instructions_are_ready
@@ -178,20 +178,20 @@ module issue_table
   */  
   always_comb begin : shift_ordered_table
 
-    for(int unsigned k = 0; k < ISSUE_ENTRY; k++) begin : do_we_shift_order_table_entry
-      order_inst_less[k] = (k < chosen_ordered);
+    for(int unsigned i = 0; i < ISSUE_ENTRY; i++) begin : do_we_shift_order_table_entry
+      order_inst_less[i] = (i < chosen_ordered);
     end // do_we_shift_instruction
 
-    for(int unsigned j = 0; j < ISSUE_ENTRY; j++) begin : shift_order_table_entry
+    for(int unsigned i = 0; i < ISSUE_ENTRY; i++) begin : shift_order_table_entry
 
-      case({chosen_valid, order_inst_less[j]})
+      case({chosen_valid, order_inst_less[i]})
         2'b10: begin
-          instr_order_table_n[j]  = instr_order_table[j+1];
-          order_inst_v_n[j]       = order_inst_v[j+1];
+          instr_order_table_n[i]  = instr_order_table[i+1];
+          order_inst_v_n[i]       = order_inst_v[i+1];
         end
         default: begin
-          instr_order_table_n[j]  = instr_order_table[j];
-          order_inst_v_n[j]       = order_inst_v[j];
+          instr_order_table_n[i]  = instr_order_table[i];
+          order_inst_v_n[i]       = order_inst_v[i];
         end
 
       endcase // tabled_inst_less[j]
@@ -297,8 +297,9 @@ module issue_table
 
   always_comb begin : setting_output_valid_for_FU
 
-    for(int unsigned t = 0; t < NUM_FU; t++)                         begin : FU_and_issuing_instruction_to_be_valid
-      valid_o_n[t] = chosen_fu[t] & issuing_instruction;
+    for(int unsigned i = 0; i < NUM_FU; i++)                         begin : FU_and_issuing_instruction_to_be_valid
+      valid_o_n[i] = chosen_fu[i] & issuing_instruction;
+      // valid_o[i] = chosen_fu[i] & issuing_instruction;
     end // FU_and_issuing_instruction
 
   end // setting_output_valid_for_FU
@@ -328,13 +329,13 @@ module issue_table
 
     else begin : normal_operation
 
-      for(int unsigned l = 0; l < ISSUE_ENTRY; l++)   begin : shift_ordered_instruction_and_insert_new_instruction
-        instr_order_table[l]  <= instr_order_table_n[l];
-        order_inst_v[l]       <= order_inst_v_n[l];
+      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)   begin : shift_ordered_instruction_and_insert_new_instruction
+        instr_order_table[i]  <= instr_order_table_n[i];
+        order_inst_v[i]       <= order_inst_v_n[i];
       end // shift_ordered_instruction_and_insert_new_instruction
       
-      for(int unsigned x = 0; x < ISSUE_ENTRY; x++)   begin : update_store_buff_valid
-        store_buff_table_v[x] <= store_buff_table_v_n[x];
+      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)   begin : update_store_buff_valid
+        store_buff_table_v[i] <= store_buff_table_v_n[i];
       end // update_store_buff_valid
 
 
@@ -352,16 +353,16 @@ module issue_table
         store_buff_table_v[chosen]  <= '0;
       end // clear_issued_instr_location
 
-      for(int unsigned y = 0; y < ISSUE_ENTRY; y++)   begin : ingest_data_on_CDB
+      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)   begin : ingest_data_on_CDB
 
-        if(src1_tag_v[y] & ~tabled_inst[y].source_1_v)  begin : ingest_data_1
-          tabled_inst[y].source_1_data <= cdb[src1_tag_index[y]].result;
-          tabled_inst[y].source_1_v    <= 1'b1;
+        if(src1_tag_v[i] & ~tabled_inst[i].source_1_v)  begin : ingest_data_1
+          tabled_inst[i].source_1_data <= cdb[src1_tag_index[i]].result;
+          tabled_inst[i].source_1_v    <= 1'b1;
         end // ingest_data_1
 
-        if(src2_tag_v[y] & ~tabled_inst[y].source_2_v)  begin : ingest_data_2
-          tabled_inst[y].source2_imm_data <= cdb[src2_tag_index[y]].result;
-          tabled_inst[y].source_2_v       <= 1'b1;
+        if(src2_tag_v[i] & ~tabled_inst[i].source_2_v)  begin : ingest_data_2
+          tabled_inst[i].source2_imm_data <= cdb[src2_tag_index[i]].result;
+          tabled_inst[i].source_2_v       <= 1'b1;
         end // ingest_data_2
 
       end // ingest_data_on_CDB
@@ -376,6 +377,15 @@ module issue_table
 
   // Assign instruction outputs
   assign instruction_o  = chosen_instruction_r;
-  assign valid_o        = valid_o_r;
+
+  // assign instruction_o = chosen_valid ? tabled_inst[chosen] : '0;
+
+  always_comb begin
+    for(int unsigned i = 0; i < NUM_FU; i++) begin
+      valid_o[i]        = valid_o_r[i] & ~reset_i;
+    end
+  end
+
+  // assign valid_o        = valid_o_r;
 
 endmodule // issue_table
