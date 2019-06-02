@@ -8,7 +8,7 @@ module pj_top
   );
 
   logic                   data_mem_w_v_i;
-  logic                   data_mem_w_addr_i;
+  logic [WORD_SIZE_P-1:0] data_mem_w_addr_i;
   logic [WORD_SIZE_P-1:0] data_mem_w_data_i;
   logic                   data_mem_r_v_i;
   logic [WORD_SIZE_P-1:0] data_mem_r_addr_i;

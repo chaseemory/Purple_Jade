@@ -61,6 +61,11 @@ module issue_table
   logic [$clog2(ISSUE_ENTRY)-1:0] new_instr_loc;
   logic                           new_instr_loc_v;
 
+  // REGISTERED OUTPUTS SIGNALS
+  issued_instruction_t                              chosen_instruction_r;
+  logic [NUM_FU-1:0]                                valid_o_n;
+  logic [NUM_FU-1:0]                                valid_o_r;
+
 
   // STORE BUFFER NON-SENSE 
   logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]     store_buff_table;
@@ -293,7 +298,7 @@ module issue_table
   always_comb begin : setting_output_valid_for_FU
 
     for(int unsigned t = 0; t < NUM_FU; t++)                         begin : FU_and_issuing_instruction_to_be_valid
-      valid_o[t] = chosen_fu[t] & issuing_instruction;
+      valid_o_n[t] = chosen_fu[t] & issuing_instruction;
     end // FU_and_issuing_instruction
 
   end // setting_output_valid_for_FU
@@ -312,10 +317,12 @@ module issue_table
         store_buff_table_v[i] <= '0;
       end // reset
 
-      instr_order_table[ISSUE_ENTRY] <= '0;
-      order_inst_v[ISSUE_ENTRY]      <= '0;
-      inst_count      <= '0;
-      ready_o         <= '0;
+      instr_order_table[ISSUE_ENTRY]  <= '0;
+      order_inst_v[ISSUE_ENTRY]       <= '0;
+      inst_count                      <= '0;
+      ready_o                         <= '0;
+      valid_o_r                       <= '0;
+      chosen_instruction_r            <= '0;
 
     end // reset_logic
 
@@ -345,27 +352,30 @@ module issue_table
         store_buff_table_v[chosen]  <= '0;
       end // clear_issued_instr_location
 
-      for(int unsigned v = 0; v < ISSUE_ENTRY; v++)   begin : ingest_data_on_CDB
+      for(int unsigned y = 0; y < ISSUE_ENTRY; y++)   begin : ingest_data_on_CDB
 
-        if(src1_tag_v[v] & ~tabled_inst[v].source_1_v)  begin : ingest_data_1
-          tabled_inst[v].source_1_data <= cdb[src1_tag_index[v]].result;
-          tabled_inst[v].source_1_v    <= 1'b1;
+        if(src1_tag_v[y] & ~tabled_inst[y].source_1_v)  begin : ingest_data_1
+          tabled_inst[y].source_1_data <= cdb[src1_tag_index[y]].result;
+          tabled_inst[y].source_1_v    <= 1'b1;
         end // ingest_data_1
 
-        if(src2_tag_v[v] & ~tabled_inst[v].source_2_v)  begin : ingest_data_2
-          tabled_inst[v].source2_imm_data <= cdb[src2_tag_index[v]].result;
-          tabled_inst[v].source_2_v       <= 1'b1;
+        if(src2_tag_v[y] & ~tabled_inst[y].source_2_v)  begin : ingest_data_2
+          tabled_inst[y].source2_imm_data <= cdb[src2_tag_index[y]].result;
+          tabled_inst[y].source_2_v       <= 1'b1;
         end // ingest_data_2
 
       end // ingest_data_on_CDB
 
       // MISC signals
-      ready_o     <= ready_o_n;
-      inst_count  <= inst_count_n;
+      ready_o               <= ready_o_n;
+      inst_count            <= inst_count_n;
+      valid_o_r             <= valid_o_n;
+      chosen_instruction_r  <= chosen_valid ? tabled_inst[chosen] : '0;
     end // normal_operation
   end // always_ff @(posedge clk_i)
 
   // Assign instruction outputs
-  assign instruction_o = chosen_valid ? tabled_inst[chosen] : '0;
+  assign instruction_o  = chosen_instruction_r;
+  assign valid_o        = valid_o_r;
 
 endmodule // issue_table
