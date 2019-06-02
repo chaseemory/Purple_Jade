@@ -32,15 +32,16 @@ module rename_stage
 
 // io casting
 decoded_instruction_t decoded;
-renamed_instruction_t renamed;
+renamed_instruction_t renamed, renamed_r, renamed_n;
 commit_rename_t commit_entry;
 rename_rob_t rename_rob;
 
 // io assignment
 assign decoded = decoded_i;
-assign renamed_o = renamed;
+assign renamed_o = renamed_r;
 assign commit_entry = commit_rename_i;
 assign rename_rob_o = rename_rob;
+assign renamed_n = (issue_rename_ready_i) ? renamed : renamed_r;
 
 // speculative renaming lookup tables and freelist
 logic [NUM_ARCH_REG-1:0][$clog2(NUM_PHYS_REG)-1:0] lut_spec_n, lut_spec_q /*verilator public*/;
@@ -72,8 +73,10 @@ assign prev_store_cleared_n = (rename_sb_v_o) ? 1'b1 :
   ((sb_st_clear_valid_i && sb_st_clear_entry_i == sb_num_q) ? 1'b0 : prev_store_cleared);
 
 // valid ready signals: demanding
+logic  renamed_v, renamed_v_r;
 assign rename_decode_ready_o = (fl_spec_num != 0) && (!roll_back) && issue_rename_ready_i && rob_ready_i && decoded_v_i;
-assign renamed_v_o = issue_rename_ready_i && rename_rob_v_o;
+assign renamed_v = (issue_rename_ready_i) ? (rename_rob_v_o) : renamed_v_r;
+assign renamed_v_o = renamed_v_r;
 assign rename_rob_v_o = rename_decode_ready_o & decoded_v_i;
 
 assign renamed.pc = decoded.pc;
@@ -128,7 +131,7 @@ always_comb
     renamed.dest_id  =  {{REG_PAD_WIDTH{1'b0}}, decoded.dest_id};
     
     // renaming logics
-    if (renamed_v_o)
+    if (renamed_v)
       begin
         // translating sources
         renamed.source_1 = lut_spec_q[decoded.source_1];
@@ -204,6 +207,8 @@ always_ff @(posedge clk_i)
         `endif
         sb_num_q            <= '0;
         prev_store_cleared  <= '0;
+        renamed_r           <= '0;
+        renamed_v_r         <= '0;
       end 
     else
       begin
@@ -214,6 +219,8 @@ always_ff @(posedge clk_i)
         fl_spec_num <= fl_spec_num_n;
         sb_num_q <= sb_num_n;
         prev_store_cleared <= prev_store_cleared_n;
+        renamed_r           <= renamed_n;
+        renamed_v_r         <= renamed_v;        
       end    
   end
 
