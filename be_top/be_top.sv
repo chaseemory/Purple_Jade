@@ -55,7 +55,7 @@ logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]       issue_sb_num_vector /*verila
 logic [ISSUE_ENTRY-1:0]                             st_clear_vector     /*verilator public*/;
 
 // issue <-> execute common data bus
-CDB_t                                               cdb [NUM_FU-1:0];
+CDB_t                                               cdb [NUM_FU-1:0] /*verilator public*/;
 
 // execute <-> commit/write physical reg
 `ifdef DEBUG

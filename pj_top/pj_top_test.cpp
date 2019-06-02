@@ -217,6 +217,21 @@ static void printReg(Vpj_top_pj_top_no_mem* top, int num=0, bool one=false) {
     }
 }
 
+static void printBus(Vpj_top_pj_top_no_mem* top) {
+    vluint32_t* cdb = top->back_end->cdb;
+    bool first = true;
+    for (int i = 0; i < 7; i++) {
+        if (getbits(&cdb[i], 27, 1)) {
+            if (first) {
+                cout << "on bus " << endl;
+                first = false;
+            }
+            cout << "| bus # " << i << " reg " << getbits(&cdb[i], 20, 7) << " data " << getbits(&cdb[i], 0, 16) << endl;
+        }
+    }
+
+}
+
 static vluint64_t ripLut(vluint32_t* lut, int num) {
     if ((num / 32) == ((num + 6) / 32)) {
         return (lut[num / 32] >> (num % 32)) & 0x7f;
@@ -388,7 +403,10 @@ int main(int argc, char** argv, char** env) {
                  cout << endl;
             }
 
+            printBus(top);
+            cout << endl;
             printPregWB(top);
+            cout << endl;
             // instructions writting back
             printRobWb(top);
             cout << endl;

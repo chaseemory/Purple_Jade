@@ -52,7 +52,6 @@ assign exe_rob_o[`NOOP_FU] = '0;
 assign exe_reg_o[`NOOP_FU] = '0;
 
 // common data bus assignments
-assign cdb_o[`ALU_FU] = exe_rob_o[`ALU_FU][ROB_WB_WIDTH-1-:CDB_WIDTH];
 assign cdb_o[`LOGICAL_FU] = exe_rob_o[`LOGICAL_FU][ROB_WB_WIDTH-1-:CDB_WIDTH];
 assign cdb_o[`MUL_FU] = exe_rob_o[`MUL_FU][ROB_WB_WIDTH-1-:CDB_WIDTH];
 
@@ -66,6 +65,7 @@ fu_alu alu_fu
  ,.reg_dest_i(issued.dest_id)
  ,.alu_rob_o (exe_rob_o[`ALU_FU])
  ,.alu_reg_o (exe_reg_o[`ALU_FU])
+ ,.cdb_o     (cdb_o[`ALU_FU])
  ,.*
 );
 
@@ -96,7 +96,7 @@ fu_branch branch_fu
 );
 
 fu_mult mult_fu
-( .exe_v_i    (issue_exe_v_i[`MUL_FU])
+( .exe_v_i    (issue_exe_v_i[`MUL_FU] & ~mispredict_i)
  ,.operand1_i (issued.source_1_data)
  ,.operand2_i (operand2)
  ,.rob_dest_i (issued.rob_dest)
@@ -107,7 +107,7 @@ fu_mult mult_fu
 );
 
 fu_lsu lsu_fu
-( .exe_v_i    (issue_exe_v_i[`MEM_FU])
+( .exe_v_i    (issue_exe_v_i[`MEM_FU] & ~mispredict_i)
  ,.opcode_i   (issued.opcode)
  ,.operand1_i (issued.source_1_data)
  ,.operand2_i (issued.source2_imm_data)
