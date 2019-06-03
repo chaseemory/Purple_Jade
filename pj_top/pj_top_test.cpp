@@ -184,20 +184,20 @@ static void printRobWb(Vpj_top_pj_top_no_mem* top) {
 }
 
 static void printPregWB(Vpj_top_pj_top_no_mem* top) {
-    vluint32_t v =  top->back_end->commit->states->exe_w_v_i;
-    vluint32_t addr = top->back_end->commit->states->exe_addr_i;
-    vluint32_t* data = top->back_end->commit->states->exe_data_i;
+    // vluint32_t v =  top->back_end->commit->states->exe_w_v_i;
+    // vluint32_t addr = top->back_end->commit->states->exe_addr_i;
+    // vluint32_t* data = top->back_end->commit->states->exe_data_i;
     bool first = true;
 
-    for (int i = 0; i < 7; i++) {
-        if (((v >> i) & 0x1)) {
-            if (first) {
-                cout << "reg validate" << endl;
-                first = false;
-            }
-            cout << "| reg " << hex << (int) ((addr >> i * 7) & 0x7f) << " " << getbits(data, 16 * i, 16) << endl;
-        }
-    }
+    // for (int i = 0; i < 7; i++) {
+    //     if (((v >> i) & 0x1)) {
+    //         if (first) {
+    //             cout << "reg validate" << endl;
+    //             first = false;
+    //         }
+    //         cout << "| reg " << hex << (int) ((addr >> i * 7) & 0x7f) << " " << getbits(data, 16 * i, 16) << endl;
+    //     }
+    // }
 
 }
 

@@ -26,6 +26,8 @@ module commit_stage
  , input  [CDB_SB_WIDTH-1:0]                            exe_sb_i
  // CDB-rob interface
  , input  [ROB_WB_WIDTH-1:0]                            cdb_i [NUM_FU-1:0]
+ // CDB Intergace for RF
+ , input   CDB_t                                        cdb [NUM_FU-1:0]
  // execute-memory interface
  , input  [WORD_SIZE_P-1:0]                             exe_mem_addr_i
  , output [WORD_SIZE_P-1:0]                             exe_mem_data_o
@@ -99,6 +101,7 @@ arch_state states
  , .flag_rob_o       	  (flag_rob)
  , .rob_phys_reg_set_i   (rob_phys_reg_set)
  , .rob_phys_mispredict_i(rob_mispredict_o)
+ , .cdb_i                (cdb)
  , .*
 );
 
