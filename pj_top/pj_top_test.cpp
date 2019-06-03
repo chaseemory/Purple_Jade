@@ -348,15 +348,15 @@ int main(int argc, char** argv, char** env) {
                 continue;
             }
 
-            if (cmd == string("wfs")) {
-                cout << "wfs vector " << endl;
-                vluint32_t* v = &(top->back_end->st_clear_vector);
-                vluint32_t* num = top->back_end->issue_sb_num_vector;
-                for (int i = 0; i < 32; i++) {
-                    cout << "| " << getbits(num, i * 4, 4) << " " << getbits(v, i, 1) << endl;
-                }
-                continue;
-            }
+            // if (cmd == string("wfs")) {
+            //     cout << "wfs vector " << endl;
+            //     vluint32_t* v = &(top->back_end->st_clear_vector);
+            //     vluint32_t* num = top->back_end->issue_sb_num_vector;
+            //     for (int i = 0; i < 32; i++) {
+            //         cout << "| " << getbits(num, i * 4, 4) << " " << getbits(v, i, 1) << endl;
+            //     }
+            //     continue;
+            // }
 
             if (cmd == string("fe")) {
                 printDecoded(top);
