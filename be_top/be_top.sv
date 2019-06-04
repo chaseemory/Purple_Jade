@@ -195,6 +195,8 @@ commit_stage commit
  , .exe_sb_i                (lsu_sb_entry)
  // rob write back
  , .cdb_i                   (exe_rob_wb)
+ // CDB Interface
+ , .cdb                     (cdb)
  // execute memory
  , .exe_mem_addr_i          (lsu_mem_addr)
  , .exe_mem_data_o          (mem_lsu_data)

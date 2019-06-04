@@ -6,9 +6,12 @@ module arch_state
 (input                                                  clk_i
  , input                                                reset_i
  // execute register write back
- , input [NUM_FU-1:0]                                   exe_w_v_i  /*verilator public*/
- , input [NUM_FU-1:0][$clog2(NUM_PHYS_REG)-1:0]         exe_addr_i /*verilator public*/
- , input [NUM_FU-1:0][WORD_SIZE_P-1:0]                  exe_data_i /*verilator public*/
+ // , input [NUM_FU-1:0]                                   exe_w_v_i  /*verilator public*/
+ // , input [NUM_FU-1:0][$clog2(NUM_PHYS_REG)-1:0]         exe_addr_i /*verilator public*/
+ // , input [NUM_FU-1:0][WORD_SIZE_P-1:0]                  exe_data_i /*verilator public*/
+
+ , input   CDB_t                                        cdb_i [NUM_FU-1:0]
+
  // rob register clear
  , input                                                rob_phys_valid_i
  , input [$clog2(NUM_PHYS_REG)-1:0]                     rob_phys_reg_cl_i
@@ -56,16 +59,16 @@ always_comb
     // regfile forwarding units
     for (int unsigned i = 0; i < NUM_FU; i++)
       begin
-        if (exe_w_v_i[i] && exe_addr_i[i] == issue_read_rs1_i)
+        if (cdb_i[i].valid && cdb_i[i].dest == issue_read_rs1_i)
           begin
             rs1_valid_o = 1'b1;
-            rs1_data_o = exe_data_i[i];
+            rs1_data_o = cdb_i[i].result;
           end  
 
-        if (exe_w_v_i[i] && exe_addr_i[i] == issue_read_rs2_i)
+        if (cdb_i[i].valid && cdb_i[i].dest == issue_read_rs2_i)
           begin
             rs2_valid_o = 1'b1;
-            rs2_data_o = exe_data_i[i];
+            rs2_data_o = cdb_i[i].result;
           end
       end
   end
@@ -81,10 +84,10 @@ always_comb
     // and valid bit
     for (int unsigned i = 0; i < NUM_FU; i++)
       begin
-        if (exe_w_v_i[i])
+        if (cdb_i[i].valid)
           begin
-            reg_n[exe_addr_i[i]] = exe_data_i[i];
-            valid_n[exe_addr_i[i]] = 1'b1;  // set valid
+            reg_n[cdb_i[i].dest] = cdb_i[i].result;
+            valid_n[cdb_i[i].dest] = 1'b1;  // set valid
           end
       end
   	// commit stage free a register

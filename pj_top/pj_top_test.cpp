@@ -184,20 +184,20 @@ static void printRobWb(Vpj_top_pj_top_no_mem* top) {
 }
 
 static void printPregWB(Vpj_top_pj_top_no_mem* top) {
-    vluint32_t v =  top->back_end->commit->states->exe_w_v_i;
-    vluint32_t addr = top->back_end->commit->states->exe_addr_i;
-    vluint32_t* data = top->back_end->commit->states->exe_data_i;
+    // vluint32_t v =  top->back_end->commit->states->exe_w_v_i;
+    // vluint32_t addr = top->back_end->commit->states->exe_addr_i;
+    // vluint32_t* data = top->back_end->commit->states->exe_data_i;
     bool first = true;
 
-    for (int i = 0; i < 7; i++) {
-        if (((v >> i) & 0x1)) {
-            if (first) {
-                cout << "reg validate" << endl;
-                first = false;
-            }
-            cout << "| reg " << hex << (int) ((addr >> i * 7) & 0x7f) << " " << getbits(data, 16 * i, 16) << endl;
-        }
-    }
+    // for (int i = 0; i < 7; i++) {
+    //     if (((v >> i) & 0x1)) {
+    //         if (first) {
+    //             cout << "reg validate" << endl;
+    //             first = false;
+    //         }
+    //         cout << "| reg " << hex << (int) ((addr >> i * 7) & 0x7f) << " " << getbits(data, 16 * i, 16) << endl;
+    //     }
+    // }
 
 }
 
@@ -348,15 +348,15 @@ int main(int argc, char** argv, char** env) {
                 continue;
             }
 
-            if (cmd == string("wfs")) {
-                cout << "wfs vector " << endl;
-                vluint32_t* v = &(top->back_end->st_clear_vector);
-                vluint32_t* num = top->back_end->issue_sb_num_vector;
-                for (int i = 0; i < 32; i++) {
-                    cout << "| " << getbits(num, i * 4, 4) << " " << getbits(v, i, 1) << endl;
-                }
-                continue;
-            }
+            // if (cmd == string("wfs")) {
+            //     cout << "wfs vector " << endl;
+            //     vluint32_t* v = &(top->back_end->st_clear_vector);
+            //     vluint32_t* num = top->back_end->issue_sb_num_vector;
+            //     for (int i = 0; i < 32; i++) {
+            //         cout << "| " << getbits(num, i * 4, 4) << " " << getbits(v, i, 1) << endl;
+            //     }
+            //     continue;
+            // }
 
             if (cmd == string("fe")) {
                 printDecoded(top);
