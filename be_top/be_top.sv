@@ -1,21 +1,31 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
 `include "rename_def.svh"
+`endif
 
 module be_top
 (input                                        clk_i
  , input                                      reset_i
  // fe/fifo <-> be/rename interface
- , input  [DECODED_INSTRUCTION_WIDTH-1:0]     decoded_i
- , input                                      decoded_v_i
+ , input  [DECODED_INSTRUCTION_WIDTH-1:0]     decoded_i /*verilator public*/
+ , input                                      decoded_v_i /*verilator public*/
  , output                                     rename_decode_ready_o
  // be/rob <-> fe/pc_next interface
  , output                                     be_fe_mispredict_o
  , output [WORD_SIZE_P-1:0]                   be_fe_redirected_pc_o
+
+// interface for data_memory
+ , output                                     data_mem_w_v_i
+ , output [WORD_SIZE_P-1:0]                   data_mem_w_addr_i
+ , output [WORD_SIZE_P-1:0]                   data_mem_w_data_i
+ , output                                     data_mem_r_v_i
+ , output [WORD_SIZE_P-1:0]                   data_mem_r_addr_i
+ , input  [WORD_SIZE_P-1:0]                   data_mem_r_data_o
 );
 
 // renamed <-> issue
 logic                                               rename_issue_v;
-logic [RENAMED_INSTRUCTION_WIDTH-1:0]               rename_issue_entry;
+logic [RENAMED_INSTRUCTION_WIDTH-1:0]               rename_issue_entry /*verilator public*/;
 logic                                               issue_renamed_ready;
 
 // rename <-> commit/freeing registers
@@ -26,7 +36,7 @@ logic [COMMIT_RENAME_WIDTH-1:0]                     commit_rename_free_reg;
 logic                                               rob_sb_rename_ready;
 logic [$clog2(ROB_ENTRY)-1:0]                       rob_rename_num;
 logic [$clog2(SB_ENTRY)-1:0]                        sb_rename_num;
-logic [RENAME_ROB_ENTRY_WIDTH-1:0]                  rename_rob_entry;
+logic [RENAME_ROB_ENTRY_WIDTH-1:0]                  rename_rob_entry /*verilator public*/;
 logic                                               rename_rob_v;
 logic                                               rename_sb_v;
 logic                                               rob_ready, sb_ready;
@@ -37,15 +47,15 @@ logic                                               sb_st_clear_valid;
 logic [$clog2(SB_ENTRY)-1:0]                        sb_st_clear_entry;
 
 // issued <-> execute
-logic  [NUM_FU-1:0]                                 issue_exe_v;
-issued_instruction_t                                issue_exe_entry;
+logic  [NUM_FU-1:0]                                 issue_exe_v /*verilator public*/;
+issued_instruction_t                                issue_exe_entry /*verilator public*/;
 
 // issued <-> store check
-logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]       issue_sb_num_vector;
-logic [ISSUE_ENTRY-1:0]                             st_clear_vector;
+logic [ISSUE_ENTRY-1:0][$clog2(SB_ENTRY)-1:0]       issue_sb_num_vector /*verilator public*/;
+logic [ISSUE_ENTRY-1:0]                             st_clear_vector     /*verilator public*/;
 
 // issue <-> execute common data bus
-CDB_t                                               cdb [NUM_FU-1:0];
+CDB_t                                               cdb [NUM_FU-1:0] /*verilator public*/;
 
 // execute <-> commit/write physical reg
 `ifdef DEBUG
@@ -136,6 +146,7 @@ issue_table issue
  , .st_clear_vector_i    (st_clear_vector)
  // common data bus
  , .cdb                  (cdb)
+ , .reset_i              (reset_i | be_fe_mispredict_o)
  , .*
 );
 
@@ -184,6 +195,8 @@ commit_stage commit
  , .exe_sb_i                (lsu_sb_entry)
  // rob write back
  , .cdb_i                   (exe_rob_wb)
+ // CDB Interface
+ , .cdb                     (cdb)
  // execute memory
  , .exe_mem_addr_i          (lsu_mem_addr)
  , .exe_mem_data_o          (mem_lsu_data)
@@ -209,8 +222,17 @@ commit_stage commit
  // to prev store check
  , .sb_wb_vector_o          (sb_wb_vector)
  , .sb_commit_pt_o          (sb_commit_pt)
+ `ifdef VERILATOR
  , .rob_debug_valid_o       ()
  , .rob_debug_o             ()
+ `endif
+ // Data Mem interface
+ , .data_mem_w_v_i
+ , .data_mem_w_addr_i
+ , .data_mem_w_data_i
+ , .data_mem_r_v_i
+ , .data_mem_r_addr_i
+ , .data_mem_r_data_o
  , .*
 );
 /* verilator lint_on UNOPTFLAT */

@@ -1,5 +1,7 @@
-`include "Purple_Jade_pkg.svh";
+`ifdef VERILATOR
+`include "Purple_Jade_pkg.svh"
 `include "rename_def.svh";
+`endif
 
 module rob
 (input                                      clk_i
@@ -15,13 +17,14 @@ module rob
  // rob-physical register interface
  , output                                   rob_phys_valid_o
  , output [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_cl_o
+ , output [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_set_o
  // rob-store buffer interface: pop signal to store buffer
  , output                                   rob_sb_valid_o
  , output                                   rob_mispredict_o
- , output [WORD_SIZE_P-1:0]                 rob_fe_redirected_pc_o
+ , output [WORD_SIZE_P-1:0]                 rob_fe_redirected_pc_o /*verilator public*/
  // rename-commit interface
- , output                                   rob_rename_valid_o
- , output [COMMIT_RENAME_WIDTH-1:0]         rob_rename_entry_o
+ , output                                   rob_rename_valid_o  /*verilator public*/
+ , output [COMMIT_RENAME_WIDTH-1:0]         rob_rename_entry_o  /*verilator public*/
  // commit-flag interface
  , output                                   rob_flag_valid_o
  , output [NUM_FLAGS*2-1:0]                 rob_flag_o
@@ -34,41 +37,40 @@ module rob
 );
 
 // input output casting
-rob_wb_t cdb [NUM_FU-1:0];
+rob_wb_t cdb [NUM_FU-1:0] /*verilator public*/;
 assign cdb = cdb_i;
 
 // rob
 `ifdef DEBUG
-rob_t                                   rob_q [ROB_ENTRY-1:0];
+rob_t                                   rob_q [ROB_ENTRY-1:0] /*verilator public*/;
 rob_t                                   rob_n [ROB_ENTRY-1:0];
 `else
 rob_t [ROB_ENTRY-1:0]                   rob_q, rob_n;
 `endif
 logic  [$clog2(ROB_ENTRY)-1:0]          rob_alloc_pt, rob_alloc_pt_n;
 logic  [$clog2(ROB_ENTRY)-1:0]          rob_commit_pt, rob_commit_pt_n;
-logic  [$clog2(ROB_ENTRY):0]            rob_num, rob_num_n;
+logic  [$clog2(ROB_ENTRY):0]            rob_num, rob_num_n /*verilator public*/;
 
 // instruction being committed
-rob_t                                   committing_instr;
+rob_t                                   committing_instr/*verilator public*/;
 
 // ready valid signals
 assign rob_rename_ready_o = (rob_num != 0) & ~rob_mispredict_o;
 
 // committing a store instruction
 assign committing_instr  = rob_q[rob_commit_pt];
-assign rob_sb_valid_o = committing_instr.wb & committing_instr.is_store & ~rob_mispredict_o;
+assign rob_sb_valid_o = committing_instr.wb & committing_instr.is_store & ~rob_mispredict_o & committing_instr.valid;
 assign rob_rename_entry_num_o = rob_alloc_pt;
 
 // committing a reg write instruction
 // clear freed register
 // not a store, wb and write enabled
 // committing_instr.freed is going to be freed, value contained is no longer valid
-assign rob_phys_valid_o = committing_instr.wb & committing_instr.w_v & ~committing_instr.is_store & ~rob_mispredict_o;
+assign rob_phys_valid_o = committing_instr.wb & committing_instr.w_v & ~committing_instr.is_store & ~rob_mispredict_o & committing_instr.valid;
 assign rob_phys_reg_cl_o = committing_instr.freed_reg;
-
+assign rob_phys_reg_set_o = committing_instr.addr[0+:$clog2(NUM_PHYS_REG)];
 // misprediction detection variables
-logic 					prev_spec_branch_n, prev_spec_branch;
-logic [WORD_SIZE_P-1:0] predicted_pc_n, predicted_pc;
+logic [WORD_SIZE_P-1:0] predicted_pc;
 logic [WORD_SIZE_P-1:0]	condition_pc;
 logic 					condition_taken;
 logic 					N, Z, V, C;  // current flags
@@ -80,16 +82,13 @@ assign V = flag_rob_i[v];
 
 // condition_pc is targeted address for conditional branch
 assign condition_pc = (condition_taken) ? (committing_instr.resolved_pc) : (committing_instr.pc + 1);
-assign prev_spec_branch_n = (committing_instr.wb & ~rob_mispredict_o) ? committing_instr.is_spec : prev_spec_branch;  // previous instruction commited is a speculative
-assign predicted_pc_n = (committing_instr.wb & ~rob_mispredict_o) ? ((committing_instr.is_cond_branch) ? condition_pc  // correct address to jump to
-		: committing_instr.resolved_pc) : predicted_pc;
+assign predicted_pc = (committing_instr.is_cond_branch) ? condition_pc : committing_instr.resolved_pc;
 // previous speculative branch and current pc does not match
-assign rob_mispredict_o = (committing_instr.pc != predicted_pc) && (rob_num != ROB_ENTRY) && committing_instr.valid
-							&& prev_spec_branch;  // mismatch of pcs
+assign rob_mispredict_o = (committing_instr.predicted_pc != predicted_pc) && committing_instr.valid && committing_instr.is_spec && committing_instr.wb;  // mismatch of pcs
 assign rob_fe_redirected_pc_o = predicted_pc;
 
 // to renaming
-assign rob_rename_valid_o = committing_instr.wb &  ~rob_mispredict_o;
+assign rob_rename_valid_o = committing_instr.wb &  ~rob_mispredict_o & committing_instr.valid;
 commit_rename_t rename_entry;
 assign rename_entry.w_v = committing_instr.w_v;
 // used to update non speculative renaming table
@@ -161,8 +160,13 @@ always_comb
             for (int unsigned j = 0; j < NUM_FU; j++)
               begin
                 // not written back, rob entry match
+                `ifdef VERILATOR
                 if (!rob_q[i].wb && cdb[j].cdb.valid 
                     && cdb[j].rob_dest == $clog2(ROB_ENTRY)'(i))
+                `else 
+                if (!rob_q[i].wb && cdb[j].cdb.valid 
+                    && cdb[j].rob_dest == i)
+                `endif 
                   begin
                     rob_n[i].wb = 1'b1;  // written back
                     rob_n[i].flags = cdb[j].cdb.flags;
@@ -212,8 +216,6 @@ always_ff @(posedge clk_i)
         rob_alloc_pt     <= '0;
         rob_commit_pt    <= '0;
         rob_num          <= ($clog2(ROB_ENTRY)+1)'(ROB_ENTRY);
-        prev_spec_branch <= '0;
-        predicted_pc     <= '0;
       end     
     else 
       begin
@@ -221,8 +223,6 @@ always_ff @(posedge clk_i)
         rob_alloc_pt     <= rob_alloc_pt_n;
         rob_commit_pt    <= rob_commit_pt_n;
         rob_num          <= rob_num_n;
-        prev_spec_branch <= prev_spec_branch_n;
-        predicted_pc     <= predicted_pc_n;
       end
   end
 endmodule

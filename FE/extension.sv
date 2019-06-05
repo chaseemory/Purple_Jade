@@ -1,5 +1,8 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
 `include "FE_def.svh"
+`endif
+
 
 module extension
     /* verilator lint_off UNUSED */
@@ -80,5 +83,21 @@ module extension
   );
 
   assign immediate_o[7] = reg_4z_lo;
+
+  logic [WORD_SIZE_P-1:0] reg_3z_lo;
+  zero_extend #(.INPUT_SIZE(3)
+  ) reg_3z
+  ( .i(instruction_i[5:3])
+  , .o(reg_3z_lo)
+  );
+
+  assign immediate_o[8] = reg_3z_lo;
+
+  /*  Weird output to put the immediate for store as well as the second source register
+      inside the field. This is because STORES require 3 sources and we only have space for 2
+      but in this way we can sneak the immediate along with the source2 register value and
+      it can be sign extended and dealt with inside the LSU
+  */
+  assign immediate_o[9] = {instruction_i[(2*$clog2(NUM_ARCH_DEST_REG))+:5],{WORD_SIZE_P-5-$clog2(NUM_ARCH_DEST_REG){1'b0}}, instruction_i[0+:$clog2(NUM_ARCH_DEST_REG)]};
 
 endmodule // extension

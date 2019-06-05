@@ -1,7 +1,5 @@
-pj_top.sv
+pj_top_no_mem.sv
 
-../pj_top_no_mem/pj_top_no_mem.sv
-  
 ../rename_stage/rename_stage.sv
 ../basejump_stl/bsg_misc/bsg_mux.v
 ../basejump_stl/bsg_dataflow/bsg_fifo_1r1w_small.v
@@ -14,7 +12,6 @@ pj_top.sv
 ../be_top/be_top.sv
 
 ../issue_stage/issue_table.sv	
-../issue_stage/priority_encoder.sv 
 ../issue_stage/prev_st_check.sv
 
 ../commit_stage/arch_state.sv	
@@ -42,3 +39,4 @@ pj_top.sv
 ../FE/sign_extend.sv
 ../FE/zero_extend.sv
 ../FE/circular_stack.sv
+

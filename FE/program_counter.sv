@@ -1,4 +1,7 @@
+`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+`endif
+
 module program_counter
   ( input   logic                   clk_i
   , input   logic [WORD_SIZE_P-1:0] pc_i

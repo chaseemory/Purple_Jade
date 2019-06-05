@@ -1,5 +1,7 @@
-`include "Purple_Jade_pkg.svh";
+`ifdef VERILATOR
+`include "Purple_Jade_pkg.svh"
 `include "rename_def.svh";
+`endif
 
 module commit_stage
 (input                                                  clk_i
@@ -24,6 +26,8 @@ module commit_stage
  , input  [CDB_SB_WIDTH-1:0]                            exe_sb_i
  // CDB-rob interface
  , input  [ROB_WB_WIDTH-1:0]                            cdb_i [NUM_FU-1:0]
+ // CDB Intergace for RF
+ , input   CDB_t                                        cdb [NUM_FU-1:0]
  // execute-memory interface
  , input  [WORD_SIZE_P-1:0]                             exe_mem_addr_i
  , output [WORD_SIZE_P-1:0]                             exe_mem_data_o
@@ -51,17 +55,27 @@ module commit_stage
 `endif
  , output [SB_ENTRY-1:0]                                sb_wb_vector_o
  , output [$clog2(SB_ENTRY)-1:0]                        sb_commit_pt_o
+
+ // interface for data_memory
+ , output                                               data_mem_w_v_i
+ , output [WORD_SIZE_P-1:0]                             data_mem_w_addr_i
+ , output [WORD_SIZE_P-1:0]                             data_mem_w_data_i
+ , output                                               data_mem_r_v_i
+ , output [WORD_SIZE_P-1:0]                             data_mem_r_addr_i
+ , input  [WORD_SIZE_P-1:0]                             data_mem_r_data_o
+
 );
 
 // rob <-> arch_state
 logic                                   rob_phys_valid;
 logic [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_cl;
+logic [$clog2(NUM_PHYS_REG)-1:0]        rob_phys_reg_set;
 logic                                   rob_flag_valid;
 logic [NUM_FLAGS*2-1:0]                 rob_flag;
 logic [NUM_FLAGS-1:0]                   flag_rob;
 
 // rob <-> store_buffer
-logic                                   rob_sb_valid;
+logic                                   rob_sb_valid /*verilator public*/;
 
 // store buffer <-> memory
 logic                                   sb_mem_v;
@@ -75,8 +89,9 @@ rob reorder_buffer
  , .rob_flag_valid_o      (rob_flag_valid)
  , .rob_flag_o            (rob_flag)
  , .flag_rob_i			  (flag_rob)
+ , .rob_phys_reg_set_o    (rob_phys_reg_set)
  , .*
-);
+); /*verilator public_module*/
 
 arch_state states
 (  .rob_phys_valid_i	  (rob_phys_valid)
@@ -84,6 +99,9 @@ arch_state states
  , .rob_flag_valid_i 	  (rob_flag_valid)
  , .rob_flag_i       	  (rob_flag)
  , .flag_rob_o       	  (flag_rob)
+ , .rob_phys_reg_set_i   (rob_phys_reg_set)
+ , .rob_phys_mispredict_i(rob_mispredict_o)
+ , .cdb_i                (cdb)
  , .*
 );
 
@@ -94,20 +112,32 @@ store_buffer sb
  , .sb_mem_addr_o         (sb_mem_addr)
  , .sb_mem_data_o         (sb_mem_data)
  , .*
-);
+); /*verilator public_module*/
 
-bsg_mem_1r1w_sync #( 
-   .width_p               (WORD_SIZE_P)
- , .els_p                 (2**WORD_SIZE_P) 
-)
-  mem
-(  .w_v_i   			  (sb_mem_v)
- , .w_addr_i			  (sb_mem_addr)
- , .w_data_i			  (sb_mem_data)
- , .r_v_i   			  (1'b1)  //  hardwired for now
- , .r_addr_i			  (exe_mem_addr_i)
- , .r_data_o			  (exe_mem_data_o)
- , .*
-);
+
+
+assign data_mem_w_v_i     = sb_mem_v;
+assign data_mem_w_addr_i  = sb_mem_addr;
+assign data_mem_w_data_i  = sb_mem_data;
+assign data_mem_r_addr_i  = exe_mem_addr_i;
+assign data_mem_r_v_i     = 1'b1;
+assign exe_mem_data_o     = data_mem_r_data_o;
+
+
+
+// bsg_mem_1r1w_sync #( 
+//    .width_p               (WORD_SIZE_P)
+//  , .els_p                 (2**WORD_SIZE_P) 
+//  , .read_write_same_addr_p(1)
+// )
+//   mem
+// (  .w_v_i   			  (sb_mem_v)
+//  , .w_addr_i			  (sb_mem_addr)
+//  , .w_data_i			  (sb_mem_data)
+//  , .r_v_i   			  (1'b1)  //  hardwired for now
+//  , .r_addr_i			  (exe_mem_addr_i)
+//  , .r_data_o			  (exe_mem_data_o)
+//  , .*
+// );
 
 endmodule // commit_stage

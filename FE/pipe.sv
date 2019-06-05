@@ -1,13 +1,13 @@
 module pipe
   #(parameter WIDTH_P = -1
   )
-  ( input                 clk_i
-  , input   [WIDTH_P-1:0] data_i
-  , input                 flush
-  , input                 stall
-  , input                 v_i
-  , output  [WIDTH_P-1:0] data_o
-  , output                v_o
+  ( input                       clk_i
+  , input         [WIDTH_P-1:0] data_i
+  , input                       flush
+  , input                       stall
+  , input                       v_i
+  , output logic  [WIDTH_P-1:0] data_o
+  , output logic                v_o
   );
 
   always_ff @(posedge clk_i) begin

@@ -1,3 +1,4 @@
+#include "Varch_state_arch_state.h"
 #include "Varch_state.h"
 #include "verilated.h"
 
@@ -24,9 +25,19 @@ int main(int argc, char** argv, char** env) {
     top->reset_i = 1;
     top->issue_read_rs1_i = 7;
     top->issue_read_rs2_i = 18;
+    top->rob_phys_mispredict_i = 0;
+    top->rob_phys_valid_i = 0;
     tick(top);
-    assert(top->rs1_valid_o == 1);    
-    assert(top->rs2_valid_o == 0);    
+    cout << hex << (vluint32_t) top->arch_state->valid[0] << endl;
+    cout << hex << (vluint32_t) top->arch_state->valid[1] << endl;
+    cout << hex << (vluint32_t) top->arch_state->valid[2] << endl;
+    cout << hex << (vluint32_t) top->arch_state->valid[3] << endl;
+    cout << hex << (vluint32_t) top->arch_state->valid_n[0] << endl;
+    cout << hex << (vluint32_t) top->arch_state->valid_n[1] << endl;
+    cout << hex << (vluint32_t) top->arch_state->valid_n[2] << endl;
+    cout << hex << (vluint32_t) top->arch_state->valid_n[3] << endl;
+    assert(top->arch_state->rs1_valid_o == 1);    
+    assert(top->arch_state->rs2_valid_o == 0);    
     // test bypassing
     top->reset_i = 0;
     top->exe_w_v_i = 0x5;
@@ -38,17 +49,20 @@ int main(int argc, char** argv, char** env) {
     top->rob_flag_valid_i = 1;
     top->rob_flag_i = 0x9f;
     tick(top);
-    assert(top->rs1_valid_o == 1);
-    assert(top->rs1_data_o == 18);
-    assert(top->rs2_valid_o == 1);
-    assert(top->rs2_data_o == 19);
-    assert(top->flag_rob_o == 0x0);
+    cout << "flags ";
+    cout << (int) top->arch_state->flag_n << " "<< (int) top->arch_state->new_flag  <<  endl;
+    assert(top->arch_state->rs1_valid_o == 1);
+    assert(top->arch_state->rs1_data_o == 18);
+    assert(top->arch_state->rs2_valid_o == 1);
+    assert(top->arch_state->rs2_data_o == 19);
+    assert(top->arch_state->flag_rob_o == 0x0);
     tick(top);
-    assert(top->rs1_valid_o == 1);
-    assert(top->rs1_data_o == 18);
-    assert(top->rs2_valid_o == 1);
-    assert(top->rs2_data_o == 19);
-    assert(top->flag_rob_o == 0x9);
+    assert(top->arch_state->rs1_valid_o == 1);
+    assert(top->arch_state->rs1_data_o == 18);
+    assert(top->arch_state->rs2_valid_o == 1);
+    assert(top->arch_state->rs2_data_o == 19);
+    cout << (int) top->flag_rob_o << endl;
+    assert(top->flag_rob_o == 9);
     top->rob_flag_i = 0x22;
     tick(top);
     tick(top);
@@ -58,7 +72,7 @@ int main(int argc, char** argv, char** env) {
     top->rob_phys_reg_cl_i = 19;
     tick(top);
     tick(top);   
-    assert(top->rs2_valid_o == 0);
+    assert(top->arch_state->rs2_valid_o == 0);
     delete top; 
     return 0;
 }
