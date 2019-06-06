@@ -31,9 +31,9 @@ logic                                 be_fe_mispredict     /*verilator public*/;
 logic [WORD_SIZE_P-1:0]               be_fe_redirected_pc  /*verilator public*/;
 
 // fifo <-> be
-logic                                 fifo_be_valid;
+logic                                 fifo_be_valid /*verilator public*/;
 logic                                 be_fifo_ready;
-logic [DECODED_INSTRUCTION_WIDTH-1:0] fifo_be_data;
+logic [DECODED_INSTRUCTION_WIDTH-1:0] fifo_be_data /*verilator public*/;
 
 fe_top front_end
 (  .ready_i                  (fifo_fe_ready)
@@ -63,7 +63,7 @@ bsg_fifo_1r1w_small
 
 be_top back_end
 (  .decoded_i            (fifo_be_data)
- , .decoded_v_i          (fifo_be_valid)
+ , .decoded_v_i          (fifo_be_valid & ~ reset_i)
  , .rename_decode_ready_o(be_fifo_ready)
  , .be_fe_mispredict_o   (be_fe_mispredict)
  , .be_fe_redirected_pc_o(be_fe_redirected_pc)

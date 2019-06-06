@@ -1,5 +1,5 @@
 # basic defines
-vev = verilator
+vev = /homes/yongqw2/ee526/verilator/install/bin/verilator
 fld = $(shell pwd)/
 sim = $(fld)../Purple_Jade_Tests/spoke/spoke
 filelist = $(fld)filelist.verilator

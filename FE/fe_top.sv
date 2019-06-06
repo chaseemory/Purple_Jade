@@ -152,7 +152,6 @@ module fe_top
   logic [WORD_SIZE_P-1:0] branch_offset_branch_r;
   logic                   flush_d_b, valid_d_b, is_branch_branch_r;
 
-  // Verilatorssss doesnt like me using part of the struct to determine another part of it :/
   /* verilator lint_off UNOPTFLAT */                
   decoded_instruction_t instruction_decoded_branch;
   /* verilator lint_on UNOPTFLAT */

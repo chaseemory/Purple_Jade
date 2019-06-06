@@ -138,7 +138,7 @@ static void printDecoded(Vpj_top_pj_top_no_mem* top) {
     vluint32_t* decoded = top->fe_fifo_data;
     vluint32_t decoded_v = top->fe_fifo_valid;
     if (!decoded_v)
-        cout << "decoded not valid" << endl;
+      return;
     cout << "| pc " << setw(4) << hex  << getbits(decoded, 17, 16);
     cout << "| w_v   " << getbits(decoded, 1, 1);
     cout << "| dest  " << getbits(decoded, 53, 4); 
@@ -146,6 +146,20 @@ static void printDecoded(Vpj_top_pj_top_no_mem* top) {
     if (!(decoded[0] & 0x1))
         cout << "| rs2  " << getbits(decoded, 33, 4);
     cout << endl; 
+}
+
+static void printFIFODecoded(Vpj_top_pj_top_no_mem* top) {
+  vluint32_t* decoded = top->fifo_be_data;
+  vluint32_t decoded_v = top->fifo_be_valid;
+  if (!decoded_v)
+    return;
+  cout << "| pc " << setw(4) << hex  << getbits(decoded, 17, 16);
+  cout << "| w_v   " << getbits(decoded, 1, 1);
+  cout << "| dest  " << getbits(decoded, 53, 4);
+  cout << "| rs1  " << getbits(decoded, 49, 4);
+  if (!(decoded[0] & 0x1))
+    cout << "| rs2  " << getbits(decoded, 33, 4);
+  cout << endl;
 }
 
 static void printIssued(Vpj_top_pj_top_no_mem* top) {
@@ -264,10 +278,12 @@ int main(int argc, char** argv, char** env) {
     overall_top->reset_i = 1;
     tick(overall_top);
     tick(overall_top);
+    printFIFODecoded(top);
     overall_top->reset_i = 0;
     tick(overall_top);
+    printFIFODecoded(top);
     string trace_name = string(argv[1]);
-    ifstream trace(trace_name);
+    ifstream trace(trace_name.c_str());
     string line;
     vluint64_t instr = 0;
     bool passed = false;
@@ -391,7 +407,8 @@ int main(int argc, char** argv, char** env) {
 
             cout << "CYCLE " << dec << cycle_count << hex << endl;
             // renaming instr
-            if (top->back_end->rename->__PVT__renamed_v_o) {
+	    printDecoded(top);
+            if (top->back_end->rename->renamed_v_o) {
                 cout << "Renamed" << endl;
                 printRenamed(top);
                 cout << endl;
