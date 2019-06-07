@@ -31,8 +31,12 @@ module rob
  , input  [NUM_FLAGS-1:0]                   flag_rob_i
  // exe-commit flag read
 `ifdef DEBUG
- , output                                   rob_debug_valid_o								
- , output [DEBUG_WIDTH-1:0]                 rob_debug_o
+ , output                                   rob_debug_valid_o	/*verilator public*/							
+ , output [DEBUG_WIDTH-1:0]                 rob_debug_o/*verilator public*/
+ , output [WORD_SIZE_P-1:0]                 rob_debug_pc_o/*verilator public*/
+ , output                                   rob_debug_w_v_o  /*verilator public*/             
+ , output [$clog2(NUM_ARCH_REG)-1:0]        rob_debug_reg_addr_o/*verilator public*/
+ , output [WORD_SIZE_P-1:0]                 rob_debug_reg_val_o/*verilator public*/
 `endif
 );
 
@@ -103,13 +107,17 @@ assign rob_flag_o = {committing_instr.flag_mask, committing_instr.flags};
 
 `ifdef DEBUG
 debug_t debug;
-assign rob_debug_valid_o = committing_instr.wb & ~rob_mispredict_o;
+assign rob_debug_valid_o = committing_instr.wb & committing_instr.valid;
 assign debug.pc = committing_instr.pc;
 assign debug.is_store = committing_instr.is_store;
 assign debug.w_v = committing_instr.w_v;
 assign debug.addr = committing_instr.addr;
 assign debug.result = committing_instr.result;
 assign rob_debug_o = debug;
+assign rob_debug_pc_o = committing_instr.pc;
+assign rob_debug_w_v_o = committing_instr.w_v;
+assign rob_debug_reg_addr_o = committing_instr.alloc_reg;
+assign rob_debug_reg_val_o = committing_instr.result;
 `endif
 
 // is conditional taken

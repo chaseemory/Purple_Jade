@@ -21,6 +21,14 @@ module be_top
  , output                                     data_mem_r_v_i
  , output [WORD_SIZE_P-1:0]                   data_mem_r_addr_i
  , input  [WORD_SIZE_P-1:0]                   data_mem_r_data_o
+`ifdef DEBUG
+ , output                                     rob_debug_valid_o	/*verilator public*/							
+ , output [DEBUG_WIDTH-1:0]                   rob_debug_o       /*verilator public*/
+ , output [WORD_SIZE_P-1:0]                   rob_debug_pc_o    /*verilator public*/
+ , output                                     rob_debug_w_v_o   /*verilator public*/
+ , output [$clog2(NUM_ARCH_REG)-1:0]          rob_debug_reg_addr_o /*verilator public*/
+ , output [WORD_SIZE_P-1:0]                   rob_debug_reg_val_o  /*verilator public*/
+`endif
 );
 
 // renamed <-> issue
@@ -222,10 +230,6 @@ commit_stage commit
  // to prev store check
  , .sb_wb_vector_o          (sb_wb_vector)
  , .sb_commit_pt_o          (sb_commit_pt)
- `ifdef VERILATOR
- , .rob_debug_valid_o       ()
- , .rob_debug_o             ()
- `endif
  // Data Mem interface
  , .data_mem_w_v_i
  , .data_mem_w_addr_i
@@ -233,6 +237,12 @@ commit_stage commit
  , .data_mem_r_v_i
  , .data_mem_r_addr_i
  , .data_mem_r_data_o
+ , .rob_debug_valid_o								
+ , .rob_debug_o
+ , .rob_debug_pc_o
+ , .rob_debug_w_v_o               
+ , .rob_debug_reg_addr_o
+ , .rob_debug_reg_val_o
  , .*
 );
 /* verilator lint_on UNOPTFLAT */

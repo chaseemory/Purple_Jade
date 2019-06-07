@@ -292,26 +292,26 @@ int main(int argc, char** argv, char** env) {
         passed = true;
         while (getline(trace, line)) {
             std::stringstream ss;
-            while (!(is_committing(top) | top->be_fe_mispredict)) {
+            while (!overall_top->rob_debug_valid_o) {
                 cycle(overall_top);
             }
             // parsing committing instructions
             // pc
-            ss << setw(4) << setfill('0') << hex << pc(top);
-            vluint64_t reg_write = w_v(top);
+            ss << setw(4) << setfill('0') << hex << overall_top->pj_top->rob_debug_pc_o;
+            vluint64_t reg_write = overall_top->pj_top->rob_debug_w_v_o;
             ss << setw(1) << hex << reg_write;
-            if (reg_write) {
-                ss << setw(4) << setfill('0') << hex << reg_w(top);
-                ss << setw(4) << setfill('0') << hex << reg_data(top);
+            if (overall_top->pj_top->rob_debug_w_v_o) {
+                ss << setw(4) << setfill('0') << hex << (int) overall_top->rob_debug_reg_addr_o;
+                ss << setw(4) << setfill('0') << hex << (int) overall_top->rob_debug_reg_val_o;
             } else {
                 ss << setw(4) << setfill('0') << hex << 0;
                 ss << setw(4) << setfill('0') << hex << 0;
             }
-            vluint64_t mem_write = mem_v(top);
+            vluint64_t mem_write = overall_top->pj_top->mem_w_v_o;
             ss << setw(1) << hex << mem_write;
-            if (mem_write) {
-                ss << setw(4) << setfill('0') << hex << mem_addr(top);
-                ss << setw(4) << setfill('0') << hex << mem_data(top);
+            if (overall_top->mem_w_v_o) {
+                ss << setw(4) << setfill('0') << hex << (int)overall_top->mem_addr_o;
+                ss << setw(4) << setfill('0') << hex << (int)overall_top->mem_data_o;
             } else {
                 ss << setw(4) << setfill('0') << hex << 0;
                 ss << setw(4) << setfill('0') << hex << 0;            
