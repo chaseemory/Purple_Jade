@@ -18,7 +18,7 @@ module commit_stage
  , output logic                                         rs2_valid_o
  , output logic [WORD_SIZE_P-1:0]						rs2_data_o
  // rename store buffer setup
- , input                                                issue_sb_v_i
+ , input                                                issue_sb_v_i/*verilator public*/
  , output [$clog2(SB_ENTRY)-1:0]                        sb_issue_entry_num_o	
  , output                                               sb_issue_ready_o
  // execute-write back interfaces
@@ -50,8 +50,12 @@ module commit_stage
  , output                                               rob_mispredict_o
  , output [WORD_SIZE_P-1:0]                             rob_fe_redirected_pc_o
 `ifdef DEBUG
- , output                                               rob_debug_valid_o								
- , output [DEBUG_WIDTH-1:0]                             rob_debug_o
+ , output                                               rob_debug_valid_o	/*verilator public*/							
+ , output [DEBUG_WIDTH-1:0]                             rob_debug_o/*verilator public*/
+ , output [WORD_SIZE_P-1:0]                             rob_debug_pc_o/*verilator public*/
+ , output                                               rob_debug_w_v_o  /*verilator public*/             
+ , output [$clog2(NUM_ARCH_REG)-1:0]                    rob_debug_reg_addr_o/*verilator public*/
+ , output [WORD_SIZE_P-1:0]                             rob_debug_reg_val_o/*verilator public*/
 `endif
  , output [SB_ENTRY-1:0]                                sb_wb_vector_o
  , output [$clog2(SB_ENTRY)-1:0]                        sb_commit_pt_o
@@ -63,7 +67,6 @@ module commit_stage
  , output                                               data_mem_r_v_i
  , output [WORD_SIZE_P-1:0]                             data_mem_r_addr_i
  , input  [WORD_SIZE_P-1:0]                             data_mem_r_data_o
-
 );
 
 // rob <-> arch_state
@@ -90,6 +93,12 @@ rob reorder_buffer
  , .rob_flag_o            (rob_flag)
  , .flag_rob_i			  (flag_rob)
  , .rob_phys_reg_set_o    (rob_phys_reg_set)
+ , .rob_debug_valid_o								
+ , .rob_debug_o
+ , .rob_debug_pc_o
+ , .rob_debug_w_v_o               
+ , .rob_debug_reg_addr_o
+ , .rob_debug_reg_val_o
  , .*
 ); /*verilator public_module*/
 

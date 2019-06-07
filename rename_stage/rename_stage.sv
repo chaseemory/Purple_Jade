@@ -12,7 +12,7 @@ module rename_stage
  , output                                     rename_decode_ready_o
  // rename-issue interface
  , output [RENAMED_INSTRUCTION_WIDTH-1:0]     renamed_o  
- , output                                     renamed_v_o
+ , output                                     renamed_v_o /*verilator public*/
  , input                                      issue_rename_ready_i
  // commit-rename interface
  , input                                      commit_v_i

@@ -138,7 +138,7 @@ static void printDecoded(Vpj_top_pj_top_no_mem* top) {
     vluint32_t* decoded = top->fe_fifo_data;
     vluint32_t decoded_v = top->fe_fifo_valid;
     if (!decoded_v)
-        cout << "decoded not valid" << endl;
+      return;
     cout << "| pc " << setw(4) << hex  << getbits(decoded, 17, 16);
     cout << "| w_v   " << getbits(decoded, 1, 1);
     cout << "| dest  " << getbits(decoded, 53, 4); 
@@ -146,6 +146,20 @@ static void printDecoded(Vpj_top_pj_top_no_mem* top) {
     if (!(decoded[0] & 0x1))
         cout << "| rs2  " << getbits(decoded, 33, 4);
     cout << endl; 
+}
+
+static void printFIFODecoded(Vpj_top_pj_top_no_mem* top) {
+  vluint32_t* decoded = top->fifo_be_data;
+  vluint32_t decoded_v = top->fifo_be_valid;
+  if (!decoded_v)
+    return;
+  cout << "| pc " << setw(4) << hex  << getbits(decoded, 17, 16);
+  cout << "| w_v   " << getbits(decoded, 1, 1);
+  cout << "| dest  " << getbits(decoded, 53, 4);
+  cout << "| rs1  " << getbits(decoded, 49, 4);
+  if (!(decoded[0] & 0x1))
+    cout << "| rs2  " << getbits(decoded, 33, 4);
+  cout << endl;
 }
 
 static void printIssued(Vpj_top_pj_top_no_mem* top) {
@@ -264,10 +278,12 @@ int main(int argc, char** argv, char** env) {
     overall_top->reset_i = 1;
     tick(overall_top);
     tick(overall_top);
+    printFIFODecoded(top);
     overall_top->reset_i = 0;
     tick(overall_top);
+    printFIFODecoded(top);
     string trace_name = string(argv[1]);
-    ifstream trace(trace_name);
+    ifstream trace(trace_name.c_str());
     string line;
     vluint64_t instr = 0;
     bool passed = false;
@@ -276,26 +292,26 @@ int main(int argc, char** argv, char** env) {
         passed = true;
         while (getline(trace, line)) {
             std::stringstream ss;
-            while (!(is_committing(top) | top->be_fe_mispredict)) {
+            while (!overall_top->rob_debug_valid_o) {
                 cycle(overall_top);
             }
             // parsing committing instructions
             // pc
-            ss << setw(4) << setfill('0') << hex << pc(top);
-            vluint64_t reg_write = w_v(top);
+            ss << setw(4) << setfill('0') << hex << overall_top->pj_top->rob_debug_pc_o;
+            vluint64_t reg_write = overall_top->pj_top->rob_debug_w_v_o;
             ss << setw(1) << hex << reg_write;
-            if (reg_write) {
-                ss << setw(4) << setfill('0') << hex << reg_w(top);
-                ss << setw(4) << setfill('0') << hex << reg_data(top);
+            if (overall_top->pj_top->rob_debug_w_v_o) {
+                ss << setw(4) << setfill('0') << hex << (int) overall_top->rob_debug_reg_addr_o;
+                ss << setw(4) << setfill('0') << hex << (int) overall_top->rob_debug_reg_val_o;
             } else {
                 ss << setw(4) << setfill('0') << hex << 0;
                 ss << setw(4) << setfill('0') << hex << 0;
             }
-            vluint64_t mem_write = mem_v(top);
+            vluint64_t mem_write = overall_top->pj_top->mem_w_v_o;
             ss << setw(1) << hex << mem_write;
-            if (mem_write) {
-                ss << setw(4) << setfill('0') << hex << mem_addr(top);
-                ss << setw(4) << setfill('0') << hex << mem_data(top);
+            if (overall_top->mem_w_v_o) {
+                ss << setw(4) << setfill('0') << hex << (int)overall_top->mem_addr_o;
+                ss << setw(4) << setfill('0') << hex << (int)overall_top->mem_data_o;
             } else {
                 ss << setw(4) << setfill('0') << hex << 0;
                 ss << setw(4) << setfill('0') << hex << 0;            
@@ -391,7 +407,8 @@ int main(int argc, char** argv, char** env) {
 
             cout << "CYCLE " << dec << cycle_count << hex << endl;
             // renaming instr
-            if (top->back_end->rename->__PVT__renamed_v_o) {
+	    printDecoded(top);
+            if (top->back_end->rename->renamed_v_o) {
                 cout << "Renamed" << endl;
                 printRenamed(top);
                 cout << endl;

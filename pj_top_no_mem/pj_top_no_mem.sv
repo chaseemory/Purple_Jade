@@ -16,6 +16,14 @@ module pj_top_no_mem
  // interface for i_rom
  , output  logic [WORD_SIZE_P-1:0]    i_rom_r_addr_i
  , input   logic [WORD_SIZE_P-1:0]    i_rom_data_o
+ `ifdef DEBUG
+ , output                             rob_debug_valid_o	/*verilator public*/							
+ , output [DEBUG_WIDTH-1:0]           rob_debug_o/*verilator public*/
+ , output [WORD_SIZE_P-1:0]           rob_debug_pc_o/*verilator public*/
+ , output                             rob_debug_w_v_o   /*verilator public*/            
+ , output [$clog2(NUM_ARCH_REG)-1:0]  rob_debug_reg_addr_o/*verilator public*/
+ , output [WORD_SIZE_P-1:0]           rob_debug_reg_val_o/*verilator public*/
+`endif
 );
 
 // fifo sizes
@@ -31,9 +39,9 @@ logic                                 be_fe_mispredict     /*verilator public*/;
 logic [WORD_SIZE_P-1:0]               be_fe_redirected_pc  /*verilator public*/;
 
 // fifo <-> be
-logic                                 fifo_be_valid;
+logic                                 fifo_be_valid /*verilator public*/;
 logic                                 be_fifo_ready;
-logic [DECODED_INSTRUCTION_WIDTH-1:0] fifo_be_data;
+logic [DECODED_INSTRUCTION_WIDTH-1:0] fifo_be_data /*verilator public*/;
 
 fe_top front_end
 (  .ready_i                  (fifo_fe_ready)
@@ -63,7 +71,7 @@ bsg_fifo_1r1w_small
 
 be_top back_end
 (  .decoded_i            (fifo_be_data)
- , .decoded_v_i          (fifo_be_valid)
+ , .decoded_v_i          (fifo_be_valid & ~ reset_i)
  , .rename_decode_ready_o(be_fifo_ready)
  , .be_fe_mispredict_o   (be_fe_mispredict)
  , .be_fe_redirected_pc_o(be_fe_redirected_pc)
@@ -74,6 +82,12 @@ be_top back_end
  , .data_mem_r_v_i
  , .data_mem_r_addr_i
  , .data_mem_r_data_o
+ , .rob_debug_valid_o								
+ , .rob_debug_o
+ , .rob_debug_pc_o
+ , .rob_debug_w_v_o               
+ , .rob_debug_reg_addr_o
+ , .rob_debug_reg_val_o
  , .*
 );
 endmodule

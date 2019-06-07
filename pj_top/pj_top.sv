@@ -3,8 +3,19 @@
 `endif
 
 module pj_top
-  (input                  clk_i
-  ,input                  reset_i
+  (input                                      clk_i
+  ,input                                      reset_i
+  `ifdef DEBUG
+ , output                                     rob_debug_valid_o /*verilator public*/             
+ , output [DEBUG_WIDTH-1:0]                   rob_debug_o       /*verilator public*/
+ , output [WORD_SIZE_P-1:0]                   rob_debug_pc_o/*verilator public*/
+ , output                                     rob_debug_w_v_o   /*verilator public*/            
+ , output [$clog2(NUM_ARCH_REG)-1:0]          rob_debug_reg_addr_o/*verilator public*/
+ , output [WORD_SIZE_P-1:0]                   rob_debug_reg_val_o/*verilator public*/
+ , output                                     mem_w_v_o/*verilator public*/
+ , output [WORD_SIZE_P-1:0]                   mem_addr_o/*verilator public*/
+ , output [WORD_SIZE_P-1:0]                   mem_data_o/*verilator public*/
+`endif
   );
 
   logic                   data_mem_w_v_i;
@@ -15,7 +26,11 @@ module pj_top
   logic [WORD_SIZE_P-1:0] data_mem_r_data_o;
 
   logic [WORD_SIZE_P-1:0] i_rom_r_addr_i;
-  logic [WORD_SIZE_P-1:0] i_rom_data_o;
+  logic [WORD_SIZE_P-1:0] i_rom_data_o; 
+
+  assign mem_w_v_o = data_mem_w_v_i;
+  assign mem_data_o = data_mem_w_data_i;
+  assign mem_addr_o = data_mem_w_addr_i;
 
   pj_top_no_mem core
     ( .clk_i
@@ -30,6 +45,13 @@ module pj_top
     // interface for i_rom
     , .i_rom_r_addr_i
     , .i_rom_data_o
+    , .rob_debug_valid_o               
+    , .rob_debug_o
+    , .rob_debug_pc_o
+    , .rob_debug_w_v_o               
+    , .rob_debug_reg_addr_o
+    , .rob_debug_reg_val_o
+    , .*
     );
 
   
