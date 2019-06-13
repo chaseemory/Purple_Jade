@@ -1,7 +1,9 @@
 `ifndef _RENAME_DEF_SVH_
 `define _RENAME_DEF_SVH_
 
-`include "Purple_Jade_pkg.svh";
+// `ifdef VERILATOR
+`include "Purple_Jade_pkg.svh"
+// `endif
 
 parameter COMMIT_RENAME_WIDTH = $clog2(NUM_ARCH_REG) + $clog2(NUM_PHYS_REG) + 1;
 

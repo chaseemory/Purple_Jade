@@ -2,6 +2,8 @@
 `define _PURPLE_JADE_PKG_
 // Parameters
 
+`define DEBUG
+  
 parameter I_ROM_DEPTH_P                   = 65536;
 parameter WORD_SIZE_P                     = 16;
 parameter NUM_FLAGS                       = 4;

@@ -1,6 +1,4 @@
-`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
-`endif
 
 module issue_table
   ( // Misc inputs
@@ -118,21 +116,37 @@ module issue_table
     genvar u;
     for(u = 0; u < ISSUE_ENTRY; u++) begin : src_tag_match_encode
 
-      bsg_encode_one_hot #(.width_p(NUM_FU)
-                          ,.lo_to_hi_p(1)
-                           ) src_1_encoder
+      // bsg_encode_one_hot #(.width_p(NUM_FU)
+      //                     ,.lo_to_hi_p(1)
+      //                      ) src_1_encoder
+      //   (.i(src1_tag_match[u])
+      //   ,.addr_o(src1_tag_index[u])
+      //   ,.v_o(src1_tag_v[u])
+      //   );
+
+      // bsg_encode_one_hot #(.width_p(NUM_FU)
+      //                     ,.lo_to_hi_p(1)
+      //                      ) src_2_encoder
+      //   (.i(src2_tag_match[u])
+      //   ,.addr_o(src2_tag_index[u])
+      //   ,.v_o(src2_tag_v[u])
+      //   );
+
+      priority_encoder #(.els_p(NUM_FU)
+                        ) src_1_encoder
         (.i(src1_tag_match[u])
         ,.addr_o(src1_tag_index[u])
         ,.v_o(src1_tag_v[u])
         );
 
-      bsg_encode_one_hot #(.width_p(NUM_FU)
-                          ,.lo_to_hi_p(1)
-                           ) src_2_encoder
+      priority_encoder #(.els_p(NUM_FU)
+                        ) src_2_encoder
         (.i(src2_tag_match[u])
         ,.addr_o(src2_tag_index[u])
         ,.v_o(src2_tag_v[u])
         );
+
+
 
     end // src_tag_match_encode
 

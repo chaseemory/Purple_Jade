@@ -8,10 +8,7 @@
  * CAUTIONS : Once a bit in st_clear_vector_o is high, be sure to latch it.
  * Value after the bit becomes high might be garbage.
  */
-
-`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
-`endif
 
 module prev_st_check (
  // from scheduler

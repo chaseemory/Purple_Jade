@@ -1,6 +1,4 @@
-`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
-`endif
 
 module arch_state
 (input                                                  clk_i

@@ -1,6 +1,4 @@
-`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
-`endif
 
 module store_buffer
 (input                                      clk_i
