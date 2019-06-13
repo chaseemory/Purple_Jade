@@ -1,8 +1,6 @@
 // A ROM for instructions
 // Async Reads
-`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
-`endif
 
 module i_rom
   #(localparam  ADDR_WIDTH_LP = $clog2(I_ROM_DEPTH_P)
@@ -14,7 +12,8 @@ module i_rom
   logic [WORD_SIZE_P-1:0] mem [I_ROM_DEPTH_P-1:0];
 
   initial begin
-    $readmemb(`TEST_BIN, mem);
+    // $readmemb(`TEST_BIN, mem);
+    $readmemb("/homes/yongqw2/ee526/Purple_Jade/Purple_Jade_Tests/test/bin/test_load_store.bin", mem);
   end // initial
 
   assign data_o = mem[r_addr_i];

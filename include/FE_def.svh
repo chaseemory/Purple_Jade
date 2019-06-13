@@ -1,4 +1,7 @@
+
+// `ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
+// `endif
 
 `ifndef _FE_DEF_PKG_
 `define _FE_DEF_PKG_

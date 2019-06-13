@@ -1,6 +1,4 @@
-`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
-`endif
 
 module pj_top_no_mem
 (input                                clk_i
@@ -16,14 +14,14 @@ module pj_top_no_mem
  // interface for i_rom
  , output  logic [WORD_SIZE_P-1:0]    i_rom_r_addr_i
  , input   logic [WORD_SIZE_P-1:0]    i_rom_data_o
- `ifdef DEBUG
+ //`ifdef DEBUG
  , output                             rob_debug_valid_o	/*verilator public*/							
  , output [DEBUG_WIDTH-1:0]           rob_debug_o/*verilator public*/
  , output [WORD_SIZE_P-1:0]           rob_debug_pc_o/*verilator public*/
  , output                             rob_debug_w_v_o   /*verilator public*/            
  , output [$clog2(NUM_ARCH_REG)-1:0]  rob_debug_reg_addr_o/*verilator public*/
  , output [WORD_SIZE_P-1:0]           rob_debug_reg_val_o/*verilator public*/
-`endif
+//`endif
 );
 
 // fifo sizes

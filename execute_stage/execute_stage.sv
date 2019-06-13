@@ -1,6 +1,4 @@
-`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
-`endif
 
 module execute_stage #(
     parameter ISSUE_INSTRUTION_WIDTH = $bits(issued_instruction_t)
