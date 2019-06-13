@@ -12,8 +12,11 @@ module i_rom
   logic [WORD_SIZE_P-1:0] mem [I_ROM_DEPTH_P-1:0];
 
   initial begin
-    // $readmemb(`TEST_BIN, mem);
+    `ifdef VERILATOR
+    $readmemb(`TEST_BIN, mem);
+    `else 
     $readmemb("/homes/yongqw2/ee526/Purple_Jade/Purple_Jade_Tests/test/bin/test_load_store.bin", mem);
+    `endif
   end // initial
 
   assign data_o = mem[r_addr_i];
