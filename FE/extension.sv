@@ -1,7 +1,5 @@
-`ifdef VERILATOR
 `include "Purple_Jade_pkg.svh"
 `include "FE_def.svh"
-`endif
 
 
 module extension
