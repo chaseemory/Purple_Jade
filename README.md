@@ -1,6 +1,14 @@
 # Purple_Jade
 the best armv6-M Thumb processor ever designed
 ## General
+Online documentation
+
+Micro-Architectural Specification - https://drive.google.com/open?id=1aIqUV03NqkBF80jSwOxxaStmN5bM0d-9u39tnP3JNfI
+Project/ISA Specification - https://drive.google.com/open?id=1sJCp4TvvizIbFdNGwKVSY6Ehd1l9G5n6
+Decode Format Information - https://drive.google.com/open?id=1oir6ubBpc3Vvat1QswyakwPgTSsmvWKGnWVqEmCaDlE
+
+Google Drive with all documentation - https://drive.google.com/open?id=1ph-RoMxtkyzQRGPX-eKBcNCpMRZW9m5n
+
 ## Folder Directory
 Folder Name|Description
 ---|---
