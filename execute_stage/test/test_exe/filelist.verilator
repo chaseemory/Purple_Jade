@@ -1,0 +1,7 @@
+execute_stage.sv
+flag.sv
+fu_alu.sv
+fu_mult.sv
+fu_branch.sv
+fu_lsu.sv
+fu_logic.sv

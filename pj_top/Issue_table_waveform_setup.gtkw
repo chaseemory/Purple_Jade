@@ -1,0 +1,159 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Fri May 31 05:38:31 2019
+[*]
+[dumpfile] "/home/chase/ee478/Purple_Jade/pj_top/Vpj_top.vcd"
+[dumpfile_mtime] "Fri May 31 05:32:00 2019"
+[dumpfile_size] 560771
+[savefile] "/home/chase/ee478/Purple_Jade/pj_top/Issue_table_waveform_setup.gtkw"
+[timestart] 9
+[size] 2554 1307
+[pos] -1 -99
+*-3.690814 28 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] pj_top.
+[treeopen] pj_top.back_end.
+[treeopen] pj_top.back_end.issue.
+[sst_width] 356
+[signals_width] 273
+[sst_expanded] 1
+[sst_vpaned_height] 328
+@c00022
+pj_top.back_end.issue.store_buff_table_v[7:0]
+@28
+(0)pj_top.back_end.issue.store_buff_table_v[7:0]
+(1)pj_top.back_end.issue.store_buff_table_v[7:0]
+(2)pj_top.back_end.issue.store_buff_table_v[7:0]
+(3)pj_top.back_end.issue.store_buff_table_v[7:0]
+@24
+pj_top.back_end.issue.chosen_ordered[2:0]
+@28
+pj_top.back_end.issue.chosen_valid
+@1401200
+-group_end
+@c00022
+pj_top.back_end.issue.valid_inst[7:0]
+@28
+(0)pj_top.back_end.issue.valid_inst[7:0]
+(1)pj_top.back_end.issue.valid_inst[7:0]
+(2)pj_top.back_end.issue.valid_inst[7:0]
+(3)pj_top.back_end.issue.valid_inst[7:0]
+@1401200
+-group_end
+@c00022
+pj_top.back_end.issue.ordered_instr_ready[7:0]
+@28
+(0)pj_top.back_end.issue.ordered_instr_ready[7:0]
+(1)pj_top.back_end.issue.ordered_instr_ready[7:0]
+(2)pj_top.back_end.issue.ordered_instr_ready[7:0]
+(3)pj_top.back_end.issue.ordered_instr_ready[7:0]
+(4)pj_top.back_end.issue.ordered_instr_ready[7:0]
+(5)pj_top.back_end.issue.ordered_instr_ready[7:0]
+(6)pj_top.back_end.issue.ordered_instr_ready[7:0]
+@1401200
+-group_end
+@28
+(7)pj_top.back_end.issue.ordered_instr_ready[7:0]
+@c00028
+#{pj_top.back_end.issue.order_inst_v[3:0]} (5)pj_top.back_end.issue.order_inst_v[8:0] (6)pj_top.back_end.issue.order_inst_v[8:0] (7)pj_top.back_end.issue.order_inst_v[8:0] (8)pj_top.back_end.issue.order_inst_v[8:0]
+@28
+(5)pj_top.back_end.issue.order_inst_v[8:0]
+(6)pj_top.back_end.issue.order_inst_v[8:0]
+(7)pj_top.back_end.issue.order_inst_v[8:0]
+(8)pj_top.back_end.issue.order_inst_v[8:0]
+@1401200
+-group_end
+@28
+pj_top.back_end.issue.clk_i
+@24
+pj_top.back_end.issue.inst_count_n[3:0]
+@28
+pj_top.back_end.issue.valid_i
+@24
+pj_top.back_end.issue.chosen[2:0]
+@c00028
+#{pj_top.back_end.issue.ordered_instr_ready[3:0]} (4)pj_top.back_end.issue.ordered_instr_ready[7:0] (5)pj_top.back_end.issue.ordered_instr_ready[7:0] (6)pj_top.back_end.issue.ordered_instr_ready[7:0] (7)pj_top.back_end.issue.ordered_instr_ready[7:0]
+@28
+(4)pj_top.back_end.issue.ordered_instr_ready[7:0]
+(5)pj_top.back_end.issue.ordered_instr_ready[7:0]
+(6)pj_top.back_end.issue.ordered_instr_ready[7:0]
+(7)pj_top.back_end.issue.ordered_instr_ready[7:0]
+@1401200
+-group_end
+@28
+pj_top.back_end.issue.chosen_valid
+@24
+pj_top.back_end.issue.instr_order_table(0)[2:0]
+pj_top.back_end.issue.instr_order_table(1)[2:0]
+pj_top.back_end.issue.instr_order_table(2)[2:0]
+pj_top.back_end.issue.instr_order_table(3)[2:0]
+pj_top.back_end.issue.instr_order_table(4)[2:0]
+@25
+pj_top.back_end.issue.instr_order_table_n(0)[2:0]
+@24
+pj_top.back_end.issue.instr_order_table_n(1)[2:0]
+pj_top.back_end.issue.instr_order_table_n(2)[2:0]
+pj_top.back_end.issue.instr_order_table_n(3)[2:0]
+pj_top.back_end.issue.instr_order_table_n(4)[2:0]
+@c00024
++{tabled_inst(0)_pc[15:0]} pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+@28
+(0)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(1)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(2)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(3)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(4)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(5)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(6)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(7)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(8)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(9)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(10)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(11)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(12)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(13)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(14)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+(15)pj_top.back_end.issue.tabled_inst(0).pc[15:0]
+@1401200
+-group_end
+@28
++{issue.tabled_inst(0)_source_1_v} pj_top.back_end.issue.tabled_inst(0).source_1_v
++{tabled_inst(0)_source_2_v} pj_top.back_end.issue.tabled_inst(0).source_2_v
+(7)pj_top.back_end.issue.store_buff_table_v[7:0]
+(7)pj_top.back_end.issue.valid_inst[7:0]
+@24
+pj_top.back_end.issue.tabled_inst(0).func_unit[2:0]
+pj_top.back_end.issue.tabled_inst(0).opcode[2:0]
++{tabled_inst(1)_pc[15:0]} pj_top.back_end.issue.tabled_inst(1).pc[15:0]
++{tabled_inst(1)_source_1_v} pj_top.back_end.issue.tabled_inst(1).source_1_v
++{tabled_inst(1)_source_2_v} pj_top.back_end.issue.tabled_inst(1).source_2_v
+@28
+(6)pj_top.back_end.issue.store_buff_table_v[7:0]
+(6)pj_top.back_end.issue.valid_inst[7:0]
+@24
++{tabled_inst(1)_func_unit[2:0]} pj_top.back_end.issue.tabled_inst(1).func_unit[2:0]
+pj_top.back_end.issue.tabled_inst(1).opcode[2:0]
++{tabled_inst(2)_pc[15:0]} pj_top.back_end.issue.tabled_inst(2).pc[15:0]
++{tabled_inst(2)_source_1_v} pj_top.back_end.issue.tabled_inst(2).source_1_v
++{tabled_inst(2)_source_2_v} pj_top.back_end.issue.tabled_inst(2).source_2_v
+@28
+(5)pj_top.back_end.issue.store_buff_table_v[7:0]
+(5)pj_top.back_end.issue.valid_inst[7:0]
+@24
++{tabled_inst(2)_func_unit[2:0]} pj_top.back_end.issue.tabled_inst(2).func_unit[2:0]
+pj_top.back_end.issue.tabled_inst(2).opcode[2:0]
++{issue.tabled_inst(3)_pc[15:0]} pj_top.back_end.issue.tabled_inst(3).pc[15:0]
+pj_top.back_end.issue.tabled_inst(3).source_1_v
+pj_top.back_end.issue.tabled_inst(3).source_2_v
+@28
+(4)pj_top.back_end.issue.store_buff_table_v[7:0]
+(4)pj_top.back_end.issue.valid_inst[7:0]
+@24
+pj_top.back_end.issue.tabled_inst(3).func_unit[2:0]
++{tabled_inst(3)_opcode[2:0]} pj_top.back_end.issue.tabled_inst(3).opcode[2:0]
+pj_top.back_end.issue.instruction_o.pc[15:0]
+pj_top.back_end.issue.instruction_o.source_1_v
+pj_top.back_end.issue.instruction_o.source_2_v
+pj_top.back_end.issue.instruction_o.func_unit[2:0]
+pj_top.back_end.issue.instruction_o.opcode[2:0]
+[pattern_trace] 1
+[pattern_trace] 0

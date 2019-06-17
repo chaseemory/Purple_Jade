@@ -1,0 +1,45 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Fri May 31 06:33:17 2019
+[*]
+[dumpfile] "/home/chase/ee478/Purple_Jade/pj_top/Vpj_top.vcd"
+[dumpfile_mtime] "Fri May 31 06:28:26 2019"
+[dumpfile_size] 640720
+[savefile] "/home/chase/ee478/Purple_Jade/pj_top/fe_waveform_setup.gtkw"
+[timestart] 7
+[size] 2558 1088
+[pos] -1 -1
+*-3.686203 80 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] pj_top.
+[treeopen] pj_top.back_end.commit.
+[treeopen] pj_top.front_end.
+[sst_width] 356
+[signals_width] 302
+[sst_expanded] 1
+[sst_vpaned_height] 639
+@28
+pj_top.front_end.reset_i
+pj_top.clk_i
+@24
+pj_top.front_end.program_counter_fetch_r[15:0]
+pj_top.front_end.program_counter_n[15:0]
+pj_top.front_end.branch_target[15:0]
+@28
+pj_top.front_end.take_branch_local
+@29
+pj_top.front_end.take_branch
+@28
+pj_top.front_end.valid_f_d
+pj_top.front_end.valid_d_b
+@24
+pj_top.front_end.branch_offset_branch_r[15:0]
+pj_top.front_end.instruction_final.pc[15:0]
+@28
+pj_top.front_end.instruction_final.branch_speculation
+pj_top.front_end.valid_o
+@24
+pj_top.front_end.branch_mis_target[15:0]
+@28
+pj_top.back_end.be_fe_mispredict_o
+[pattern_trace] 1
+[pattern_trace] 0
