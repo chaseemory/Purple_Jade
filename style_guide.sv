@@ -1,4 +1,7 @@
-module ex_module
+module ex_module #(
+    parameter EX_PARAM
+  , parameter EX_PARAM_2
+  )
   ( input   logic                   a_i
   , output  logic [EX_PARAM-1:0]    b_o
   , output  logic [EX_PARAM_2-1:0]  c_o 
@@ -19,14 +22,14 @@ module ex_module
     ,.ex2_o(ex_signal_3)
     );
 
-
+  // Two vertical spaces between major blocks
   always_comb begin : ex_always_block //always name blocks
     //always tab things within scope, leave one line empty
     //declare iteration variables within for statement if possible for scope
     for(int unsigned i = 0; i < EX_PARAM; i++) begin : ex_for_loop // always name these too
 
       if(!EX_PARAM) begin : ex_if_statement // always name these too
-
+                          // if multiple similar blocks align names
         ex_signal_1[i] = ex_signal_2[i];
 
       end // ex_if_statement

@@ -7,12 +7,14 @@ module pc_next
   );
 
   always_comb begin
+
     casez({reset_i, stall, branch_take})
       3'b1??:   pc_next = '0;
       3'b01?:   pc_next = pc_i;
       3'b001:   pc_next = branch_target_i;
       default:  pc_next = pc_2_i;
     endcase
+    
   end // always_comb
 
 endmodule // pc_next
