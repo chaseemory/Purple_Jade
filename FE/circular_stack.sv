@@ -42,17 +42,22 @@ module circular_stack
   always_ff @(posedge clk_i) begin : next_state
 
     if(reset_i) begin : reset_logic
+
       curr_ptr  <= ELS_P - 1;
       next_ptr  <= '0;
+
       for(int unsigned i = 0; i < ELS_P; i++) begin : reset_stack
         stack[i] <= '0;
       end // reset_stack
+
     end // reset_logic
 
     else begin : normal_next_state
+
        curr_ptr <= curr_ptr_n;
        next_ptr <= next_ptr_n;
        if(push_i) stack[next_ptr] <= address_i;
+       
     end
 
   end // next_state

@@ -55,9 +55,9 @@ module issue_table
 
   logic [$clog2(ISSUE_ENTRY)-1:0]                   chosen_ordered;
 
-  logic accepting_new_instruction, issuing_instruction, ready_o_n;
-  logic [$clog2(ISSUE_ENTRY)-1:0] new_instr_loc;
-  logic                           new_instr_loc_v;
+  logic                                             accepting_new_instruction, issuing_instruction, ready_o_n;
+  logic [$clog2(ISSUE_ENTRY)-1:0]                   new_instr_loc;
+  logic                                             new_instr_loc_v;
 
   // REGISTERED OUTPUTS SIGNALS
   issued_instruction_t                              chosen_instruction_r;
@@ -116,37 +116,21 @@ module issue_table
     genvar u;
     for(u = 0; u < ISSUE_ENTRY; u++) begin : src_tag_match_encode
 
-      // bsg_encode_one_hot #(.width_p(NUM_FU)
-      //                     ,.lo_to_hi_p(1)
-      //                      ) src_1_encoder
-      //   (.i(src1_tag_match[u])
-      //   ,.addr_o(src1_tag_index[u])
-      //   ,.v_o(src1_tag_v[u])
-      //   );
-
-      // bsg_encode_one_hot #(.width_p(NUM_FU)
-      //                     ,.lo_to_hi_p(1)
-      //                      ) src_2_encoder
-      //   (.i(src2_tag_match[u])
-      //   ,.addr_o(src2_tag_index[u])
-      //   ,.v_o(src2_tag_v[u])
-      //   );
-
-      priority_encoder #(.els_p(NUM_FU)
-                        ) src_1_encoder
-        (.i(src1_tag_match[u])
+      priority_encoder #(
+         .els_p(NUM_FU)
+        ) src_1_encoder
+        (.i     (src1_tag_match[u])
         ,.addr_o(src1_tag_index[u])
-        ,.v_o(src1_tag_v[u])
+        ,.v_o   (src1_tag_v[u])
         );
 
-      priority_encoder #(.els_p(NUM_FU)
-                        ) src_2_encoder
-        (.i(src2_tag_match[u])
+      priority_encoder #(
+         .els_p(NUM_FU)
+        ) src_2_encoder
+        (.i     (src2_tag_match[u])
         ,.addr_o(src2_tag_index[u])
-        ,.v_o(src2_tag_v[u])
+        ,.v_o   (src2_tag_v[u])
         );
-
-
 
     end // src_tag_match_encode
 
@@ -173,21 +157,14 @@ module issue_table
 
 
   logic chosen_valid;
-  // bsg_priority_encode #(.width_p(ISSUE_ENTRY)
-  //                      ,.lo_to_hi_p(1)
-  //                     ) chosen_selector
 
-  //   ( .i(ordered_instr_ready)
-  //   , .addr_o(chosen_ordered) //[$clog2(ISSUE_ENTRY)-1:0])
-  //   , .v_o(chosen_valid)
-  //   );
+  priority_encoder #(
+     .els_p(ISSUE_ENTRY)
+    ) chosen_selector
 
-  priority_encoder #(.els_p(ISSUE_ENTRY)
-                    ) chosen_selector
-
-    ( .i(ordered_instr_ready)
-    , .addr_o(chosen_ordered) //[$clog2(ISSUE_ENTRY)-1:0])
-    , .v_o(chosen_valid)
+    (.i     (ordered_instr_ready)
+    ,.addr_o(chosen_ordered)
+    ,.v_o   (chosen_valid)
     );
 
   assign chosen                                = instr_order_table[chosen_ordered]; //[$clog2(ISSUE_ENTRY)-1:0]];
@@ -282,24 +259,15 @@ module issue_table
 
 
   // DETERMINE WHERE NEXT INSTRUCTION WILL GO
-  // bsg_priority_encode #(.width_p(ISSUE_ENTRY)
-  //                      ,.lo_to_hi_p(1)
-  //                     ) new_selector
-
-  //   ( .i(~valid_inst)
-  //   , .addr_o(new_instr_loc)
-  //   , .v_o(new_instr_loc_v)
-  //   );
-
-  priority_encoder #(.els_p(ISSUE_ENTRY)) 
+  priority_encoder #(
+     .els_p(ISSUE_ENTRY)) 
     new_selector
-    ( .i(~valid_inst)
-    , .addr_o(new_instr_loc)
-    , .v_o(new_instr_loc_v)
+    (.i     (~valid_inst)
+    ,.addr_o(new_instr_loc)
+    ,.v_o   (new_instr_loc_v)
     );
 
   // Instruction Count Logic / New Instruction Input Logic
-  
   assign accepting_new_instruction  = (ready_o & valid_i);
   assign issuing_instruction        = chosen_valid;         // A valid instruction has been chose to issue by Decoder
 
@@ -318,7 +286,8 @@ module issue_table
 
   // DETERMINE WHICH FU WILL BE USED AND SET OUTPUTS CORRECTLY
   logic [NUM_FU-1:0] chosen_fu;
-  bsg_decode #(.num_out_p(NUM_FU)
+  bsg_decode #(
+     .num_out_p(NUM_FU)
     ) FU_out
     (.i(tabled_inst[chosen].func_unit)
     ,.o(chosen_fu)
@@ -326,9 +295,8 @@ module issue_table
 
   always_comb begin : setting_output_valid_for_FU
 
-    for(int unsigned i = 0; i < NUM_FU; i++)                         begin : FU_and_issuing_instruction_to_be_valid
+    for(int unsigned i = 0; i < NUM_FU; i++) begin : FU_and_issuing_instruction_to_be_valid
       valid_o_n[i] = chosen_fu[i] & issuing_instruction;
-      // valid_o[i] = chosen_fu[i] & issuing_instruction;
     end // FU_and_issuing_instruction
 
   end // setting_output_valid_for_FU
@@ -337,7 +305,7 @@ module issue_table
   always_ff @(posedge clk_i) begin
 
     if(reset_i) begin : reset_logic
-      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)   begin : reset
+      for(int unsigned i = 0; i < ISSUE_ENTRY; i++) begin : reset
         valid_inst[i]         <= '0;
         order_inst_v[i]       <= '0;
         instr_order_table[i]  <= '0;
@@ -358,12 +326,12 @@ module issue_table
 
     else begin : normal_operation
 
-      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)   begin : shift_ordered_instruction_and_insert_new_instruction
+      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)     begin : shift_ordered_instruction_and_insert_new_instruction
         instr_order_table[i]  <= instr_order_table_n[i];
         order_inst_v[i]       <= order_inst_v_n[i];
       end // shift_ordered_instruction_and_insert_new_instruction
       
-      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)   begin : update_store_buff_valid
+      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)     begin : update_store_buff_valid
         store_buff_table_v[i] <= store_buff_table_v_n[i];
       end // update_store_buff_valid
 
@@ -382,7 +350,7 @@ module issue_table
         store_buff_table_v[chosen]  <= '0;
       end // clear_issued_instr_location
 
-      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)   begin : ingest_data_on_CDB
+      for(int unsigned i = 0; i < ISSUE_ENTRY; i++)     begin : ingest_data_on_CDB
 
         if(src1_tag_v[i] & ~tabled_inst[i].source_1_v)  begin : ingest_data_1
           tabled_inst[i].source_1_data <= cdb[src1_tag_index[i]].result;
