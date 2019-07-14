@@ -68,8 +68,8 @@ module store_buffer
   // shifting logics
   /* verilator lint_off UNUSED */
   logic [SB_ENTRY*2-1:0]    shift_temp;
-  assign shift_temp = {match_vector, match_vector} >> sb_commit_pt;
-  assign trimed_match_vector = shift_temp[0+:SB_ENTRY];
+  assign shift_temp           = {match_vector, match_vector} >> sb_commit_pt;
+  assign trimed_match_vector  = shift_temp[0+:SB_ENTRY];
   /* verilator lint_on UNUSED */
   
   generate
@@ -81,15 +81,15 @@ module store_buffer
   assign sb_commit_pt_o = sb_commit_pt;
   
   // sb to renaming to clear valid store bits
-  assign sb_rename_clear_st_v_o = sb_mem_v_o;
+  assign sb_rename_clear_st_v_o   = sb_mem_v_o;
   assign sb_rename_clear_st_num_o = sb_commit_pt;
   
   always_comb begin
     // default assignments
-    sb_n = sb_q;
-    sb_alloc_pt_n = sb_alloc_pt;
-    sb_commit_pt_n = sb_commit_pt;
-    sb_num_n = sb_num;
+    sb_n            = sb_q;
+    sb_alloc_pt_n   = sb_alloc_pt;
+    sb_commit_pt_n  = sb_commit_pt;
+    sb_num_n        = sb_num;
   
     // issue logic
     // most of time wb is zero and result is written
@@ -99,43 +99,45 @@ module store_buffer
         sb_num_n--;
     end
   
-      // common data bus write back
-      // a store writing back its address and result
-      if (exe_sb_v_i) begin
-        sb_n[cdb.sb_dest].wb = 1'b1;
-        sb_n[cdb.sb_dest].address = cdb.address;
-        sb_n[cdb.sb_dest].result = cdb.result;
-      end
-  
-      // commit logic assignments
-      // address written back & valid pop from rob
-      if (sb_mem_v_o) begin
-        sb_n[sb_commit_pt].wb = 1'b0;
-        sb_commit_pt_n++;
-        sb_num_n++;
-      end
-  
-      // misprediction flush everything
-      if (rob_mispredict_i) begin    
-        sb_n = '{default: 0};
-        sb_alloc_pt_n = '0;
-        sb_commit_pt_n = '0;
-`ifdef VERILATOR
-        sb_num_n = ($clog2(SB_ENTRY)+1)'(SB_ENTRY);
-`else 
-        sb_num_n = 5'd16;
-`endif
-      end
+    // common data bus write back
+    // a store writing back its address and result
+    if (exe_sb_v_i) begin
+      sb_n[cdb.sb_dest].wb = 1'b1;
+      sb_n[cdb.sb_dest].address = cdb.address;
+      sb_n[cdb.sb_dest].result = cdb.result;
     end
+
+    // commit logic assignments
+    // address written back & valid pop from rob
+    if (sb_mem_v_o) begin
+      sb_n[sb_commit_pt].wb = 1'b0;
+      sb_commit_pt_n++;
+      sb_num_n++;
+    end
+
+    // misprediction flush everything
+    if (rob_mispredict_i) begin    
+      sb_n = '{default: 0};
+      sb_alloc_pt_n = '0;
+      sb_commit_pt_n = '0;
+`ifdef VERILATOR
+      sb_num_n = ($clog2(SB_ENTRY)+1)'(SB_ENTRY);
+`else 
+      sb_num_n = 5'd16;
+`endif
+    end
+  end // always_comb
   
   // load bypass match vector
   always_comb begin
     match_vector = '0;
   
-    for (int unsigned i = 0; i < SB_ENTRY; i++)
+    for (int unsigned i = 0; i < SB_ENTRY; i++) begin
       // computing match vector
-      if (sb_q[i].wb == 1'b1 && (sb_q[i].address == exe_ld_bypass_addr_i))
-          match_vector[i] = 1'b1;
+      if (sb_q[i].wb == 1'b1 && (sb_q[i].address == exe_ld_bypass_addr_i)) begin
+        match_vector[i] = 1'b1;
+      end // if (sb_q[i].wb == 1'b1 && (sb_q[i].address == exe_ld_bypass_addr_i))
+    end // for (int unsigned i = 0; i < SB_ENTRY; i++)
   end
   
   // matched logics
@@ -172,11 +174,13 @@ module store_buffer
       sb_num           <= 5'd16;
 `endif
 
-    end else begin
+    end // if(reset_i)
+    else begin
       sb_q             <= sb_n;
       sb_alloc_pt      <= sb_alloc_pt_n;
       sb_commit_pt     <= sb_commit_pt_n;
       sb_num           <= sb_num_n;
     end
   end
+  
 endmodule

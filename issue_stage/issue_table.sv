@@ -55,9 +55,9 @@ module issue_table
 
   logic [$clog2(ISSUE_ENTRY)-1:0]                   chosen_ordered;
 
-  logic accepting_new_instruction, issuing_instruction, ready_o_n;
-  logic [$clog2(ISSUE_ENTRY)-1:0] new_instr_loc;
-  logic                           new_instr_loc_v;
+  logic                                             accepting_new_instruction, issuing_instruction, ready_o_n;
+  logic [$clog2(ISSUE_ENTRY)-1:0]                   new_instr_loc;
+  logic                                             new_instr_loc_v;
 
   // REGISTERED OUTPUTS SIGNALS
   issued_instruction_t                              chosen_instruction_r;
@@ -119,17 +119,17 @@ module issue_table
       priority_encoder #(
          .els_p(NUM_FU)
         ) src_1_encoder
-        (.i(src1_tag_match[u])
+        (.i     (src1_tag_match[u])
         ,.addr_o(src1_tag_index[u])
-        ,.v_o(src1_tag_v[u])
+        ,.v_o   (src1_tag_v[u])
         );
 
       priority_encoder #(
          .els_p(NUM_FU)
         ) src_2_encoder
-        (.i(src2_tag_match[u])
+        (.i     (src2_tag_match[u])
         ,.addr_o(src2_tag_index[u])
-        ,.v_o(src2_tag_v[u])
+        ,.v_o   (src2_tag_v[u])
         );
 
     end // src_tag_match_encode
@@ -162,9 +162,9 @@ module issue_table
      .els_p(ISSUE_ENTRY)
     ) chosen_selector
 
-    (.i(ordered_instr_ready)
+    (.i     (ordered_instr_ready)
     ,.addr_o(chosen_ordered)
-    ,.v_o(chosen_valid)
+    ,.v_o   (chosen_valid)
     );
 
   assign chosen                                = instr_order_table[chosen_ordered]; //[$clog2(ISSUE_ENTRY)-1:0]];
@@ -262,9 +262,9 @@ module issue_table
   priority_encoder #(
      .els_p(ISSUE_ENTRY)) 
     new_selector
-    (.i(~valid_inst)
+    (.i     (~valid_inst)
     ,.addr_o(new_instr_loc)
-    ,.v_o(new_instr_loc_v)
+    ,.v_o   (new_instr_loc_v)
     );
 
   // Instruction Count Logic / New Instruction Input Logic

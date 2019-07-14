@@ -23,15 +23,15 @@ module fu_logic
   logic [WORD_SIZE_P-1:0] flag_shift_r, flag_shift_l, flag_shift_ar;
   
   // output assignments
-  assign logic_rob_o = out;
-  assign logic_reg_o = reg_wb;
-  assign out_n.rob_dest = rob_dest_i;
-  assign out_n.cdb.valid = exe_v_i;
-  assign out_n.cdb.dest = reg_dest_i;
-  assign out_n.cdb.flags = flags;
+  assign logic_rob_o      = out;
+  assign logic_reg_o      = reg_wb;
+  assign out_n.rob_dest   = rob_dest_i;
+  assign out_n.cdb.valid  = exe_v_i;
+  assign out_n.cdb.dest   = reg_dest_i;
+  assign out_n.cdb.flags  = flags;
   assign out_n.cdb.result = result;
-  assign reg_wb.cdb = out_n.cdb;
-  assign reg_wb.w_v = exe_v_i; 
+  assign reg_wb.cdb       = out_n.cdb;
+  assign reg_wb.w_v       = exe_v_i; 
   
   // flag computation
   logic carry_out;
@@ -45,18 +45,19 @@ module fu_logic
   assign neg_res = ~operand2_i;
   
   // shift computations
-  assign lsls_res = operand1_i << operand2_i;
-  assign lsrs_res = operand1_i >> operand2_i;
-  assign asrs_res = $signed(operand1_i) >>> operand2_i;
-  assign flag_shift_l = operand1_i << (operand2_i - 1);
-  assign flag_shift_r = operand1_i >> (operand2_i - 1);
-  assign flag_shift_ar = $signed(operand1_i) >>> (operand2_i - 1);
+  assign lsls_res       = operand1_i << operand2_i;
+  assign lsrs_res       = operand1_i >> operand2_i;
+  assign asrs_res       = $signed(operand1_i) >>> operand2_i;
+  assign flag_shift_l   = operand1_i << (operand2_i - 1);
+  assign flag_shift_r   = operand1_i >> (operand2_i - 1);
+  assign flag_shift_ar  = $signed(operand1_i) >>> (operand2_i - 1);
   
   // rotation
   /* verilator lint_off UNUSED */
   logic [WORD_SIZE_P*2-1:0]    rotate_temp;
-  assign rotate_temp = {operand1_i, operand1_i} >> (operand2_i & {$clog2(WORD_SIZE_P){1'b1}});
-  assign rors_res = rotate_temp[0+:WORD_SIZE_P];
+
+  assign rotate_temp  = {operand1_i, operand1_i} >> (operand2_i & {$clog2(WORD_SIZE_P){1'b1}});
+  assign rors_res     = rotate_temp[0+:WORD_SIZE_P];
   /* verilator lint_on UNUSED */
   
   // result assignment
@@ -64,65 +65,73 @@ module fu_logic
     unique case(opcode_i)
       `AND_OP  :
         begin
-          result = and_res;
-          flags = flag_logic;
+          result    = and_res;
+          flags     = flag_logic;
           carry_out = '0;
         end
       `XOR_OP  :
         begin
-          result = xor_res;
-          flags = flag_logic;
+          result    = xor_res;
+          flags     = flag_logic;
           carry_out = '0;
        end
       `OR_OP   :
         begin
-          result = or_res;
-          flags = flag_logic;
+          result    = or_res;
+          flags     = flag_logic;
           carry_out = '0;
         end
       `NEG_OP  : 
         begin
-          result = neg_res;
-          flags = flag_logic;
+          result    = neg_res;
+          flags     = flag_logic;
           carry_out = '0;
         end
       `LSLS_OP :
         begin
-          result = lsls_res;
-          flags = flag_shift;
+          result    = lsls_res;
+          flags     = flag_shift;
           carry_out = flag_shift_l[WORD_SIZE_P-1];
         end
       `LSRS_OP :
         begin
-          result = lsrs_res;
-          flags = flag_shift;
+          result    = lsrs_res;
+          flags     = flag_shift;
           carry_out = flag_shift_r[0];
         end
       `ASRS_OP :
         begin
-          result = asrs_res;
-          flags = flag_shift;
+          result    = asrs_res;
+          flags     = flag_shift;
           carry_out = flag_shift_ar[0];
         end
       `RORS_OP :
         begin
-          result = rors_res;
-          flags = flag_shift;
+          result    = rors_res;
+          flags     = flag_shift;
           carry_out = rors_res[WORD_SIZE_P-1];
         end
       default  :
         begin 
-          result = '0;
-          flags = flag_shift;
+          result    = '0;
+          flags     = flag_shift;
           carry_out = '0;
           $display("logic fu opcode error");
         end
     endcase
   
   // sequential process
-  always_ff @(posedge clk_i)
-      if (reset_i)
-          out <= '0;
-      else
-          out <= out_n;
+  always_ff @(posedge clk_i) 
+  begin
+
+    if (reset_i) begin
+      out <= '0;
+    end // if (reset_i)
+
+    else begin
+      out <= out_n;
+    end
+
+  end // always_ff @(posedge clk_i)
+
 endmodule // fu_logic

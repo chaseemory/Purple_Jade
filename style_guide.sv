@@ -17,9 +17,9 @@ module ex_module #(
      .ex1_p(EX_PARAM)
     ,.ex2_p(EX_PARAM_2)
     ) ex_module_name
-    (.i(ex_signal_1)
-    ,.ex_o(ex_signal_2)
-    ,.ex2_o(ex_signal_3)
+    (.in    (ex_signal_1)
+    ,.ex_o  (ex_signal_2)
+    ,.ex2_o (ex_signal_3)
     );
 
   // Two vertical spaces between major blocks

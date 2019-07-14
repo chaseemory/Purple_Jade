@@ -1,5 +1,5 @@
 `include "Purple_Jade_pkg.svh"
-`include "rename_def.svh";
+`include "rename_def.svh"
 
 module commit_stage
   ( input                                                  clk_i
@@ -84,12 +84,12 @@ module commit_stage
   logic [WORD_SIZE_P-1:0]                 sb_mem_data;
   
   rob reorder_buffer
-    ( .rob_phys_valid_o      (rob_phys_valid)
+    ( .rob_phys_valid_o     (rob_phys_valid)
     ,.rob_phys_reg_cl_o     (rob_phys_reg_cl)
     ,.rob_sb_valid_o        (rob_sb_valid)
     ,.rob_flag_valid_o      (rob_flag_valid)
     ,.rob_flag_o            (rob_flag)
-    ,.flag_rob_i			  (flag_rob)
+    ,.flag_rob_i            (flag_rob)
     ,.rob_phys_reg_set_o    (rob_phys_reg_set)
     ,.rob_debug_valid_o								
     ,.rob_debug_o
@@ -101,14 +101,14 @@ module commit_stage
     ); /*verilator public_module*/
   
   arch_state states
-    ( .rob_phys_valid_i	      (rob_phys_valid)
+    ( .rob_phys_valid_i	    (rob_phys_valid)
     , .rob_phys_reg_cl_i	  (rob_phys_reg_cl)
     , .rob_flag_valid_i 	  (rob_flag_valid)
     , .rob_flag_i       	  (rob_flag)
-    , .flag_rob_o       	  (flag_rob)
-    , .rob_phys_reg_set_i     (rob_phys_reg_set)
-    , .rob_phys_mispredict_i  (rob_mispredict_o)
-    , .cdb_i                  (cdb)
+    , .flag_rob_o           (flag_rob)
+    , .rob_phys_reg_set_i   (rob_phys_reg_set)
+    , .rob_phys_mispredict_i(rob_mispredict_o)
+    , .cdb_i                (cdb)
     , .*
     );
   

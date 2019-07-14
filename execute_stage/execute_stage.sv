@@ -42,16 +42,16 @@ module execute_stage #(
   assign operand2 = (issued.imm) ? issued.source2_imm : issued.source2_imm_data;
   
   // UNUSED assignment
-  assign cdb_o[`DIV_FU] = '0;
-  assign exe_rob_o[`DIV_FU] = '0;
-  assign exe_reg_o[`DIV_FU] = '0;
-  assign cdb_o[`NOOP_FU] = '0;
-  assign exe_rob_o[`NOOP_FU] = '0;
-  assign exe_reg_o[`NOOP_FU] = '0;
+  assign cdb_o[`DIV_FU]       = '0;
+  assign exe_rob_o[`DIV_FU]   = '0;
+  assign exe_reg_o[`DIV_FU]   = '0;
+  assign cdb_o[`NOOP_FU]      = '0;
+  assign exe_rob_o[`NOOP_FU]  = '0;
+  assign exe_reg_o[`NOOP_FU]  = '0;
   
   // common data bus assignments
   assign cdb_o[`LOGICAL_FU] = exe_rob_o[`LOGICAL_FU][ROB_WB_WIDTH-1-:CDB_WIDTH];
-  assign cdb_o[`MUL_FU] = exe_rob_o[`MUL_FU][ROB_WB_WIDTH-1-:CDB_WIDTH];
+  assign cdb_o[`MUL_FU]     = exe_rob_o[`MUL_FU][ROB_WB_WIDTH-1-:CDB_WIDTH];
   
   fu_alu alu_fu
     (.exe_v_i   (issue_exe_v_i[`ALU_FU] & ~mispredict_i)
